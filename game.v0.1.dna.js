@@ -113,54 +113,64 @@ function generateRandomDNASequence(presets = {}) {
 function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequences) {
     // Trait importance weights
     const weights = {
-        aggression: 0.25,
-        energyConsumption: 0.2,
-        spikiness: 0.15,
-        size: 0.15,
-        membrane: 0.1,
-        moveStyle: 0.2
+        edges: 0.2,                // Impacts shape (spiky vs smooth organisms)
+        moveStyle: 0.175,           // Movement impacts combat behavior
+        membrane: 0.1,             // Defensive trait
+        size: 0.15,                // Affects durability and collision area
+        spikiness: 0.15,           // Offensive capability in collisions
+        eyes: 0.05,                // May influence perception (less significant for combat)
+        gravityResistance: 0.1,    // Determines resistance to environmental effects
+        energyConsumption: 0.2,    // Affects speed, power, and stamina tradeoffs
+        aggression: 0.2           // Aggressiveness directly impacts strategy
     };
 
-    // Helper function to encode moveStyle
-    function encodeMoveStyle(moveStyle) {
-        switch (moveStyle) {
-            case "float": return 0;
-            case "tail": return 1;
-            case "legs": return 2;
-            default: return -1;
-        }
+    // Helper function to encode categorical traits
+    function encodeCategoricalTrait(value, categories) {
+        return categories.indexOf(value);
     }
 
     // Helper function to extract traits from a DNA sequence
     function extractTraits(dna) {
         const traits = {
-            aggression: 0,
-            energyConsumption: 0,
-            spikiness: 0,
-            size: 0,
+            edges: 0,
+            moveStyle: -1,
             membrane: 0,
-            moveStyle: -1
+            size: 0,
+            spikiness: 0,
+            eyes: 0,
+            gravityResistance: -1,
+            energyConsumption: 0,
+            aggression: 0
         };
 
         dna.forEach((gene) => {
             switch (gene.role.title) {
-                case "aggression":
-                    traits.aggression = gene.current;
-                    break;
-                case "energy-consumption":
-                    traits.energyConsumption = gene.current;
-                    break;
-                case "spiky-ness":
-                    traits.spikiness = gene.current / 100; // Normalize to 0-1
-                    break;
-                case "size":
-                    traits.size = gene.current / 50; // Normalize to 0-2
-                    break;
-                case "membrane":
-                    traits.membrane = gene.current / 100; // Normalize to 0-1
+                case "edges":
+                    traits.edges = gene.role.values[gene.current];
                     break;
                 case "move-style":
-                    traits.moveStyle = encodeMoveStyle(gene.role.values[gene.current]);
+                    traits.moveStyle = encodeCategoricalTrait(gene.role.values[gene.current], ["float", "tail", "legs"]);
+                    break;
+                case "membrane":
+                    traits.membrane = gene.current / 100; // Normalize membrane to 0-1
+                    break;
+                case "size":
+                    traits.size = gene.role.values[gene.current];
+                    break;
+                case "spiky-ness":
+                    traits.spikiness = gene.current / 100; // Normalize spikiness to 0-1
+                    break;
+                case "eyes":
+                    traits.eyes = gene.role.values[gene.current];
+                    break;
+                case "gravity resistance":
+                    traits.gravityResistance = encodeCategoricalTrait(gene.role.values[gene.current], ["low", "medium", "high"]);
+                    break;
+                case "energy-consumption":
+                    traits.energyConsumption = gene.role.values[gene.current] / 100; // Normalize to 0-1
+                    break;
+                case "aggression":
+                    traits.aggression = gene.current / 100; // Normalize aggression to 0-1
                     break;
             }
         });
@@ -175,9 +185,11 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
     function calculateSimilarityScore(targetTraits, comparisonTraits) {
         let similarity = 0;
         Object.keys(weights).forEach((trait) => {
-            if (trait === "moveStyle") {
+            if (trait === "moveStyle" || trait === "gravityResistance") {
+                // For categorical traits, use direct match scoring
                 similarity += weights[trait] * (targetTraits[trait] === comparisonTraits[trait] ? 1 : 0);
             } else {
+                // For numerical traits, calculate weighted similarity
                 similarity += weights[trait] * (1 - Math.abs(targetTraits[trait] - comparisonTraits[trait]));
             }
         });

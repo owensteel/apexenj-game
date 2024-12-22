@@ -82,6 +82,7 @@ function determineCombatAction(organism, enemy) {
 
 const combatTable = document.getElementById("combat-table")
 const combatResult = document.getElementById("combat-result")
+const combatResultsTable = document.getElementById("combat-results-table")
 const combatForfeitButton = document.getElementById("forfeit-button")
 
 const playerHealthBar = document.getElementById("player-health")
@@ -101,6 +102,8 @@ let enemy;
 let winningDNA;
 let losingDNA;
 let combatWinner;
+let combatRound;
+let combatResults;
 function startCombat(playerOrganism) {
     if (enemy) {
         console.error("combat already in session")
@@ -175,17 +178,48 @@ function endCombat(defeatedId, reason) {
 
     if (defeatedId == player.id) {
         combatResult.innerHTML = `DEFEATED! Your organism ${reason}!`
+
         if (reason !== "forfeited") {
             winningDNA.push(enemy.dnaSequence)
             losingDNA.push(player.dnaSequence)
         }
+
+        if (reason == "ran out of energy") {
+            combatResults.wasExhausted++
+        }
+        if (reason == "was beaten") {
+            combatResults.wasBeaten++
+        }
     } else if (defeatedId == enemy.id) {
         combatResult.innerHTML = `WON! The enemy ${reason}!`
+
         winningDNA.push(player.dnaSequence)
         losingDNA.push(enemy.dnaSequence)
+
+        if (reason == "ran out of energy") {
+            combatResults.exhaustedEnemy++
+        }
+        if (reason == "was beaten") {
+            combatResults.beatEnemy++
+        }
     } else {
         combatResult.innerHTML = "STALEMATE! No organism was doing anything."
     }
+
+    const totalWins = combatResults.exhaustedEnemy + combatResults.beatEnemy
+    const totalDefeats = combatResults.wasExhausted + combatResults.wasBeaten
+
+    document.getElementById("combat-wds-table").innerHTML = `
+        <td colspan="2">${totalWins}</td>
+        <td colspan="2">${totalDefeats}</td>
+    `
+
+    combatResultsTable.innerHTML = `
+        <td>${Math.round((combatResults.exhaustedEnemy / totalWins) * 100)}%</td>
+        <td>${Math.round((combatResults.beatEnemy / totalWins) * 100)}%</td>
+        <td>${Math.round((combatResults.wasExhausted / totalDefeats) * 100)}%</td>
+        <td>${Math.round((combatResults.wasBeaten / totalDefeats) * 100)}%</td>
+    `
 
     if (reason == "draw") {
         return
@@ -205,6 +239,7 @@ function endCombat(defeatedId, reason) {
         player.velocity = { x: 0.01, y: 0 };
 
         if (combatSeriesContinue) {
+            combatRound++
             startCombat(player)
         } else {
             Organisms.setIdle(true);
@@ -322,6 +357,13 @@ function startStopCombatSeries(playerOrganism) {
     if (combatSeriesContinue) {
         winningDNA = []
         losingDNA = []
+
+        combatRound = 1
+        combatResultsTable.innerHTML = "<tr><td>0%</td><td>0%</td><td>0%</td><td>0%</td></tr>"
+        combatResults = {
+            wasExhausted: 0, wasBeaten: 0, exhaustedEnemy: 0, beatEnemy: 0
+        }
+
         startCombat(playerOrganism)
     }
     return combatSeriesContinue
