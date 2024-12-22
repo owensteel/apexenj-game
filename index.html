@@ -18,6 +18,15 @@
             border: solid 1px #000;
             user-select: none;
         }
+
+        .game-wrapper {
+            position: relative;
+        }
+
+        .game-wrapper progress {
+            position: absolute;
+            z-index: 1;
+        }
     </style>
 </head>
 
@@ -26,6 +35,49 @@
     <div id="game-wrapper">
         <canvas id="game-canvas"></canvas>
     </div>
+
+    <pre id="log"></pre>
+
+    <hr>
+
+    <button id="combat-button">START COMBAT</button>
+
+    <hr>
+
+    <h3 style="color:red" id="combat-result"></h3>
+
+    <table style="display:none" border="1" id="combat-table">
+        <tr>
+            <th>Combatant</th>
+            <th>Health</th>
+            <th>Energy</th>
+            <th>Strategy</th>
+        </tr>
+        <tr>
+            <th>Player</th>
+            <td>
+                <progress id="player-health" style="filter: hue-rotate(90deg)" max="100"></progress>
+            </td>
+            <td>
+                <progress id="player-energy" style="filter: hue-rotate(90deg)" max="100"></progress>
+            </td>
+            <td>
+                <p id="player-strat"></p>
+            </td>
+        </tr>
+        <tr>
+            <th>Enemy</th>
+            <td>
+                <progress id="enemy-health" max="100"></progress>
+            </td>
+            <td>
+                <progress id="enemy-energy" max="100"></progress>
+            </td>
+            <td>
+                <p id="enemy-strat"></p>
+            </td>
+        </tr>
+    </table>
 
     <script type="module" src="./game.v0.1.main.js"></script>
 </body>

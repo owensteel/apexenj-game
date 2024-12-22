@@ -26,12 +26,17 @@ const gravity = 0.025;
 // Organism class
 class Organism {
     constructor(dnaSequence) {
+        this.id = String(Math.random()).split(".")[1]
         this.moveStyleCache = null;
         this.traits = this.updateTraitsFromDNA(dnaSequence);
         this.mesh = null;
         this.membraneOutline = null;
         this.velocity = { x: 0.01, y: 0 }; // Default velocity
         this.eyeAnimations = [];
+        this.animationsInProgress = {
+            hurt: false,
+            explode: false
+        }
         this.createOrganismMesh();
     }
 
@@ -44,7 +49,10 @@ class Organism {
             spikiness: 1,    // Default spikiness
             moveStyle: "float",
             membrane: 1,     // Default membrane thickness
-            eyes: 1          // Default number of eyes
+            eyes: 1,          // Default number of eyes
+            aggression: 50,
+            energyConsumption: 1,
+            gravityResistance: "medium"
         };
 
         dnaSequence.forEach((gene) => {
@@ -69,6 +77,15 @@ class Organism {
                     break;
                 case "eyes":
                     traits.eyes = Math.max(1, gene.current + 1);
+                    break;
+                case "aggression":
+                    traits.aggression = gene.current;
+                    break;
+                case "energy-consumption":
+                    traits.energyConsumption = gene.role.values[gene.current];
+                    break;
+                case "gravity resistance":
+                    traits.gravityResistance = gene.current;
                     break;
             }
         });
@@ -173,14 +190,16 @@ class Organism {
 
     // Update movement logic
     updateMovement() {
-        if (this.traits.moveStyle === "float") {
-            this.mesh.position.y += Math.sin(Date.now() * 0.001) * 0.01;
-        } else if (this.traits.moveStyle === "tail") {
-            this.mesh.position.x += this.velocity.x;
-            this.mesh.position.y += Math.sin(Date.now() * 0.002) * 0.01;
+        const organismSpeed = (this.traits.energyConsumption / 100) * 0.02
 
-            if (this.mesh.position.x > 5 || this.mesh.position.x < -5) {
-                this.velocity.x *= -1;
+        if (this.traits.moveStyle === "float") {
+            if (idleAnimationsToggle) {
+                this.mesh.position.y += Math.sin(Date.now() * 0.001) * organismSpeed;
+            }
+        } else if (this.traits.moveStyle === "tail") {
+            if (idleAnimationsToggle) {
+                this.mesh.position.x += this.velocity.x * (organismSpeed / 0.02);
+                this.mesh.position.y += Math.sin(Date.now() * 0.002) * organismSpeed;
             }
         } else if (this.traits.moveStyle === "legs") {
             this.velocity.y += gravity;
@@ -196,22 +215,108 @@ class Organism {
         this.membraneOutline.rotation.copy(this.mesh.rotation);
 
         // Rotate idly
-        this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * (this.traits.moveStyle === "legs" ? 0.005 : 0.01);
+        this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * (this.traits.moveStyle === "legs" ? 0 : Math.random() * 0.01);
+    }
+
+    // Hurting animation
+    hurt() {
+        if (this.animationsInProgress.hurt) {
+            return
+        }
+
+        this.animationsInProgress.hurt = true
+        const cachedMaterial = this.membraneOutline.material
+
+        this.mesh.scale.x -= 0.1
+        this.mesh.scale.y -= 0.1
+        this.membraneOutline.material = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+
+        setTimeout(() => {
+            this.mesh.scale.x += 0.1
+            this.mesh.scale.y += 0.1
+            this.membraneOutline.material = cachedMaterial
+            setTimeout(() => {
+                this.animationsInProgress.hurt = false
+            }, 125)
+        }, 125)
+    }
+
+    // Explode!
+    explode() {
+        if (this.animationsInProgress.explode) {
+            return
+        }
+
+        this.animationsInProgress.explode = true
+
+        // Reset appearance first
+        this.createOrganismMesh()
+
+        const cachedMaterial = this.mesh.material
+        let aniCycle;
+        aniCycle = setInterval(() => {
+            this.mesh.scale.x -= Math.random() / 10
+            this.mesh.scale.y -= Math.random() / 10
+            this.mesh.scale.z -= Math.random() / 10
+            this.membraneOutline.scale.x += Math.random() / 10
+            this.membraneOutline.scale.y += Math.random() / 10
+        }, (1000 / 12))
+        setTimeout(() => {
+            // Last frame of animation
+            this.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            scene.remove(this.membraneOutline)
+            clearInterval(aniCycle)
+        }, 1000)
+        setTimeout(() => {
+            // Reset everything
+            this.mesh.material = cachedMaterial
+            scene.add(this.membraneOutline)
+            this.mesh.scale.x = 1
+            this.mesh.scale.y = 1
+            this.mesh.scale.z = 1
+            this.membraneOutline.scale.x = 1
+            this.membraneOutline.scale.y = 1
+
+            this.animationsInProgress.explode = false
+        }, 2000)
+    }
+
+    // Remove organism completely
+    remove() {
+        // Remove from stage
+        scene.remove(this.mesh)
+        scene.remove(this.membraneOutline)
+        // Remove from array
+        const index = organisms.findIndex(item => item.id === this.id)
+        if (index !== -1) {
+            organisms.splice(index, 1);
+        }
     }
 }
 
 // Main render loop
+let idleAnimationsToggle = false
 function animate() {
     if (activeAnimation) cancelAnimationFrame(activeAnimation);
 
     function renderFrame() {
-        organisms.forEach((organism) => organism.updateMovement());
+        organisms.forEach((organism) => {
+            organism.updateMovement()
+            // Bounce off edges regardless
+            if (organism.mesh.position.x > 6 || organism.mesh.position.x < -6) {
+                organism.velocity.x = -organism.velocity.x;
+            }
+            if (organism.mesh.position.y > 3 || organism.mesh.position.y < -3) {
+                organism.velocity.y = -organism.velocity.y;
+            }
+        });
         renderer.render(scene, camera);
         activeAnimation = requestAnimationFrame(renderFrame);
     }
 
     renderFrame();
 }
+animate()
 
 // Add a new organism
 function addOrganism(dnaSequence) {
@@ -220,5 +325,9 @@ function addOrganism(dnaSequence) {
     return newOrganism
 }
 
+function setIdle(state) {
+    idleAnimationsToggle = state
+}
+
 // Export functions for external use
-export { addOrganism, animate };
+export { addOrganism, setIdle };

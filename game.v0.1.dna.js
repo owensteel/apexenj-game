@@ -80,7 +80,8 @@ const dnaRoles = shuffleArray([
     },
     {
         type: "system",
-        title: "energy-consumption"
+        title: "energy-consumption",
+        values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     },
     {
         type: "system",
@@ -89,13 +90,17 @@ const dnaRoles = shuffleArray([
 ]);
 
 // DNA sequence (1D array)
-function generateRandomDNASequence() {
+function generateRandomDNASequence(presets = {}) {
     return dnaRoles.map(role => {
         let currentSet = 0;
-        if ("values" in role) {
-            currentSet = Math.floor(Math.random() * role.values.length);
+        if (role.title in presets) {
+            currentSet = presets[role.title]
         } else {
-            currentSet = Math.floor(Math.random() * 11) * 10;
+            if ("values" in role) {
+                currentSet = Math.floor(Math.random() * role.values.length);
+            } else {
+                currentSet = Math.floor(Math.random() * 11) * 10;
+            }
         }
         return {
             current: currentSet,

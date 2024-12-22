@@ -6,6 +6,7 @@
 
 import * as DNA from './game.v0.1.dna.js'
 import * as Organisms from './game.v0.1.organisms.js'
+import * as Combat from './game.v0.1.combat.js'
 
 // Setup for the game canvas
 const canvas = document.getElementById('game-canvas');
@@ -47,9 +48,9 @@ function drawDNASequence() {
         playerOrganism.createOrganismMesh();
     } else {
         playerOrganism = Organisms.addOrganism(dnaSequence);
-    }
 
-    Organisms.animate();
+        window.playerOrganismGlobal = playerOrganism
+    }
 }
 
 // Cycle gene values on click
@@ -76,3 +77,16 @@ canvas.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     drawDNASequence();
 });
+
+const combatButton = document.getElementById("combat-button")
+let combatSeriesToggle = false
+combatButton.onclick = () => {
+    combatSeriesToggle = Combat.startStopCombatSeries(playerOrganism)
+    if (combatSeriesToggle) {
+        combatButton.innerHTML = "COMBAT SERIES: RUNNING"
+    } else {
+        combatButton.innerHTML = "COMBAT SERIES: STOPPING..."
+    }
+}
+
+Organisms.setIdle(true);
