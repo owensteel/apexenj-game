@@ -97,20 +97,27 @@ let combatSeriesContinue = false
 
 let player;
 let enemy;
+let winningDNA;
+let losingDNA;
+let combatWinner;
 function startCombat(playerOrganism) {
     if (enemy) {
         console.error("combat already in session")
         return
     }
 
-    enemy = Organisms.addOrganism(
-        DNA.generateRandomDNASequence(/* presets = */{
-            // Tail or legs only
-            "move-style": Math.random() > 0.5 ? 1 : 2,
-            // Should put up a fight
-            "aggression": 100
-        })
-    )
+    combatWinner = null;
+
+    if (winningDNA.length > 0 && losingDNA.length > 0) {
+        // Based on prediction
+        enemy = Organisms.addOrganism(
+            DNA.generateFromPrediction(winningDNA, losingDNA)
+        )
+    } else {
+        // Random
+        enemy = Organisms.addOrganism(DNA.generateRandomDNASequence())
+    }
+
     enemy.mesh.position.x = Math.random() >= 0.5 ? -5 : 5;
     enemy.mesh.position.y = 0;
     combatantIds.enemy = enemy.id
@@ -163,8 +170,18 @@ function endCombat(defeatedId, reason) {
 
     if (defeatedId == player.id) {
         combatResult.innerHTML = `DEFEATED! Your organism ${reason}!`
-    } else {
+        winningDNA.push(enemy.dnaSequence)
+        losingDNA.push(player.dnaSequence)
+    } else if (defeatedId == enemy.id) {
         combatResult.innerHTML = `WON! The enemy ${reason}!`
+        winningDNA.push(player.dnaSequence)
+        losingDNA.push(enemy.dnaSequence)
+    } else {
+        combatResult.innerHTML = "STALEMATE! No organism was doing anything."
+    }
+
+    if (reason == "draw") {
+        return
     }
 
     setTimeout(() => {
@@ -278,7 +295,11 @@ function updateCombat(organism, enemy) {
 
         organism.explode();
 
-        endCombat(organism.id, reason);
+        if (combatWinner == null) {
+            endCombat(organism.id, reason);
+        } else {
+            endCombat(null, "draw");
+        }
     }
 
     // Update membrane outline to match organism's position
@@ -289,6 +310,8 @@ function updateCombat(organism, enemy) {
 function startStopCombatSeries(playerOrganism) {
     combatSeriesContinue = !combatSeriesContinue
     if (combatSeriesContinue) {
+        winningDNA = []
+        losingDNA = []
         startCombat(playerOrganism)
     }
     return combatSeriesContinue
@@ -307,9 +330,9 @@ function checkCollision(mesh1, mesh2) {
 }
 
 function calculateDamage(attackerTraits, defenderTraits) {
-    const spikeFactor = attackerTraits.spikiness * 2.5; // Higher spikiness deals more damage
-    const membraneFactor = defenderTraits.membrane * 2.5; // Thicker membrane absorbs more damage
-    return Math.max(0.05, spikeFactor - membraneFactor);
+    const spikeFactor = attackerTraits.spikiness * 2; // Higher spikiness deals more damage
+    const membraneFactor = defenderTraits.membrane * 2; // Thicker membrane absorbs more damage
+    return Math.max(0.01, spikeFactor - membraneFactor);
 }
 
 export { startCombat, startStopCombatSeries }

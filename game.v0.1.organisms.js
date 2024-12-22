@@ -28,6 +28,7 @@ class Organism {
     constructor(dnaSequence) {
         this.id = String(Math.random()).split(".")[1]
         this.moveStyleCache = null;
+        this.dnaSequence = dnaSequence;
         this.traits = this.updateTraitsFromDNA(dnaSequence);
         this.mesh = null;
         this.membraneOutline = null;

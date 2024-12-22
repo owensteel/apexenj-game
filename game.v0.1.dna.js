@@ -110,4 +110,139 @@ function generateRandomDNASequence(presets = {}) {
     });
 }
 
-export { generateRandomDNASequence }
+function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequences) {
+    // Trait importance weights
+    const weights = {
+        aggression: 0.25,
+        energyConsumption: 0.2,
+        spikiness: 0.15,
+        size: 0.15,
+        membrane: 0.1,
+        moveStyle: 0.2
+    };
+
+    // Helper function to encode moveStyle
+    function encodeMoveStyle(moveStyle) {
+        switch (moveStyle) {
+            case "float": return 0;
+            case "tail": return 1;
+            case "legs": return 2;
+            default: return -1;
+        }
+    }
+
+    // Helper function to extract traits from a DNA sequence
+    function extractTraits(dna) {
+        const traits = {
+            aggression: 0,
+            energyConsumption: 0,
+            spikiness: 0,
+            size: 0,
+            membrane: 0,
+            moveStyle: -1
+        };
+
+        dna.forEach((gene) => {
+            switch (gene.role.title) {
+                case "aggression":
+                    traits.aggression = gene.current;
+                    break;
+                case "energy-consumption":
+                    traits.energyConsumption = gene.current;
+                    break;
+                case "spiky-ness":
+                    traits.spikiness = gene.current / 100; // Normalize to 0-1
+                    break;
+                case "size":
+                    traits.size = gene.current / 50; // Normalize to 0-2
+                    break;
+                case "membrane":
+                    traits.membrane = gene.current / 100; // Normalize to 0-1
+                    break;
+                case "move-style":
+                    traits.moveStyle = encodeMoveStyle(gene.role.values[gene.current]);
+                    break;
+            }
+        });
+
+        return traits;
+    }
+
+    // Extract traits from the given DNA sequence
+    const targetTraits = extractTraits(dnaSequence);
+
+    // Function to calculate similarity score
+    function calculateSimilarityScore(targetTraits, comparisonTraits) {
+        let similarity = 0;
+        Object.keys(weights).forEach((trait) => {
+            if (trait === "moveStyle") {
+                similarity += weights[trait] * (targetTraits[trait] === comparisonTraits[trait] ? 1 : 0);
+            } else {
+                similarity += weights[trait] * (1 - Math.abs(targetTraits[trait] - comparisonTraits[trait]));
+            }
+        });
+        return similarity;
+    }
+
+    // Handle empty datasets
+    if (winningDNASequences.length === 0 && losingDNASequences.length === 0) {
+        return 50.0; // Neutral probability when no data is available
+    } else if (winningDNASequences.length === 0) {
+        return 0.0; // No evidence of similarity to winners
+    } else if (losingDNASequences.length === 0) {
+        return 100.0; // No evidence of similarity to losers
+    }
+
+    // Calculate average similarity scores for winning and losing DNA
+    let totalWinningScore = 0;
+    winningDNASequences.forEach((winningDNA) => {
+        const winningTraits = extractTraits(winningDNA);
+        totalWinningScore += calculateSimilarityScore(targetTraits, winningTraits);
+    });
+    const avgWinningScore = totalWinningScore / winningDNASequences.length;
+
+    let totalLosingScore = 0;
+    losingDNASequences.forEach((losingDNA) => {
+        const losingTraits = extractTraits(losingDNA);
+        totalLosingScore += calculateSimilarityScore(targetTraits, losingTraits);
+    });
+    const avgLosingScore = totalLosingScore / losingDNASequences.length;
+
+    // Combine scores into a final probability
+    const totalScore = avgWinningScore + avgLosingScore;
+    const probability = avgWinningScore / totalScore;
+
+    // Return a percentage
+    return Math.min(Math.max(probability * 100, 0), 100).toFixed(2);
+}
+
+function generateFromPrediction(winningDnaSequences, losingDnaSequences) {
+    const generated = {}
+    let bestProb = 0;
+
+    console.log("Generating...")
+
+    const minProb = 50
+    while (bestProb < minProb) {
+        for (let i = 0; i < 10; i++) {
+            const currentDnaGeneration = generateRandomDNASequence()
+            const winningProbability = Math.round(
+                predictWinProbability(
+                    currentDnaGeneration,
+                    winningDnaSequences,
+                    losingDnaSequences
+                )
+            )
+            generated[winningProbability] = currentDnaGeneration
+        }
+        const probsSorted = Object.keys(generated).sort((a, b) => { return parseInt(a) - parseInt(b); })
+        bestProb = probsSorted.pop()
+    }
+
+    const bestDnaGeneration = generated[bestProb]
+
+    console.log(`Generated sequence with ${bestProb}% probability of winning (${Object.keys(generated).length} total generations)`)
+    return bestDnaGeneration
+}
+
+export { generateRandomDNASequence, generateFromPrediction }
