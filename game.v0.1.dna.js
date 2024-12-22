@@ -53,7 +53,7 @@ const dnaRoles = shuffleArray([
     {
         type: "body",
         title: "move-style",
-        values: ["float", "tail", "legs"]
+        values: ["float", "legs", "tail"]
     },
     {
         type: "body",
@@ -236,19 +236,16 @@ function generateFromPrediction(winningDnaSequences, losingDnaSequences) {
 
     const minProb = 50
     while (bestProb < minProb) {
-        for (let i = 0; i < 10; i++) {
-            const currentDnaGeneration = generateRandomDNASequence()
-            const winningProbability = Math.round(
-                predictWinProbability(
-                    currentDnaGeneration,
-                    winningDnaSequences,
-                    losingDnaSequences
-                )
+        const currentDnaGeneration = generateRandomDNASequence()
+        const winningProbability = Math.round(
+            predictWinProbability(
+                currentDnaGeneration,
+                winningDnaSequences,
+                losingDnaSequences
             )
-            generated[winningProbability] = currentDnaGeneration
-        }
-        const probsSorted = Object.keys(generated).sort((a, b) => { return parseInt(a) - parseInt(b); })
-        bestProb = probsSorted.pop()
+        )
+        generated[winningProbability] = currentDnaGeneration
+        bestProb = winningProbability
     }
 
     const bestDnaGeneration = generated[bestProb]

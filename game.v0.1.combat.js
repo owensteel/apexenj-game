@@ -56,7 +56,7 @@ function determineCombatAction(organism, enemy) {
         action.movement = "idle"; // Poor vision limits reaction
     }
 
-    if (organism.traits.aggression > 50 && (enemy.currentStrat == "idle" || enemy.currentStrat == "flee")) {
+    if (organism.traits.aggression >= 25 && (enemy.currentStrat == "idle" || enemy.currentStrat == "flee")) {
         action.movement = "chase";
         action.attack = true;
     }
@@ -83,6 +83,7 @@ function determineCombatAction(organism, enemy) {
 const combatTable = document.getElementById("combat-table")
 const combatResult = document.getElementById("combat-result")
 const combatResultsTable = document.getElementById("combat-results-table")
+const combatWinsDefsTable = document.getElementById("combat-wds-table")
 const combatForfeitButton = document.getElementById("forfeit-button")
 
 const playerHealthBar = document.getElementById("player-health")
@@ -112,6 +113,10 @@ function startCombat(playerOrganism) {
 
     combatWinner = null;
 
+    player = playerOrganism
+    player.mesh.position.x = 0;
+    combatantIds.player = player.id
+
     if (winningDNA.length > 0 && losingDNA.length > 0) {
         // Based on prediction
         enemy = Organisms.addOrganism(
@@ -119,16 +124,36 @@ function startCombat(playerOrganism) {
         )
     } else {
         // Random
-        enemy = Organisms.addOrganism(DNA.generateRandomDNASequence())
+        const presets = {
+            "edges": 0,
+            "move-style": 0,
+            "membrane": 0,
+            "size": 0,
+            "spiky-ness": 0,
+            "eyes": 0,
+            "gravity resistance": 0,
+            "energy-consumption": 0,
+            "aggression": 0
+        }
+
+        player.dnaSequence.forEach((gene) => {
+            if (gene.role.title in presets) {
+                let currentSet;
+                if ("values" in gene.role) {
+                    currentSet = (gene.role.values.length - 1) - gene.current;
+                } else {
+                    currentSet = 100 - gene.current;
+                }
+                presets[gene.role.title] = currentSet
+            }
+        })
+
+        enemy = Organisms.addOrganism(DNA.generateRandomDNASequence(presets))
     }
 
     enemy.mesh.position.x = Math.random() >= 0.5 ? -5 : 5;
     enemy.mesh.position.y = 0;
     combatantIds.enemy = enemy.id
-
-    player = playerOrganism
-    player.mesh.position.x = 0;
-    combatantIds.player = player.id
 
     // Set stats
     combatResult.innerHTML = ""
@@ -209,7 +234,7 @@ function endCombat(defeatedId, reason) {
     const totalWins = combatResults.exhaustedEnemy + combatResults.beatEnemy
     const totalDefeats = combatResults.wasExhausted + combatResults.wasBeaten
 
-    document.getElementById("combat-wds-table").innerHTML = `
+    combatWinsDefsTable.innerHTML = `
         <td colspan="2">${totalWins}</td>
         <td colspan="2">${totalDefeats}</td>
     `
@@ -259,7 +284,7 @@ function updateCombat(organism, enemy) {
 
     organism.currentStrat = action.movement;
 
-    const organismSpeed = (organism.traits.energyConsumption / 100) * 0.03
+    const organismSpeed = (organism.traits.energyConsumption / 100) * 0.05
 
     // Adjust velocity based on the action
     if (action.movement === "chase") {
@@ -323,7 +348,7 @@ function updateCombat(organism, enemy) {
     if (action.movement == "idle") {
         organism.energy -= 0.01;
     } else {
-        organism.energy -= (organism.traits.energyConsumption / 100) * 0.2;
+        organism.energy -= (organism.traits.energyConsumption / 100) * 0.35;
     }
 
     // Check if energy or health is depleted
@@ -358,8 +383,9 @@ function startStopCombatSeries(playerOrganism) {
         winningDNA = []
         losingDNA = []
 
+        combatWinsDefsTable.innerHTML = "<td colspan='2'>0</td><td colspan='2'>0</td>"
+        combatResultsTable.innerHTML = "<td>0%</td><td>0%</td><td>0%</td><td>0%</td>"
         combatRound = 1
-        combatResultsTable.innerHTML = "<tr><td>0%</td><td>0%</td><td>0%</td><td>0%</td></tr>"
         combatResults = {
             wasExhausted: 0, wasBeaten: 0, exhaustedEnemy: 0, beatEnemy: 0
         }
@@ -382,9 +408,16 @@ function checkCollision(mesh1, mesh2) {
 }
 
 function calculateDamage(attackerTraits, defenderTraits) {
-    const spikeFactor = attackerTraits.spikiness * 2; // Higher spikiness deals more damage
-    const membraneFactor = defenderTraits.membrane * 2; // Thicker membrane absorbs more damage
-    return Math.max(0.01, spikeFactor - membraneFactor);
+    // Factors for calculating damage
+    const spikeFactor = attackerTraits.spikiness; // Spikier organisms deal more damage
+    const sizeFactor = attackerTraits.size / 2.5;           // Larger organisms deal more damage
+    const membraneFactor = defenderTraits.membrane; // Thicker membranes absorb damage
+    const baseDamage = spikeFactor * sizeFactor;      // Base damage is scaled by size and spikiness
+
+    // Final damage inflicted
+    // 0.1 means that at least some damage is done, just out of
+    // the collision
+    return Math.max(0.05, baseDamage - membraneFactor);
 }
 
 export { startCombat, startStopCombatSeries }

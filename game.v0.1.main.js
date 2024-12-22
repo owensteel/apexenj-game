@@ -14,7 +14,17 @@ const ctx = canvas.getContext('2d');
 canvas.width = 600;
 canvas.height = 150;
 
-const dnaSequence = DNA.generateRandomDNASequence()
+const dnaSequence = DNA.generateRandomDNASequence({
+    "edges": 2,
+    "move-style": 0,
+    "membrane": 10,
+    "size": 2,
+    "spiky-ness": 10,
+    "eyes": 0,
+    "gravity resistance": 1,
+    "energy-consumption": 4,
+    "aggression": 30
+})
 let playerOrganism = null;
 
 // Draw DNA sequence
