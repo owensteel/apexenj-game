@@ -24,20 +24,6 @@ function determineCombatAction(organism, enemy) {
         action.attack = false;
     }
 
-    // Adjust energy usage based on energy consumption
-    if (organism.energyConsumption > 50) {
-        action.energyUsage = "high";
-    } else if (organism.energyConsumption < 30) {
-        action.energyUsage = "low";
-    }
-
-    // If health is low, prioritize fleeing
-    if (organism.health < 20) {
-        action.movement = "flee";
-        action.attack = false;
-        action.energyUsage = "low";
-    }
-
     // Eyes: Adjust distance awareness and reactions
     if (organism.traits.eyes > 3) {
         // Size vs. enemy size: Adjust movement and attack strategy
@@ -56,7 +42,11 @@ function determineCombatAction(organism, enemy) {
         action.movement = "idle"; // Poor vision limits reaction
     }
 
-    if (organism.traits.aggression >= 25 && (enemy.currentStrat == "idle" || enemy.currentStrat == "flee")) {
+    // Take advantage of idling or fleeing enemy
+    if (
+        (enemy.currentStrat == "idle" || enemy.currentStrat == "flee") ||
+        (organism.traits.aggression >= 25 && organism.energy >= 25)
+    ) {
         action.movement = "chase";
         action.attack = true;
     }
@@ -68,13 +58,18 @@ function determineCombatAction(organism, enemy) {
         }
     }
 
-    // Aggression and energy interplay
-    if (organism.traits.aggression > 50 && organism.energyConsumption > 50) {
-        action.attack = true;
-        action.energyUsage = "high";
-    } else if (organism.energyConsumption < 30) {
-        action.energyUsage = "low";
+    // If health/energy is low, prioritize fleeing
+    if (organism.health < (100 - organism.courage) || organism.energy < (100 - organism.courage)) {
+        action.movement = "flee";
         action.attack = false;
+        action.energyUsage = "low";
+    }
+
+    // Energy usage
+    if (action.movement == "chase" || action.movement == "flee") {
+        action.energyUsage = "high";
+    } else {
+        action.energyUsage = "low";
     }
 
     return action;
@@ -284,7 +279,7 @@ function updateCombat(organism, enemy) {
 
     organism.currentStrat = action.movement;
 
-    const organismSpeed = (organism.traits.energyConsumption / 100) * 0.05
+    const organismSpeed = (organism.traits.energyConsumption / 100) * 0.035
 
     // Adjust velocity based on the action
     if (action.movement === "chase") {
@@ -331,17 +326,10 @@ function updateCombat(organism, enemy) {
     }
 
     // Hurt when colliding with enemy
-    if (checkCollision(organism.mesh, enemy.mesh) && action.attack) {
+    if (checkCollision(organism.mesh, enemy.mesh)) {
         const damage = calculateDamage(organism.traits, enemy.traits);
         enemy.health -= damage;
         enemy.hurt();
-    }
-
-    // Hurt from colliding with enemy
-    if (checkCollision(enemy.mesh, organism.mesh)) {
-        const damage = calculateDamage(enemy.traits, organism.traits);
-        organism.health -= damage;
-        organism.hurt();
     }
 
     // Energy logic: Decrease energy based on usage

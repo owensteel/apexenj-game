@@ -87,6 +87,10 @@ const dnaRoles = shuffleArray([
         type: "system",
         title: "aggression"
     },
+    {
+        type: "system",
+        title: "courage"
+    }
 ]);
 
 // DNA sequence (1D array)
@@ -121,7 +125,8 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
         eyes: 0.05,                // May influence perception (less significant for combat)
         gravityResistance: 0.1,    // Determines resistance to environmental effects
         energyConsumption: 0.2,    // Affects speed, power, and stamina tradeoffs
-        aggression: 0.2           // Aggressiveness directly impacts strategy
+        aggression: 0.2,
+        courage: 0.2
     };
 
     // Helper function to encode categorical traits
@@ -140,7 +145,8 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
             eyes: 0,
             gravityResistance: -1,
             energyConsumption: 0,
-            aggression: 0
+            aggression: 0,
+            courage: 0
         };
 
         dna.forEach((gene) => {
@@ -170,7 +176,10 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
                     traits.energyConsumption = gene.role.values[gene.current] / 100; // Normalize to 0-1
                     break;
                 case "aggression":
-                    traits.aggression = gene.current / 100; // Normalize aggression to 0-1
+                    traits.aggression = gene.current / 100; // Normalize to 0-1
+                    break;
+                case "courage":
+                    traits.courage = gene.current; // Normalize to 0-1
                     break;
             }
         });

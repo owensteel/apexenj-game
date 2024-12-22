@@ -52,6 +52,7 @@ class Organism {
             membrane: 1,     // Default membrane thickness
             eyes: 1,          // Default number of eyes
             aggression: 50,
+            courage: 75,
             energyConsumption: 1,
             gravityResistance: "medium"
         };
@@ -81,6 +82,9 @@ class Organism {
                     break;
                 case "aggression":
                     traits.aggression = gene.current;
+                    break;
+                case "courage":
+                    traits.courage = gene.current;
                     break;
                 case "energy-consumption":
                     traits.energyConsumption = gene.role.values[gene.current];

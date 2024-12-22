@@ -23,7 +23,8 @@ const dnaSequence = DNA.generateRandomDNASequence({
     "eyes": 0,
     "gravity resistance": 1,
     "energy-consumption": 4,
-    "aggression": 30
+    "aggression": 30,
+    "courage": 50
 })
 let playerOrganism = null;
 
