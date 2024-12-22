@@ -204,6 +204,8 @@ function endCombat(defeatedId, reason) {
 
             combatTable.style.display = "none"
             combatResult.innerHTML = ""
+
+            document.getElementById('game-canvas').style.display = "block"
             document.getElementById("combat-button").innerHTML = "START COMBAT"
         }
     }, 2100)
