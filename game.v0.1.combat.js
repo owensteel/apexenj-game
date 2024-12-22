@@ -82,6 +82,7 @@ function determineCombatAction(organism, enemy) {
 
 const combatTable = document.getElementById("combat-table")
 const combatResult = document.getElementById("combat-result")
+const combatForfeitButton = document.getElementById("forfeit-button")
 
 const playerHealthBar = document.getElementById("player-health")
 const playerEnergyBar = document.getElementById("player-energy")
@@ -144,6 +145,10 @@ function startCombat(playerOrganism) {
     combatLoop();
 
     combatTable.style.display = "block"
+    combatForfeitButton.style.display = "block"
+    combatForfeitButton.onclick = () => {
+        endCombat(player.id, "forfeited")
+    }
 }
 
 let combatLoopCycle;
@@ -170,8 +175,10 @@ function endCombat(defeatedId, reason) {
 
     if (defeatedId == player.id) {
         combatResult.innerHTML = `DEFEATED! Your organism ${reason}!`
-        winningDNA.push(enemy.dnaSequence)
-        losingDNA.push(player.dnaSequence)
+        if (reason !== "forfeited") {
+            winningDNA.push(enemy.dnaSequence)
+            losingDNA.push(player.dnaSequence)
+        }
     } else if (defeatedId == enemy.id) {
         combatResult.innerHTML = `WON! The enemy ${reason}!`
         winningDNA.push(player.dnaSequence)
@@ -205,6 +212,7 @@ function endCombat(defeatedId, reason) {
             combatTable.style.display = "none"
             combatResult.innerHTML = ""
 
+            combatForfeitButton.style.display = "none"
             document.getElementById('game-canvas').style.display = "block"
             document.getElementById("combat-button").innerHTML = "START COMBAT"
         }
