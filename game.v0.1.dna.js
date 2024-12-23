@@ -39,7 +39,7 @@ const dnaColors = {
     100: "black"
 };
 
-const dnaRoles = shuffleArray([
+const dnaRoles = [
     {
         type: "body",
         title: "color",
@@ -91,11 +91,11 @@ const dnaRoles = shuffleArray([
         type: "system",
         title: "courage"
     }
-]);
+];
 
 // DNA sequence (1D array)
 function generateRandomDNASequence(presets = {}) {
-    return dnaRoles.map(role => {
+    return shuffleArray(dnaRoles).map(role => {
         let currentSet = 0;
         if (role.title in presets) {
             currentSet = presets[role.title]
@@ -179,7 +179,7 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
                     traits.aggression = gene.current / 100; // Normalize to 0-1
                     break;
                 case "courage":
-                    traits.courage = gene.current; // Normalize to 0-1
+                    traits.courage = gene.current / 100; // Normalize to 0-1
                     break;
             }
         });
@@ -237,30 +237,62 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
     return Math.min(Math.max(probability * 100, 0), 100).toFixed(2);
 }
 
-function generateFromPrediction(winningDnaSequences, losingDnaSequences) {
-    const generated = {}
-    let bestProb = 0;
-
+function generateFromPrediction(winningDNASequences, losingDNASequences, maxIterations = 100, targetProbability = 95) {
     console.log("Generating...")
 
-    const minProb = 50
-    while (bestProb < minProb) {
-        const currentDnaGeneration = generateRandomDNASequence()
-        const winningProbability = Math.round(
-            predictWinProbability(
-                currentDnaGeneration,
-                winningDnaSequences,
-                losingDnaSequences
-            )
-        )
-        generated[winningProbability] = currentDnaGeneration
-        bestProb = winningProbability
+    // Helper function to randomly mutate a DNA sequence
+    function mutateDNA(dna) {
+        const mutatedDNA = JSON.parse(JSON.stringify(dna)); // Deep copy to avoid mutating the original
+
+        const geneIndex = Math.floor(Math.random() * dna.length); // Randomly select a gene to mutate
+        const gene = mutatedDNA[geneIndex];
+
+        if ("values" in gene.role) {
+            // Mutate categorical genes by cycling through values
+            const maxIndex = gene.role.values.length - 1;
+            gene.current = Math.floor(Math.random() * (maxIndex + 1));
+        } else {
+            // Mutate numerical genes by slightly adjusting their current value
+            const mutationStep = Math.floor(Math.random() * 21) - 10; // Random step between -10 and +10
+            gene.current = Math.max(0, Math.min(100, gene.current + mutationStep));
+        }
+
+        return mutatedDNA;
     }
 
-    const bestDnaGeneration = generated[bestProb]
+    // Start with a random DNA sequence
+    const currentDNA = winningDNASequences.length > 0
+        ? JSON.parse(JSON.stringify(winningDNASequences[0])) // Clone a known winner
+        : JSON.parse(JSON.stringify(losingDNASequences[0] || generateRandomDNASequence())); // Clone a known loser or random DNA if none available
 
-    console.log(`Generated sequence with ${bestProb}% probability of winning (${Object.keys(generated).length} total generations)`)
-    return bestDnaGeneration
+    let bestDNA = currentDNA;
+    let bestProbability = predictWinProbability(bestDNA, winningDNASequences, losingDNASequences);
+
+    // Iteratively improve the DNA sequence
+    for (let iteration = 0; iteration < maxIterations; iteration++) {
+        const mutatedDNA = mutateDNA(bestDNA);
+        const probability = predictWinProbability(mutatedDNA, winningDNASequences, losingDNASequences);
+
+        // Keep the mutation if it improves the probability
+        if (probability > bestProbability) {
+            bestDNA = mutatedDNA;
+            bestProbability = probability;
+        }
+
+        // Stop if the target probability is reached
+        if (bestProbability >= targetProbability) {
+            break;
+        }
+    }
+
+    bestDNA.forEach((gene) => {
+        if (gene.title == "color") {
+            gene.current = Math.floor(Math.random() & (gene.values.length - 1))
+        }
+    })
+
+    console.log(`Best DNA sequence found with probability: ${bestProbability}%`);
+    return bestDNA;
 }
 
 export { generateRandomDNASequence, generateFromPrediction }

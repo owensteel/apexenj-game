@@ -20,7 +20,7 @@ const dnaSequence = DNA.generateRandomDNASequence({
     "membrane": 10,
     "size": 2,
     "spiky-ness": 10,
-    "eyes": 0,
+    "eyes": 1,
     "gravity resistance": 1,
     "energy-consumption": 4,
     "aggression": 30,

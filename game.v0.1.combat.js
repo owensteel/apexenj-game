@@ -51,22 +51,15 @@ function determineCombatAction(organism, enemy) {
         action.attack = true;
     }
 
-    // Move style influences movement strategy
-    if (organism.traits.moveStyle === "legs") {
-        if (action.movement === "chase" || action.movement === "flee") {
-            action.energyUsage = "high"; // Legs require more energy for dynamic movement
-        }
-    }
-
     // If health/energy is low, prioritize fleeing
-    if (organism.health < (100 - organism.courage) || organism.energy < (100 - organism.courage)) {
+    if (organism.health < (100 - organism.traits.courage) || organism.energy < (100 - organism.traits.courage)) {
         action.movement = "flee";
         action.attack = false;
         action.energyUsage = "low";
     }
 
     // Energy usage
-    if (action.movement == "chase" || action.movement == "flee") {
+    if (action.movement == "chase") {
         action.energyUsage = "high";
     } else {
         action.energyUsage = "low";
@@ -112,13 +105,9 @@ function startCombat(playerOrganism) {
     player.mesh.position.x = 0;
     combatantIds.player = player.id
 
-    if (winningDNA.length > 0 && losingDNA.length > 0) {
-        // Based on prediction
-        enemy = Organisms.addOrganism(
-            DNA.generateFromPrediction(winningDNA, losingDNA)
-        )
-    } else {
-        // Random
+    if (winningDNA.length == 0 && losingDNA.length == 0) {
+        // Generate "winner" (complement)
+
         const presets = {
             "edges": 0,
             "move-style": 0,
@@ -144,6 +133,16 @@ function startCombat(playerOrganism) {
         })
 
         enemy = Organisms.addOrganism(DNA.generateRandomDNASequence(presets))
+    } else if (winningDNA.length > 1 && losingDNA.length > 1) {
+        // Generate from predictions
+        enemy = Organisms.addOrganism(
+            DNA.generateFromPrediction(winningDNA, losingDNA)
+        )
+    } else {
+        // Generate random
+        enemy = Organisms.addOrganism(
+            DNA.generateRandomDNASequence()
+        )
     }
 
     enemy.mesh.position.x = Math.random() >= 0.5 ? -5 : 5;
@@ -336,7 +335,7 @@ function updateCombat(organism, enemy) {
     if (action.movement == "idle") {
         organism.energy -= 0.01;
     } else {
-        organism.energy -= (organism.traits.energyConsumption / 100) * 0.35;
+        organism.energy -= (organism.traits.energyConsumption / 100) * ((action.energyUsage == "high") ? 0.25 : 0.125);
     }
 
     // Check if energy or health is depleted
