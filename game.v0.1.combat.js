@@ -233,12 +233,17 @@ function endCombat(defeatedId, reason) {
         <td colspan="2">${totalDefeats}</td>
     `
 
-    combatResultsTable.innerHTML = `
-        <td>${Math.round((combatResults.exhaustedEnemy / totalWins) * 100)}%</td>
-        <td>${Math.round((combatResults.beatEnemy / totalWins) * 100)}%</td>
-        <td>${Math.round((combatResults.wasExhausted / totalDefeats) * 100)}%</td>
-        <td>${Math.round((combatResults.wasBeaten / totalDefeats) * 100)}%</td>
-    `
+    combatResultsTable.innerHTML = ""
+    if (totalWins > 0) {
+        combatResultsTable.innerHTML += `
+            <td>${Math.round((combatResults.exhaustedEnemy / totalWins) * 100)}%</td>
+            <td>${Math.round((combatResults.beatEnemy / totalWins) * 100)}%</td>`
+    }
+    if (totalDefeats > 0) {
+        combatResultsTable.innerHTML += `
+            <td>${Math.round((combatResults.wasExhausted / totalDefeats) * 100)}%</td>
+            <td>${Math.round((combatResults.wasBeaten / totalDefeats) * 100)}%</td>`
+    }
 
     if (reason == "draw") {
         return
