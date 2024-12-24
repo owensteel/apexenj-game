@@ -341,10 +341,10 @@ function updateCombat(organism, enemy) {
     // Check if energy or health is depleted
     if (organism.energy <= 0 || organism.health <= 0) {
         let reason = "";
-        if (organism.energy <= 0) {
+        if (Math.round(organism.energy / 5) * 5 <= 0) {
             reason = "ran out of energy";
         }
-        if (organism.health <= 0) {
+        if (Math.round(organism.health / 5) * 5 <= 0) {
             reason = "was beaten";
         }
 
