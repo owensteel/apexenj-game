@@ -238,11 +238,15 @@ function endCombat(defeatedId, reason) {
         combatResultsTable.innerHTML += `
             <td>${Math.round((combatResults.exhaustedEnemy / totalWins) * 100)}%</td>
             <td>${Math.round((combatResults.beatEnemy / totalWins) * 100)}%</td>`
+    } else {
+        combatResultsTable.innerHTML += "<td>0%</td><td>0%</td>"
     }
     if (totalDefeats > 0) {
         combatResultsTable.innerHTML += `
             <td>${Math.round((combatResults.wasExhausted / totalDefeats) * 100)}%</td>
             <td>${Math.round((combatResults.wasBeaten / totalDefeats) * 100)}%</td>`
+    } else {
+        combatResultsTable.innerHTML += "<td>0%</td><td>0%</td>"
     }
 
     if (reason == "draw") {
