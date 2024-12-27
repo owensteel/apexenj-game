@@ -177,11 +177,6 @@ let combatLoopCycle;
 function combatLoop() {
     combatLoopCycle = requestAnimationFrame(combatLoop)
 
-    playerHealthBar.value = Math.round(player.health / 5) * 5
-    playerEnergyBar.value = Math.round(player.energy / 5) * 5
-    enemyHealthBar.value = Math.round(enemy.health / 5) * 5
-    enemyEnergyBar.value = Math.round(enemy.energy / 5) * 5
-
     playerStrat.innerHTML = player.currentStrat;
     enemyStrat.innerHTML = enemy.currentStrat;
 
@@ -189,6 +184,7 @@ function combatLoop() {
     updateCombat(enemy, player);
 }
 
+let endingCombat = false
 function endCombat(defeatedId, reason) {
     console.log(`Ended combat.`)
 
@@ -249,11 +245,15 @@ function endCombat(defeatedId, reason) {
         combatResultsTable.innerHTML += "<td>0%</td><td>0%</td>"
     }
 
-    if (reason == "draw") {
+    if (endingCombat || reason == "draw") {
         return
     }
 
+    endingCombat = true
+
     setTimeout(() => {
+        console.log("resetting combat...")
+
         // Reset enemy
         if (enemy) {
             enemy.remove();
@@ -279,6 +279,8 @@ function endCombat(defeatedId, reason) {
             document.getElementById('game-canvas').style.display = "block"
             document.getElementById("combat-button").innerHTML = "START COMBAT"
         }
+
+        endingCombat = false
     }, 2100)
 }
 
@@ -348,12 +350,23 @@ function updateCombat(organism, enemy) {
     }
 
     // Check if energy or health is depleted
-    if (organism.energy <= 0 || organism.health <= 0) {
+    const roundedEnergy = Math.floor(organism.energy / 5) * 5
+    const roundedHealth = Math.floor(organism.health / 5) * 5
+
+    if (organism.id == player.id) {
+        playerHealthBar.value = roundedHealth
+        playerEnergyBar.value = roundedEnergy
+    } else {
+        enemyHealthBar.value = roundedHealth
+        enemyEnergyBar.value = roundedEnergy
+    }
+
+    if (roundedEnergy <= 0 || roundedHealth <= 0) {
         let reason = "";
-        if (Math.round(organism.energy / 5) * 5 <= 0) {
+        if (roundedEnergy <= 0) {
             reason = "ran out of energy";
         }
-        if (Math.round(organism.health / 5) * 5 <= 0) {
+        if (roundedHealth <= 0) {
             reason = "was beaten";
         }
 

@@ -19,22 +19,38 @@
             user-select: none;
         }
 
-        .game-wrapper {
+        game-wrapper {
             position: relative;
+            display: block;
         }
 
-        .game-wrapper progress {
-            position: absolute;
-            z-index: 1;
+        game-canvas {
+            position: relative;
+            display: flex;
+            text-align: center;
+            align-items: center;
+        }
+
+        game-canvas gene-dial {
+            position: relative;
+            display: inline-block;
+            background-color: #000;
+            align-self: center;
+            margin: 7.5px;
+            /* default */
+        }
+
+        game-canvas gene-dial.body {
+            clip-path: polygon(0 0, 100% 100%, 0 100%);
         }
     </style>
 </head>
 
 <body>
 
-    <div id="game-wrapper">
-        <canvas id="game-canvas"></canvas>
-    </div>
+    <game-wrapper id="game-wrapper">
+        <game-canvas id="game-canvas"></game-canvas>
+    </game-wrapper>
 
     <pre id="log"></pre>
 

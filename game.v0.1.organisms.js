@@ -142,7 +142,7 @@ class Organism {
 
         // Add eyes
         const eyeGeometry = new THREE.SphereGeometry(0.05 * this.traits.size, 16, 16);
-        const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
         this.eyeAnimations.forEach((cycle) => {
             clearInterval(cycle)
