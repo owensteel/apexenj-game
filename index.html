@@ -26,12 +26,21 @@
 
         game-canvas {
             position: relative;
-            display: flex;
+            display: block;
             text-align: center;
+        }
+
+        game-canvas game-dna-wrapper {
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            position: absolute;
+            display: flex;
             align-items: center;
         }
 
-        game-canvas gene-dial {
+        game-canvas game-dna-wrapper gene-dial {
             position: relative;
             display: inline-block;
             background-color: #000;
@@ -49,7 +58,9 @@
 <body>
 
     <game-wrapper id="game-wrapper">
-        <game-canvas id="game-canvas"></game-canvas>
+        <game-canvas id="game-canvas">
+            <game-dna-wrapper></game-dna-wrapper>
+        </game-canvas>
     </game-wrapper>
 
     <pre id="log"></pre>

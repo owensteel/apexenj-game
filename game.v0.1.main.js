@@ -28,8 +28,9 @@ const dnaSequence = DNA.generateRandomDNASequence({
 let playerOrganism = null;
 
 // Draw DNA sequence
+const dnaSequenceWrapper = canvas.getElementsByTagName("game-dna-wrapper")[0]
 function drawDNASequence() {
-    canvas.innerHTML = ""
+    dnaSequenceWrapper.innerHTML = ""
 
     const geneWidth = canvas.clientWidth / dnaSequence.length;
     dnaSequence.forEach((gene, index) => {
@@ -52,7 +53,7 @@ function drawDNASequence() {
             console.log(gene);
         }
 
-        canvas.appendChild(geneDial)
+        dnaSequenceWrapper.appendChild(geneDial)
     });
 
     if (playerOrganism) {
