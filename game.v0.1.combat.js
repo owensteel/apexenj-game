@@ -349,10 +349,11 @@ function updateCombat(organism, enemy) {
         organism.energy -= (organism.traits.energyConsumption / 100) * ((action.energyUsage == "high") ? 0.25 : 0.125);
     }
 
-    // Check if energy or health is depleted
+    // Round values to prevent visuals conflicting with numbers being too precise
     const roundedEnergy = Math.floor(organism.energy / 5) * 5
     const roundedHealth = Math.floor(organism.health / 5) * 5
 
+    // Display current energy/health values
     if (organism.id == player.id) {
         playerHealthBar.value = roundedHealth
         playerEnergyBar.value = roundedEnergy
@@ -361,6 +362,7 @@ function updateCombat(organism, enemy) {
         enemyEnergyBar.value = roundedEnergy
     }
 
+    // Check if energy or health is depleted
     if (roundedEnergy <= 0 || roundedHealth <= 0) {
         let reason = "";
         if (roundedEnergy <= 0) {
