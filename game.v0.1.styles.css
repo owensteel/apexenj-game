@@ -1,0 +1,51 @@
+/* v1 styles */
+
+html,
+body,
+h1,
+h2,
+h3,
+ul,
+li {
+    margin: 0px;
+    padding: 0px;
+}
+
+canvas {
+    border: solid 1px #000;
+    user-select: none;
+}
+
+game-wrapper {
+    position: relative;
+    display: block;
+}
+
+game-canvas {
+    position: relative;
+    display: block;
+    text-align: center;
+}
+
+game-canvas game-dna-wrapper {
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+}
+
+game-canvas game-dna-wrapper gene-dial {
+    position: relative;
+    display: inline-block;
+    background-color: #000;
+    align-self: center;
+    margin: 7.5px;
+    /* default */
+}
+
+game-canvas gene-dial.body {
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
