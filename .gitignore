@@ -10,6 +10,7 @@
 
 # production
 /build
+/static/bundle.js
 
 # misc
 ._*
