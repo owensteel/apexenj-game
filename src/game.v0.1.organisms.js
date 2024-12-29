@@ -1,22 +1,11 @@
 /*
 
-    Organisms Renderer
+    Organisms
 
 */
 
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js';
-
-const gameWrapper = document.getElementById("game-wrapper");
-
-// Initialize Three.js scene
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, 600 / 300, 0.1, 1000);
-camera.position.z = 5;
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xffffff, 0);
-renderer.setSize(600, 300);
-gameWrapper.appendChild(renderer.domElement);
+import * as THREE from 'three';
+import * as ThreeElements from './game.v0.1.3d.js'
 
 // Shared variables
 let organisms = []; // Array to hold all organisms
@@ -36,7 +25,8 @@ class Organism {
         this.eyeAnimations = [];
         this.animationsInProgress = {
             hurt: false,
-            explode: false
+            explode: false,
+            eat: false
         }
         this.createOrganismMesh();
     }
@@ -136,7 +126,7 @@ class Organism {
                 newMesh.position.copy(this.mesh.position)
                 newMesh.rotation.copy(this.mesh.rotation)
             }
-            scene.remove(this.mesh)
+            ThreeElements.scene.remove(this.mesh)
         }
         this.mesh = newMesh
 
@@ -183,12 +173,12 @@ class Organism {
                 newMembraneOutline.position.copy(this.membraneOutline.position)
                 newMembraneOutline.rotation.copy(this.membraneOutline.rotation)
             }
-            scene.remove(this.membraneOutline)
+            ThreeElements.scene.remove(this.membraneOutline)
         }
         this.membraneOutline = newMembraneOutline
 
-        scene.add(this.mesh);
-        scene.add(this.membraneOutline);
+        ThreeElements.scene.add(this.mesh);
+        ThreeElements.scene.add(this.membraneOutline);
 
         this.moveStyleCache = this.traits.moveStyle;
     }
@@ -223,14 +213,35 @@ class Organism {
         this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * (this.traits.moveStyle === "legs" ? 0 : Math.random() * 0.01);
     }
 
+    // Eating animation
+    eat() {
+        if (this.animationsInProgress.eat) {
+            return
+        }
+
+        this.animationsInProgress.eat = true
+
+        this.mesh.scale.x += 0.1
+        this.mesh.scale.y += 0.1
+        this.membraneOutline.material = new THREE.LineBasicMaterial({ color: 0xfff000 });
+
+        setTimeout(() => {
+            this.mesh.scale.x -= 0.1
+            this.mesh.scale.y -= 0.1
+            this.membraneOutline.material = new THREE.LineBasicMaterial({ color: 0x000000 });
+            setTimeout(() => {
+                this.animationsInProgress.eat = false
+            }, 125)
+        }, 125)
+    }
+
     // Hurting animation
     hurt() {
-        if (this.animationsInProgress.hurt) {
+        if (this.animationsInProgress.hurt || this.animationsInProgress.eat) {
             return
         }
 
         this.animationsInProgress.hurt = true
-        const cachedMaterial = this.membraneOutline.material
 
         this.mesh.scale.x -= 0.1
         this.mesh.scale.y -= 0.1
@@ -239,7 +250,7 @@ class Organism {
         setTimeout(() => {
             this.mesh.scale.x += 0.1
             this.mesh.scale.y += 0.1
-            this.membraneOutline.material = cachedMaterial
+            this.membraneOutline.material = new THREE.LineBasicMaterial({ color: 0x000000 });
             setTimeout(() => {
                 this.animationsInProgress.hurt = false
             }, 125)
@@ -269,13 +280,13 @@ class Organism {
         setTimeout(() => {
             // Last frame of animation
             this.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            scene.remove(this.membraneOutline)
+            ThreeElements.scene.remove(this.membraneOutline)
             clearInterval(aniCycle)
         }, 1000)
         setTimeout(() => {
             // Reset everything
             this.mesh.material = cachedMaterial
-            scene.add(this.membraneOutline)
+            ThreeElements.scene.add(this.membraneOutline)
             this.mesh.scale.x = 1
             this.mesh.scale.y = 1
             this.mesh.scale.z = 1
@@ -289,8 +300,8 @@ class Organism {
     // Remove organism completely
     remove() {
         // Remove from stage
-        scene.remove(this.mesh)
-        scene.remove(this.membraneOutline)
+        ThreeElements.scene.remove(this.mesh)
+        ThreeElements.scene.remove(this.membraneOutline)
         // Remove from array
         const index = organisms.findIndex(item => item.id === this.id)
         if (index !== -1) {
@@ -315,7 +326,7 @@ function animate() {
                 organism.velocity.y = -organism.velocity.y;
             }
         });
-        renderer.render(scene, camera);
+        ThreeElements.renderScene();
         activeAnimation = requestAnimationFrame(renderFrame);
     }
 

@@ -6,6 +6,7 @@
 
 import * as DNA from './game.v0.1.dna.js'
 import * as Organisms from './game.v0.1.organisms.js'
+import * as Food from './game.v0.1.food.js'
 
 function determineCombatAction(organism, enemy) {
     // Default decisions
@@ -93,11 +94,17 @@ let losingDNA;
 let combatWinner;
 let combatRound;
 let combatResults;
+let combatFoodCycle;
+
+const combatFood = Food.createFood()
+
 function startCombat(playerOrganism) {
     if (enemy) {
         console.error("combat already in session")
         return
     }
+
+    // Reset all
 
     combatWinner = null;
 
@@ -171,6 +178,14 @@ function startCombat(playerOrganism) {
     combatForfeitButton.onclick = () => {
         endCombat(player.id, "forfeited")
     }
+
+    // Food
+    combatFood.isEaten = true
+    combatFoodCycle = setInterval(() => {
+        if (combatFood.isEaten) {
+            combatFood.appear()
+        }
+    }, 2000)
 }
 
 let combatLoopCycle;
@@ -254,6 +269,12 @@ function endCombat(defeatedId, reason) {
     setTimeout(() => {
         console.log("resetting combat...")
 
+        clearInterval(combatFoodCycle)
+
+        // Reset food
+
+        combatFood.eat()
+
         // Reset enemy
         if (enemy) {
             enemy.remove();
@@ -298,9 +319,18 @@ function updateCombat(organism, enemy) {
             organism.velocity.y = Math.sign(enemy.mesh.position.y - organism.mesh.position.y) * organismSpeed;
         }
     } else if (action.movement === "flee") {
-        organism.velocity.x = -Math.sign(enemy.mesh.position.x - organism.mesh.position.x) * organismSpeed;
-        if (organism.traits.moveStyle !== "legs") {
-            organism.velocity.y = -Math.sign(enemy.mesh.position.y - organism.mesh.position.y) * organismSpeed;
+        if (combatFood.isEaten) {
+            // Run from enemy
+            organism.velocity.x = -Math.sign(enemy.mesh.position.x - organism.mesh.position.x) * organismSpeed;
+            if (organism.traits.moveStyle !== "legs") {
+                organism.velocity.y = -Math.sign(enemy.mesh.position.y - organism.mesh.position.y) * organismSpeed;
+            }
+        } else {
+            // Get food
+            organism.velocity.x = Math.sign(combatFood.mesh.position.x - organism.mesh.position.x) * organismSpeed;
+            if (organism.traits.moveStyle !== "legs") {
+                organism.velocity.y = Math.sign(combatFood.mesh.position.y - organism.mesh.position.y) * organismSpeed;
+            }
         }
     } else {
         organism.velocity.x *= 0.9; // Decelerate when idle
@@ -340,6 +370,16 @@ function updateCombat(organism, enemy) {
         const damage = calculateDamage(organism.traits, enemy.traits);
         enemy.health -= damage;
         enemy.hurt();
+    }
+
+    // Eat when colliding with food
+    if (checkCollision(organism.mesh, combatFood.mesh)) {
+        if (!combatFood.isEaten) {
+            organism.health = Math.max(organism.health, 75);
+            organism.energy = Math.max(organism.energy, 75);
+            combatFood.eat();
+            organism.eat();
+        }
     }
 
     // Energy logic: Decrease energy based on usage
@@ -413,7 +453,6 @@ function checkCollision(mesh1, mesh2) {
         const combinedRadii = mesh1.geometry.boundingSphere.radius + mesh2.geometry.boundingSphere.radius;
         return distance <= combinedRadii;
     } catch (e) {
-        console.warn("mesh bounding error")
         return false
     }
 }

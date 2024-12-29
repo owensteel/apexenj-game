@@ -49,3 +49,15 @@ game-canvas game-dna-wrapper gene-dial {
 game-canvas gene-dial.body {
     clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
+
+game-stage-wrapper {
+    position: relative;
+}
+
+game-stage-wrapper game-stage-food {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    border-radius: 30px;
+}
