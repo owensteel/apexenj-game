@@ -97,6 +97,11 @@ let combatResults;
 let combatFoodCycle;
 
 const combatFood = Food.createFood()
+function startCombatFoodCycle() {
+    combatFoodCycle = setTimeout(() => {
+        combatFood.appear(player.mesh.position, enemy.mesh.position)
+    }, 3000)
+}
 
 function startCombat(playerOrganism) {
     if (enemy) {
@@ -108,9 +113,13 @@ function startCombat(playerOrganism) {
 
     combatWinner = null;
 
+    // Reset player
+
     player = playerOrganism
     player.mesh.position.x = 0;
     combatantIds.player = player.id
+
+    // Generate enemy
 
     if (winningDNA.length == 0 && losingDNA.length == 0) {
         // Generate "winner" (complement)
@@ -156,7 +165,8 @@ function startCombat(playerOrganism) {
     enemy.mesh.position.y = 0;
     combatantIds.enemy = enemy.id
 
-    // Set stats
+    // Reset stats
+
     combatResult.innerHTML = ""
 
     enemy.health = 100
@@ -165,27 +175,27 @@ function startCombat(playerOrganism) {
     player.health = 100
     player.energy = 100
 
-    // Stop idle animations
-    Organisms.setIdle(false);
-
-    console.log(`Start combat. Player: ${player.id}, Enemy: ${enemy.id}`)
-    console.log(player.traits, enemy.traits)
-
-    combatLoop();
-
     combatTable.style.display = "block"
     combatForfeitButton.style.display = "block"
     combatForfeitButton.onclick = () => {
         endCombat(player.id, "forfeited")
     }
 
-    // Food
+    // Stop idle animations
+
+    Organisms.setIdle(false);
+
+    console.log(`Start combat. Player: ${player.id}, Enemy: ${enemy.id}`)
+    console.log(player.traits, enemy.traits)
+
+    // Start animations
+
+    combatLoop();
+
+    // Start food cycle
+
     combatFood.isEaten = true
-    combatFoodCycle = setInterval(() => {
-        if (combatFood.isEaten) {
-            combatFood.appear()
-        }
-    }, 2000)
+    startCombatFoodCycle()
 }
 
 let combatLoopCycle;
@@ -269,7 +279,7 @@ function endCombat(defeatedId, reason) {
     setTimeout(() => {
         console.log("resetting combat...")
 
-        clearInterval(combatFoodCycle)
+        clearTimeout(combatFoodCycle)
 
         // Reset food
 
@@ -373,12 +383,14 @@ function updateCombat(organism, enemy) {
     }
 
     // Eat when colliding with food
-    if (checkCollision(organism.mesh, combatFood.mesh)) {
+    if (checkFoodCollision(organism.mesh.position)) {
+        const foodStrength = 50
         if (!combatFood.isEaten) {
-            organism.health = Math.max(organism.health, 75);
-            organism.energy = Math.max(organism.energy, 75);
+            organism.health = Math.min(organism.health + (foodStrength * 0.5), 100);
+            organism.energy = Math.min(organism.energy + foodStrength, 100);
             combatFood.eat();
             organism.eat();
+            startCombatFoodCycle()
         }
     }
 
@@ -455,6 +467,34 @@ function checkCollision(mesh1, mesh2) {
     } catch (e) {
         return false
     }
+}
+
+function checkFoodCollision(orgPos) {
+    const fdPos = combatFood.mesh.position
+    const fdBoBoxSize = 0.5
+    const fdBoundingBox = {
+        topleft: {
+            x: fdPos.x - fdBoBoxSize,
+            y: fdPos.y + fdBoBoxSize
+        },
+        topright: {
+            x: fdPos.x + fdBoBoxSize,
+            y: fdPos.y + fdBoBoxSize
+        },
+        bottomleft: {
+            x: fdPos.x - fdBoBoxSize,
+            y: fdPos.y - fdBoBoxSize
+        },
+        bottomright: {
+            x: fdPos.x + fdBoBoxSize,
+            y: fdPos.y - fdBoBoxSize
+        }
+    }
+
+    return (
+        (orgPos.x > fdBoundingBox.topleft.x && orgPos.x < fdBoundingBox.bottomright.x) &&
+        (orgPos.y > fdBoundingBox.bottomleft.y && orgPos.y < fdBoundingBox.topright.y)
+    )
 }
 
 function calculateDamage(attackerTraits, defenderTraits) {

@@ -5,93 +5,103 @@
 */
 
 import * as THREE from 'three';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import * as ThreeElements from './game.v0.1.3d.js'
-
-function loadBananaModel() {
-    // Create a loader
-    const loader = new OBJLoader()
-
-    // Load the OBJ file
-    loader.load(
-        './assets/3d/Banana_01.obj',
-        obj => {
-            // Access the loaded geometry and material
-            const originalGeometry = obj.children[0].geometry
-        },
-        xhr => {
-            // Progress callback
-            console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-        },
-        error => {
-            // Error callback
-            console.error('Error loading OBJ:', error)
-        }
-    )
-}
 
 class Food {
     constructor() {
-        const bananaShape = [];
-        const radius = 0.01; // Thickness of the banana
-        const length = 1; // Length of the banana
+        // Placeholder mesh
+        this.mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.1, 0.1),
+            new THREE.MeshBasicMaterial({ color: 0xffe135 })
+        );
+        // Placeholder outline
+        this.meshOutline = new THREE.LineSegments(
+            new THREE.EdgesGeometry(this.mesh.geometry),
+            new THREE.LineBasicMaterial({ color: 0xFF4235 })
+        );
 
-        for (let i = 0; i <= 10; i++) {
-            const t = i / 10;
-            const x = radius + Math.sin(t * Math.PI) * 0.4; // Slight bulge along the curve
-            const y = t * length - length / 2; // Length from top to bottom
-            bananaShape.push(new THREE.Vector2(x, y));
-        }
-
-        const latheGeometry = new THREE.LatheGeometry(bananaShape, 32);
-
-        // Material for the banana
-        const bananaMaterial = new THREE.MeshBasicMaterial({ color: 0xffe135 }); // Yellow
-        const bananaMesh = new THREE.Mesh(latheGeometry, bananaMaterial);
-
-        // Bend the banana using Matrix4
-        const bendAmount = Math.PI / 6; // How much the banana should curve
-        bananaMesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -length / 2, 0)); // Move pivot to the center
-        bananaMesh.geometry.applyMatrix4(new THREE.Matrix4().makeRotationZ(bendAmount)); // Bend along the Z-axis
-        bananaMesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, length / 2, 0)); // Reset pivot
-
-        // Outline
-        const edgesGeometry = new THREE.EdgesGeometry(bananaMesh.geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-        const meshOutline = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-
-        this.mesh = bananaMesh;
-        this.meshOutline = meshOutline;
         this.isEaten = false;
         this.animate();
+
+        this.loadModel();
+    }
+    async loadModel() {
+        // Mesh
+        const bananaObj = await ThreeElements.loadModel('/assets/3d/Banana_01.obj') // Static URI
+        this.mesh.geometry = bananaObj.children[0].geometry;
+
+        // Outline
+        this.meshOutline.geometry = new THREE.EdgesGeometry(this.mesh.geometry);
+
+        // Scaling
+        this.mesh.scale.x = 0.015
+        this.mesh.scale.y = 0.01
+        this.mesh.scale.z = 0.01
+        this.meshOutline.scale.x = 0.015
+        this.meshOutline.scale.y = 0.01
+        this.meshOutline.scale.z = 0.01
     }
     animate() {
         // For some reason doesn't work unless cycle is isolated
         const animateCycle = () => {
             requestAnimationFrame(animateCycle);
-            this.mesh.rotation.y += 0.01;
+            this.mesh.rotation.y += 0.02;
+            this.mesh.rotation.z += 0.02;
             this.meshOutline.rotation.copy(this.mesh.rotation)
         }
         animateCycle()
     }
     addToStage() {
         ThreeElements.scene.add(this.mesh)
+        ThreeElements.scene.add(this.meshOutline)
     }
     removeFromStage() {
         ThreeElements.scene.remove(this.mesh)
+        ThreeElements.scene.remove(this.meshOutline)
     }
-    move() {
-        const maxX = 6
-        const maxY = 3
+    move(posToAvoid = []) {
+        // Define potential spawn locations
+        const cornersAndCenter = [
+            { x: -6, y: -3 }, // Bottom-left corner
+            { x: -6, y: 3 },  // Top-left corner
+            { x: 6, y: -3 },  // Bottom-right corner
+            { x: 6, y: 3 },   // Top-right corner
+            { x: 0, y: 0 }    // Center
+        ];
 
-        this.mesh.position.x = maxX - (Math.random() * (maxX * 2))
-        this.mesh.position.y = maxY - (Math.random() * (maxY * 2))
+        // Helper function to calculate distance between two points
+        function calculateDistance(point1, point2) {
+            const dx = point1.x - point2.x;
+            const dy = point1.y - point2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Find the location that is furthest away from all organisms
+        let bestLocation = null;
+        let maxDistance = -Infinity;
+
+        cornersAndCenter.forEach((location) => {
+            // Calculate the minimum distance to any organism for this location
+            const minDistanceToOrg = posToAvoid.reduce((minDistance, orgPos) => {
+                const distance = calculateDistance(location, orgPos);
+                return Math.min(minDistance, distance);
+            }, Infinity);
+
+            // Update best location if this one is further away
+            if (minDistanceToOrg > maxDistance) {
+                maxDistance = minDistanceToOrg;
+                bestLocation = location;
+            }
+        });
+
+        this.mesh.position.x = bestLocation.x
+        this.mesh.position.y = bestLocation.y
 
         this.meshOutline.position.copy(this.mesh.position)
     }
-    appear() {
+    appear(playerPos, enemyPos) {
         this.isEaten = false;
-        this.move();
+        this.move([playerPos, enemyPos]);
         this.addToStage();
     }
     eat() {
