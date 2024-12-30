@@ -383,11 +383,10 @@ function updateCombat(organism, enemy) {
     }
 
     // Eat when colliding with food
-    const foodStrength = 75;
     if (checkFoodCollision(organism.mesh.position)) {
         if (!combatFood.isEaten) {
-            organism.health = Math.min(organism.health + (foodStrength * 0.5), 100);
-            organism.energy = Math.min(organism.energy + foodStrength, 100);
+            organism.health = Math.min(organism.health + (combatFood.strength * 0.5), 100);
+            organism.energy = Math.min(organism.energy + combatFood.strength, 100);
             combatFood.eat();
             organism.eat();
             startCombatFoodCycle()

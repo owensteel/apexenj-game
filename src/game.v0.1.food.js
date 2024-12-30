@@ -21,8 +21,9 @@ class Food {
         );
 
         this.isEaten = false;
-        this.animate();
+        this.strength = 100;
 
+        this.animate();
         this.loadModel();
     }
     async loadModel() {
