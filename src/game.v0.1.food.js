@@ -21,7 +21,7 @@ class Food {
         );
 
         this.isEaten = false;
-        this.strength = 100;
+        this.strength = 75;
 
         this.animate();
         this.loadModel();
