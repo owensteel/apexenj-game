@@ -100,7 +100,7 @@ const combatFood = Food.createFood()
 function startCombatFoodCycle() {
     combatFoodCycle = setTimeout(() => {
         combatFood.appear(player.mesh.position, enemy.mesh.position)
-    }, 3000)
+    }, 5000)
 }
 
 function startCombat(playerOrganism) {
