@@ -100,6 +100,15 @@ let combatResults;
 let combatFoodCycle;
 let combatUpdateSpeed = 1;
 
+// Food setup
+
+const combatFood = Food.createFood()
+function startCombatFoodCycle() {
+    combatFoodCycle = setTimeout(() => {
+        combatFood.appear(player.mesh.position, enemy.mesh.position)
+    }, 5000 * (1 / combatUpdateSpeed))
+}
+
 // Button functions
 
 combatSpeedButton.resetElement = () => {
@@ -114,6 +123,10 @@ combatSpeedButton.onclick = () => {
         combatSpeedButton.style.color = "red"
         combatSpeedButton.style.fontWeight = "bold"
         combatUpdateSpeed = 4;
+
+        // Clear food cycle as interval will now no longer be relevant to the speed
+        clearTimeout(combatFoodCycle)
+        startCombatFoodCycle()
     } else {
         combatSpeedButton.resetElement()
     }
@@ -123,13 +136,6 @@ combatForfeitButton.onclick = () => {
 }
 
 // Combat setup
-
-const combatFood = Food.createFood()
-function startCombatFoodCycle() {
-    combatFoodCycle = setTimeout(() => {
-        combatFood.appear(player.mesh.position, enemy.mesh.position)
-    }, 5000 * (1 / combatUpdateSpeed))
-}
 
 function startCombat(playerOrganism) {
     if (enemy) {
