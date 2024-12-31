@@ -73,7 +73,10 @@ const combatTable = document.getElementById("combat-table")
 const combatResult = document.getElementById("combat-result")
 const combatResultsTable = document.getElementById("combat-results-table")
 const combatWinsDefsTable = document.getElementById("combat-wds-table")
+
+const combatControlsWrapper = document.getElementById("combat-controls")
 const combatForfeitButton = document.getElementById("forfeit-button")
+const combatSpeedButton = document.getElementById("speed-button")
 
 const playerHealthBar = document.getElementById("player-health")
 const playerEnergyBar = document.getElementById("player-energy")
@@ -95,12 +98,30 @@ let combatWinner;
 let combatRound;
 let combatResults;
 let combatFoodCycle;
+let combatUpdateSpeed = 1;
+
+// Button functions
+
+combatSpeedButton.onclick = () => {
+    if (combatUpdateSpeed == 1) {
+        combatSpeedButton.innerHTML = "4x speed"
+        combatUpdateSpeed = 4;
+    } else {
+        combatSpeedButton.innerHTML = "Normal speed"
+        combatUpdateSpeed = 1;
+    }
+}
+combatForfeitButton.onclick = () => {
+    endCombat(player.id, "forfeited")
+}
+
+// Combat setup
 
 const combatFood = Food.createFood()
 function startCombatFoodCycle() {
     combatFoodCycle = setTimeout(() => {
         combatFood.appear(player.mesh.position, enemy.mesh.position)
-    }, 5000)
+    }, 5000 * (1 / combatUpdateSpeed))
 }
 
 function startCombat(playerOrganism) {
@@ -111,7 +132,17 @@ function startCombat(playerOrganism) {
 
     // Reset all
 
+    combatUpdateSpeed = 1;
     combatWinner = null;
+
+    // Reset elements
+
+    combatResult.innerHTML = ""
+
+    combatSpeedButton.innerHTML = "Normal speed"
+
+    combatTable.style.display = "block"
+    combatControlsWrapper.style.display = "block"
 
     // Reset player
 
@@ -160,26 +191,17 @@ function startCombat(playerOrganism) {
             DNA.generateRandomDNASequence()
         )
     }
-
     enemy.mesh.position.x = Math.random() >= 0.5 ? -5 : 5;
     enemy.mesh.position.y = 0;
     combatantIds.enemy = enemy.id
 
-    // Reset stats
-
-    combatResult.innerHTML = ""
+    // Set stats
 
     enemy.health = 100
     enemy.energy = 100
 
     player.health = 100
     player.energy = 100
-
-    combatTable.style.display = "block"
-    combatForfeitButton.style.display = "block"
-    combatForfeitButton.onclick = () => {
-        endCombat(player.id, "forfeited")
-    }
 
     // Stop idle animations
 
@@ -202,11 +224,13 @@ let combatLoopCycle;
 function combatLoop() {
     combatLoopCycle = requestAnimationFrame(combatLoop)
 
+    for (let i = 0; i < combatUpdateSpeed; i++) {
+        updateCombat(player, enemy);
+        updateCombat(enemy, player);
+    }
+
     playerStrat.innerHTML = player.currentStrat;
     enemyStrat.innerHTML = enemy.currentStrat;
-
-    updateCombat(player, enemy);
-    updateCombat(enemy, player);
 }
 
 let endingCombat = false
@@ -305,8 +329,8 @@ function endCombat(defeatedId, reason) {
 
             combatTable.style.display = "none"
             combatResult.innerHTML = ""
+            combatControlsWrapper.style.display = "none"
 
-            combatForfeitButton.style.display = "none"
             document.getElementById('game-canvas').style.display = "block"
             document.getElementById("combat-button").innerHTML = "START COMBAT"
         }
