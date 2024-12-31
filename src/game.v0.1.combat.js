@@ -102,13 +102,20 @@ let combatUpdateSpeed = 1;
 
 // Button functions
 
+combatSpeedButton.resetElement = () => {
+    combatSpeedButton.innerHTML = "Normal speed"
+    combatSpeedButton.style.color = "black"
+    combatSpeedButton.style.fontWeight = "normal"
+    combatUpdateSpeed = 1;
+}
 combatSpeedButton.onclick = () => {
     if (combatUpdateSpeed == 1) {
         combatSpeedButton.innerHTML = "4x speed"
+        combatSpeedButton.style.color = "red"
+        combatSpeedButton.style.fontWeight = "bold"
         combatUpdateSpeed = 4;
     } else {
-        combatSpeedButton.innerHTML = "Normal speed"
-        combatUpdateSpeed = 1;
+        combatSpeedButton.resetElement()
     }
 }
 combatForfeitButton.onclick = () => {
@@ -139,7 +146,7 @@ function startCombat(playerOrganism) {
 
     combatResult.innerHTML = ""
 
-    combatSpeedButton.innerHTML = "Normal speed"
+    combatSpeedButton.resetElement()
 
     combatTable.style.display = "block"
     combatControlsWrapper.style.display = "block"
