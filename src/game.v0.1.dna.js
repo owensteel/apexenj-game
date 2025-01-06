@@ -39,16 +39,12 @@ const dnaColors = {
     100: "black"
 };
 
+// DNA genes
 const dnaRoles = [
     {
         type: "body",
         title: "color",
         values: ["red", "orange", "yellow", "lightgreen", "green", "blue", "purple"]
-    },
-    {
-        type: "body",
-        title: "edges",
-        values: [3, 6, 8, 10, 12, 14, 16]
     },
     {
         type: "body",
@@ -117,7 +113,6 @@ function generateRandomDNASequence(presets = {}) {
 function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequences) {
     // Trait importance weights
     const weights = {
-        edges: 0.2,                // Impacts shape (spiky vs smooth organisms)
         moveStyle: 0.175,           // Movement impacts combat behavior
         membrane: 0.1,             // Defensive trait
         size: 0.15,                // Affects durability and collision area
@@ -137,7 +132,6 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
     // Helper function to extract traits from a DNA sequence
     function extractTraits(dna) {
         const traits = {
-            edges: 0,
             moveStyle: -1,
             membrane: 0,
             size: 0,
@@ -151,9 +145,6 @@ function predictWinProbability(dnaSequence, winningDNASequences, losingDNASequen
 
         dna.forEach((gene) => {
             switch (gene.role.title) {
-                case "edges":
-                    traits.edges = gene.role.values[gene.current];
-                    break;
                 case "move-style":
                     traits.moveStyle = encodeCategoricalTrait(gene.role.values[gene.current], ["float", "tail", "legs"]);
                     break;

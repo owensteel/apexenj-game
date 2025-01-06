@@ -14,7 +14,6 @@ canvas.style.width = 600;
 canvas.style.height = 150;
 
 const dnaSequence = DNA.generateRandomDNASequence({
-    "edges": 2,
     "move-style": 0,
     "membrane": 10,
     "size": 2,

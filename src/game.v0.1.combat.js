@@ -169,7 +169,6 @@ function startCombat(playerOrganism) {
         // Generate "winner" (complement)
 
         const presets = {
-            "edges": 0,
             "move-style": 0,
             "membrane": 0,
             "size": 0,

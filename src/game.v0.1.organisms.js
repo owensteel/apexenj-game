@@ -11,6 +11,7 @@ import * as ThreeElements from './game.v0.1.3d.js'
 let organisms = []; // Array to hold all organisms
 let activeAnimation = null;
 const gravity = 0.025;
+const maxEdges = 16;
 
 // Organism class
 class Organism {
@@ -35,7 +36,6 @@ class Organism {
     updateTraitsFromDNA(dnaSequence) {
         const traits = {
             color: 0x00ff00, // Default color
-            edges: 3,        // Minimum edges
             size: 1,         // Default size
             spikiness: 1,    // Default spikiness
             moveStyle: "float",
@@ -51,9 +51,6 @@ class Organism {
             switch (gene.role.title) {
                 case "color":
                     traits.color = gene.role.values[gene.current];
-                    break;
-                case "edges":
-                    traits.edges = gene.role.values[gene.current];
                     break;
                 case "move-style":
                     traits.moveStyle = gene.role.values[gene.current];
@@ -97,9 +94,9 @@ class Organism {
     createOrganismMesh() {
         // Create geometry
         const shape = new THREE.Shape();
-        const angleStep = (2 * Math.PI) / Math.max(3, this.traits.edges);
+        const angleStep = (2 * Math.PI) / Math.max(3, maxEdges);
 
-        for (let i = 0; i < this.traits.edges; i++) {
+        for (let i = 0; i < maxEdges; i++) {
             const angle = i * angleStep;
             const spikeFactor = 1 - this.traits.spikiness * (i % 2 === 0 ? 0.5 : 0.75);
             const x = Math.cos(angle) * Math.max(0.1, this.traits.size) * spikeFactor;
