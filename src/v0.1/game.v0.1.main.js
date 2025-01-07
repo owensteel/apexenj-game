@@ -65,21 +65,23 @@ function drawDNASequence() {
     }
 }
 
-// Initialize canvas
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize
+function initMain() {
     drawDNASequence();
-});
 
-const combatButton = document.getElementById("combat-button")
-let combatSeriesToggle = false
-combatButton.onclick = () => {
-    combatSeriesToggle = Combat.startStopCombatSeries(playerOrganism)
-    if (combatSeriesToggle) {
-        canvas.style.display = "none"
-        combatButton.innerHTML = "COMBAT SERIES: RUNNING"
-    } else {
-        combatButton.innerHTML = "COMBAT SERIES: STOPPING..."
+    const combatButton = document.getElementById("combat-button")
+    let combatSeriesToggle = false
+    combatButton.onclick = () => {
+        combatSeriesToggle = Combat.startStopCombatSeries(playerOrganism)
+        if (combatSeriesToggle) {
+            canvas.style.display = "none"
+            combatButton.innerHTML = "COMBAT SERIES: RUNNING"
+        } else {
+            combatButton.innerHTML = "COMBAT SERIES: STOPPING..."
+        }
     }
+
+    Organisms.setIdle(true);
 }
 
-Organisms.setIdle(true);
+export { initMain }
