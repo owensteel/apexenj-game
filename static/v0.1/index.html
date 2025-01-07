@@ -1,0 +1,93 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./assets/css/game.v0.1.styles.css">
+</head>
+
+<body>
+
+    <game-wrapper id="game-wrapper">
+        <game-canvas id="game-canvas">
+            <game-dna-wrapper></game-dna-wrapper>
+        </game-canvas>
+        <game-stage-wrapper id="game-stage-wrapper"></game-stage-wrapper>
+    </game-wrapper>
+
+    <pre id="log"></pre>
+
+    <hr>
+
+    <button id="combat-button">START COMBAT SERIES</button>
+
+    <div id="combat-controls" style="display:none">
+        <button id="forfeit-button">Forfeit and end round</button>
+        <button id="speed-button">Speed up</button>
+    </div>
+
+    <hr>
+
+    <h3 style="color:red" id="combat-result"></h3>
+
+    <table style="display:none" border="1" id="combat-table">
+        <tr>
+            <th>Combatant</th>
+            <th>Health</th>
+            <th>Energy</th>
+            <th>Strategy</th>
+        </tr>
+        <tr>
+            <th>Player</th>
+            <td>
+                <progress id="player-health" style="filter: hue-rotate(90deg)" max="100"></progress>
+            </td>
+            <td>
+                <progress id="player-energy" style="filter: hue-rotate(90deg)" max="100"></progress>
+            </td>
+            <td>
+                <p id="player-strat"></p>
+            </td>
+        </tr>
+        <tr>
+            <th>Enemy</th>
+            <td>
+                <progress id="enemy-health" max="100"></progress>
+            </td>
+            <td>
+                <progress id="enemy-energy" max="100"></progress>
+            </td>
+            <td>
+                <p id="enemy-strat"></p>
+            </td>
+        </tr>
+    </table>
+
+    <table border="1">
+        <tr>
+            <th colspan="2">WINS</th>
+            <th colspan="2">DEFEATS</th>
+        </tr>
+        <tr id="combat-wds-table">
+            <td colspan="2">0</td>
+            <td colspan="2">0</td>
+        </tr>
+        <tr>
+            <th>Exhausted enemy</th>
+            <th>Beat enemy</th>
+            <th>Was exhausted</th>
+            <th>Was beaten</th>
+        </tr>
+        <tr id="combat-results-table">
+            <td>0%</td>
+            <td>0%</td>
+            <td>0%</td>
+            <td>0%</td>
+        </tr>
+    </table>
+
+    <p style="font-size:12px">Banana by Poly by Google [CC-BY] via Poly Pizza</p>
+
+    <script src="bundle.js"></script>
+</body>
+
+</html>
