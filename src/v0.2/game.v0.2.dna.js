@@ -43,7 +43,7 @@ const demoDnaSequence = {
             offshoots: []
         },
         {
-            role: "disconnector",
+            role: "appendage",
             offshoots: [
                 {
                     role: "appendage",
@@ -54,4 +54,31 @@ const demoDnaSequence = {
     ]
 }
 
-export { demoDnaSequence }
+function createNode(parentNode = null) {
+    const node = {
+        role: null,
+        offshoots: []
+    }
+
+    node.role = prompt("Node role?")
+
+    if (node.role == "color") {
+        if (parentNode && parentNode.offshoots.some(obj => obj.role === "color")) {
+            // Cannot be defined twice
+            alert("This node already has a color defined.")
+            return createNode(parentNode)
+        }
+        node.value = prompt("Node value?")
+    }
+
+    if (node.role == null) {
+        // Invalid input
+        return false
+    }
+
+    parentNode.offshoots.push(node)
+
+    return node
+}
+
+export { createNode, demoDnaSequence }

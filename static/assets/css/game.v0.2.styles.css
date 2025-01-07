@@ -12,7 +12,8 @@ li {
 }
 
 canvas {
-    border: solid 1px #000;
+    border-top: solid 1px #000;
+    border-bottom: solid 1px #000;
     user-select: none;
 }
 
@@ -39,6 +40,7 @@ game-canvas game-dna-wrapper {
     position: absolute;
     display: flex;
     align-items: center;
+    overflow: hidden;
 }
 
 game-canvas game-dna-wrapper game-dna-node {

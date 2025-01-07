@@ -4,16 +4,23 @@
 
 */
 
-import { demoDnaSequence } from "./game.v0.2.dna";
+import * as DNA from "./game.v0.2.dna";
+import * as ThreeElements from "./game.v0.2.3d";
+import * as Organisms from "./game.v0.2.organisms"
 
 // Setup for the game canvas
+
 const gameCanvas = document.getElementById('game-canvas');
 const gameDnaWrapper = document.getElementById("game-dna-wrapper")
-const gameStageWrapper = document.getElementById("game-stage-wrapper")
 
-// DNA sequence
+// Player data
 
-const currentDNASequence = demoDnaSequence
+const currentDNASequence = DNA.demoDnaSequence
+let playerOrganism;
+
+// DNA sequence renderer
+
+const scrollOffset = { x: 0, y: 0, zoom: 1 }
 
 function createNodeElement(node, x, y) {
     const el = document.createElement('game-dna-node');
@@ -30,13 +37,25 @@ function createNodeElement(node, x, y) {
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
 
+    // Node interactions
+    el.onclick = () => {
+        // Offshoots are for DEFINING, NOT CHAINING
+        // i.e a color cannot be defined further, but an appendage
+        // can be defined with a color, hence this restriction
+        if (node.role == "appendage" || node.role == "root") {
+            if (createNode(node)) {
+                renderDnaSequence()
+            }
+        }
+    }
+
     return el;
 }
 
 function createConnection(parentX, parentY, childX, childY) {
     const dx = childX - parentX;
     const dy = childY - parentY;
-    const length = Math.sqrt(dx * dx + dy * dy);
+    const length = 50 * scrollOffset.zoom;
     const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
     const line = document.createElement('game-dna-node-joiner');
@@ -64,12 +83,12 @@ function renderTree(node, x, y, level = 0, angleStart = 0, angleEnd = 2 * Math.P
     const angleSlice = (angleEnd - angleStart) / childCount;
 
     // The distance from parent to child (radius).
-    const radius = 50;
+    const radius = 50 * scrollOffset.zoom;
 
     // Place each child
     node.offshoots.forEach((child, idx) => {
         // For multiple children, we subdivide the angle range
-        const childAngle = angleStart + angleSlice * (idx + 0.5);
+        const childAngle = angleStart + angleSlice * (idx + /* branch offset: */ (0.5));
 
         // Convert polar coords to cartesian
         const childX = x + radius * Math.cos(childAngle);
@@ -89,17 +108,85 @@ function renderTree(node, x, y, level = 0, angleStart = 0, angleEnd = 2 * Math.P
 }
 
 function renderDnaSequence() {
+    // Redraw visual
+
     gameDnaWrapper.innerHTML = ""
-    renderTree(currentDNASequence, gameDnaWrapper.clientWidth / 2, gameDnaWrapper.clientHeight / 2);
+    renderTree(
+        currentDNASequence,
+        (gameDnaWrapper.clientWidth / 2) + scrollOffset.x,
+        (gameDnaWrapper.clientHeight / 2) + scrollOffset.y
+    );
+
+    // Create or rebuild organism
+
+    if (playerOrganism) {
+        playerOrganism.updateTraitsFromDNA(currentDNASequence);
+        playerOrganism.createMesh();
+    } else {
+        playerOrganism = Organisms.addOrganism(currentDNASequence)
+    }
 }
 
-// Initialize
+// DNA sequence visual scrolling
+
+const scrollingCursor = {
+    down: false,
+    startX: 0,
+    startY: 0
+}
+function bindCanvasScrolling() {
+    gameDnaWrapper.onmousedown = (e) => {
+        scrollingCursor.startX = e.pageX
+        scrollingCursor.startY = e.pageY
+        scrollingCursor.down = true
+    }
+    gameDnaWrapper.onmouseup = () => {
+        scrollingCursor.down = false
+    }
+    gameDnaWrapper.onmousemove = (e) => {
+        if (scrollingCursor.down) {
+            // Capture and add distance from cursor start point
+            scrollOffset.x += (e.pageX - scrollingCursor.startX)
+            scrollOffset.y += (e.pageY - scrollingCursor.startY)
+            // Reset cursor start point
+            scrollingCursor.startX = e.pageX
+            scrollingCursor.startY = e.pageY
+            // Re-render with new scroll offset
+            renderDnaSequence()
+        }
+    }
+    gameDnaWrapper.addEventListener("wheel", function (e) {
+        e.preventDefault()
+        const percent = 0.05
+        if (Math.sign(e.deltaY) > 0) {
+            if (scrollOffset.zoom > 1) {
+                scrollOffset.zoom -= percent
+            }
+        } else {
+            scrollOffset.zoom += percent
+        }
+        renderDnaSequence()
+    });
+}
+
+// Init
+
 function initMain() {
+    // DNA renderer
 
     gameCanvas.style.width = window.innerWidth
     gameCanvas.style.height = 300
 
     renderDnaSequence()
+    bindCanvasScrolling()
+
+    // 3D renderer
+
+    ThreeElements.renderScene()
+
+    // Set general organism animation mode
+
+    Organisms.setIdle(true)
 }
 
 export { initMain }
