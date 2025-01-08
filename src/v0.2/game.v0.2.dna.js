@@ -9,37 +9,6 @@ const demoDnaSequence = {
     offshoots: [
         {
             role: "appendage",
-            offshoots: [
-                {
-                    role: "color",
-                    value: "red",
-                    offshoots: []
-                }
-            ]
-        },
-        {
-            role: "appendage",
-            offshoots: [
-                {
-                    role: "color",
-                    value: "yellow",
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    offshoots: [
-                        {
-                            role: "color",
-                            value: "purple",
-                            offshoots: []
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            role: "color",
-            value: "green",
             offshoots: []
         },
         {
@@ -50,6 +19,24 @@ const demoDnaSequence = {
                     offshoots: []
                 }
             ]
+        },
+        {
+            role: "appendage",
+            offshoots: [
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
+                {
+                    role: "appendage",
+                    offshoots: []
+                }
+            ],
+            detach: true
         }
     ]
 }
@@ -60,7 +47,8 @@ function createNode(parentNode = null) {
         offshoots: []
     }
 
-    node.role = prompt("Node role?")
+    // TODO
+    node.role = "appendage"
 
     if (node.role == "color") {
         if (parentNode && parentNode.offshoots.some(obj => obj.role === "color")) {

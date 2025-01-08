@@ -11,8 +11,9 @@ const gameStageWrapper = document.getElementById("game-stage-wrapper");
 
 // Initialize Three.js scene
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
-camera.position.z = 5;
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / 300, 0.1, 1000);
+camera.position.set(0, 0, 20);
+camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xffffff, 0);
@@ -42,6 +43,16 @@ async function loadModel(objUrl) {
         console.error('Error loading OBJ model:', error);
         throw error;
     }
+}
+
+// Debug purposes, to check camera can see far enough
+function addCubeAtPos(x, y, z) {
+    const cube = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshBasicMaterial({ color: 'red' })
+    )
+    scene.add(cube)
+    cube.position.set(x, y, z);
 }
 
 export { scene, renderScene, loadModel }

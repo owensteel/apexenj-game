@@ -13,12 +13,9 @@ import * as Organisms from "./game.v0.2.organisms"
 const gameCanvas = document.getElementById('game-canvas');
 const gameDnaWrapper = document.getElementById("game-dna-wrapper")
 
-// Player data
+// DNA sequence renderer
 
 const currentDNASequence = DNA.demoDnaSequence
-let playerOrganism;
-
-// DNA sequence renderer
 
 const scrollOffset = { x: 0, y: 0, zoom: 1 }
 
@@ -40,11 +37,19 @@ function createNodeElement(node, x, y) {
     // Node interactions
     el.onclick = () => {
         // Offshoots are for DEFINING, NOT CHAINING
-        // i.e a color cannot be defined further, but an appendage
-        // can be defined with a color, hence this restriction
+        // i.e an appendage can be defined with a color, but a
+        // color cannot be defined further, hence this restriction
         if (node.role == "appendage" || node.role == "root") {
-            if (createNode(node)) {
+            if (DNA.createNode(node)) {
                 renderDnaSequence()
+                renderPlayerOrganism()
+            }
+        } else if (node.role == "color") {
+            const newValue = prompt("New color value:")
+            if (newValue) {
+                node.value = newValue
+                renderDnaSequence()
+                renderPlayerOrganism()
             }
         }
     }
@@ -68,7 +73,7 @@ function createConnection(parentX, parentY, childX, childY) {
     return line;
 }
 
-function renderTree(node, x, y, level = 0, angleStart = 0, angleEnd = 2 * Math.PI) {
+function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = Math.PI) {
 
     // Create a DOM element for the current node
     const nodeEl = createNodeElement(node, x, y);
@@ -116,15 +121,6 @@ function renderDnaSequence() {
         (gameDnaWrapper.clientWidth / 2) + scrollOffset.x,
         (gameDnaWrapper.clientHeight / 2) + scrollOffset.y
     );
-
-    // Create or rebuild organism
-
-    if (playerOrganism) {
-        playerOrganism.updateTraitsFromDNA(currentDNASequence);
-        playerOrganism.createMesh();
-    } else {
-        playerOrganism = Organisms.addOrganism(currentDNASequence)
-    }
 }
 
 // DNA sequence visual scrolling
@@ -159,7 +155,7 @@ function bindCanvasScrolling() {
         e.preventDefault()
         const percent = 0.05
         if (Math.sign(e.deltaY) > 0) {
-            if (scrollOffset.zoom > 1) {
+            if (scrollOffset.zoom > 0.5) {
                 scrollOffset.zoom -= percent
             }
         } else {
@@ -167,6 +163,18 @@ function bindCanvasScrolling() {
         }
         renderDnaSequence()
     });
+}
+
+// Player organism
+
+let playerOrganism;
+function renderPlayerOrganism() {
+    console.log("player organism updated")
+    if (playerOrganism) {
+        playerOrganism.updateTraitsFromDNA(currentDNASequence);
+    } else {
+        playerOrganism = Organisms.addOrganism(currentDNASequence)
+    }
 }
 
 // Init
@@ -184,9 +192,15 @@ function initMain() {
 
     ThreeElements.renderScene()
 
-    // Set general organism animation mode
+    // Init organism stage
 
-    Organisms.setIdle(true)
+    renderPlayerOrganism()
+
+    let liveModeToggle = false
+    document.querySelector(".live-mode-toggle-button").onclick = () => {
+        liveModeToggle = !liveModeToggle
+        Organisms.setMovementToggle(liveModeToggle, playerOrganism)
+    }
 }
 
 export { initMain }

@@ -45,6 +45,7 @@ game-canvas game-dna-wrapper {
 
 game-canvas game-dna-wrapper game-dna-node {
     position: absolute;
+    z-index: 1;
     transform: translate(-50%, -50%);
     width: 25px;
     height: 25px;
@@ -59,8 +60,7 @@ game-canvas game-dna-wrapper game-dna-node {
 }
 
 game-canvas game-dna-wrapper game-dna-node.root {
-    width: 50px;
-    height: 50px;
+    background-color: #fff;
 }
 
 game-canvas game-dna-wrapper game-dna-node-joiner {

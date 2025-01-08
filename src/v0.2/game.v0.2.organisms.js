@@ -6,87 +6,208 @@
 
 import * as THREE from 'three';
 import * as ThreeElements from './game.v0.2.3d.js'
+import * as OrganismBuilder from './game.v0.2.organism.builder.js'
+
+// Global variables
 
 const organisms = [];
-const maxEdges = 32;
-const meshSize = 1;
+const defaultMeshEdges = 6;
+const defaultMeshSize = 0.75;
+
+// Render nodes as points
+
+function renderNodePoints(
+    currentNode,
+    x = 0,
+    y = 0,
+    level = 0,
+    angleStart = -(Math.PI),
+    angleEnd = Math.PI,
+    parentNodeMesh = null
+) {
+    // Check node type
+
+    if (currentNode.role !== "appendage" && currentNode.role !== "root") {
+        // Apply any properties to parent
+
+        if (currentNode.role == "color") {
+            parentNodeMesh.material = new THREE.MeshBasicMaterial({ color: currentNode.value });
+        }
+
+        return null
+    }
+
+    // Create point geometry
+
+    const pointShape = new THREE.Shape();
+    const angleStep = (2 * Math.PI) / defaultMeshEdges;
+
+    // Point is represented by a simple flat hexagon currently
+    // but only for the sake of being visible in Three JS
+
+    for (let i = 0; i < defaultMeshEdges; i++) {
+        const angle = i * angleStep;
+        const drawX = (Math.cos(angle) * defaultMeshSize);
+        const drawY = (Math.sin(angle) * defaultMeshSize);
+
+        if (i === 0) {
+            pointShape.moveTo(drawX, drawY);
+        } else {
+            pointShape.lineTo(drawX, drawY);
+        }
+    }
+    pointShape.closePath();
+    const pointMesh = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(pointShape, {
+            depth: 1,
+            bevelEnabled: false
+        }),
+        new THREE.MeshBasicMaterial({ color: 'black' })
+    );
+    pointMesh.position.x = x
+    pointMesh.position.y = y
+
+    // Offshoots
+
+    // If there are no offshoots, stop
+    if (!currentNode.offshoots || currentNode.offshoots.length === 0) {
+        return pointMesh;
+    }
+
+    const childCount = currentNode.offshoots.length;
+    const angleSlice = (angleEnd - angleStart) / childCount;
+
+    // The distance from parent to child (radius).
+    const radius = defaultMeshSize;
+
+    // Place each child
+
+    currentNode.offshoots.forEach((child, idx) => {
+        // For multiple children, we subdivide the angle range
+        const childAngle = angleStart + angleSlice * (idx + /* branch offset: */ (0.5));
+
+        // Convert polar coords to cartesian
+        const childX = radius * Math.cos(childAngle);
+        const childY = radius * Math.sin(childAngle);
+
+        // Recurse for the child
+        // Confine each child to its own angle segment
+        const subAngleStart = angleStart + angleSlice * idx;
+        const subAngleEnd = angleStart + angleSlice * (idx + 1);
+
+        const offshootNodeMesh = renderNodePoints(
+            child,
+            childX,
+            childY,
+            level + 1,
+            subAngleStart,
+            subAngleEnd,
+            pointMesh
+        );
+        if (offshootNodeMesh) {
+            pointMesh.add(offshootNodeMesh)
+        }
+    });
+
+    return pointMesh;
+}
+
+// Organism class
 
 class Organism {
     constructor(dnaSequence) {
         this.dnaSequence = dnaSequence;
         this.mesh = null;
         this.membraneOutline = null;
+        this.velocity = {
+            x: Math.random() > 0.5 ? 0.01 : -0.01,
+            y: Math.random() > 0.5 ? 0.01 : -0.01
+        }; // Default velocity
 
-        this.createMesh();
+        if (this.dnaSequence.detach == true) {
+            // Root can never detach (obviously)
+            // WARNING: This will permanently corrupt DNA
+            // so this is why a child node's sequence must
+            // be cloned before being used
+            this.dnaSequence.detach = false
+        }
+
+        this.rebuildMesh();
     }
     updateTraitsFromDNA(dnaSequence) {
         this.dnaSequence = dnaSequence;
-        this.createMesh();
+        this.rebuildMesh();
     }
-    createMesh() {
-        // Create geometry
-        const shape = new THREE.Shape();
-        const angleStep = (2 * Math.PI) / maxEdges;
+    rebuildMesh() {
+        // Create mesh for all nodes
 
-        for (let i = 0; i < maxEdges; i++) {
-            const angle = i * angleStep;
-            const x = Math.cos(angle) * meshSize;
-            const y = Math.sin(angle) * meshSize;
+        if (movementToggle) {
 
-            if (i === 0) {
-                shape.moveTo(x, y);
-            } else {
-                shape.lineTo(x, y);
-            }
-        }
-        shape.closePath();
+            // Live mode
 
-        const extrudeSettings = {
-            depth: 1,
-            bevelEnabled: false
-        };
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshBasicMaterial({ color: 'red' });
-        const newMesh = new THREE.Mesh(geometry, material);
+            this.mesh = OrganismBuilder.buildSeamlessBodyFromNodes(
+                this.dnaSequence,
+                /* allowDetachingParts: */ false
+            );
 
-        if (this.mesh) {
-            if (this.moveStyleCache == this.traits.moveStyle) {
-                newMesh.position.copy(this.mesh.position)
+            // Separate detachable parts into individual organisms
+            const detachedParts = OrganismBuilder.gatherNodePositions(
+                this.dnaSequence,
+                /* allowDetachingParts: */ true
+            ).filter(
+                (obj) => {
+                    return obj.detach
+                }
+            )
+            detachedParts.forEach((detachedPartPos) => {
+                // Clone to prevent main DNA being corrupted
+                const detachedPartDNA = JSON.parse(JSON.stringify(detachedPartPos.node))
+                const detachedPartOrganism = addOrganism(detachedPartDNA)
+
+                // Move part to starting position
+                detachedPartOrganism.mesh.position.set(detachedPartPos.x, detachedPartPos.y, 0)
+
+                // Set velocity to spin away from parent
+                detachedPartOrganism.velocity.x = 0 - this.velocity.x
+                detachedPartOrganism.velocity.y = 0 - this.velocity.y
+            })
+        } else {
+            // Build mode, static
+
+            const newMesh = OrganismBuilder.buildSeamlessBodyFromNodes(
+                this.dnaSequence,
+                /* allowDetachingParts: */ true
+            );
+            if (this.mesh) {
+                ThreeElements.scene.remove(this.mesh)
                 newMesh.rotation.copy(this.mesh.rotation)
             }
-            ThreeElements.scene.remove(this.mesh)
-        }
-        this.mesh = newMesh
+            this.mesh = newMesh
 
-        // Add membrane outline
-        const edgesGeometry = new THREE.EdgesGeometry(geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-        const newMembraneOutline = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-
-        if (this.membraneOutline) {
-            if (this.moveStyleCache == this.traits.moveStyle) {
-                newMembraneOutline.position.copy(this.membraneOutline.position)
-                newMembraneOutline.rotation.copy(this.membraneOutline.rotation)
-            }
-            ThreeElements.scene.remove(this.membraneOutline)
+            this.mesh.position.x = 0
+            this.mesh.position.y = 0
         }
-        this.membraneOutline = newMembraneOutline
 
         ThreeElements.scene.add(this.mesh);
-        ThreeElements.scene.add(this.membraneOutline);
     }
     updateMovement() {
-        if (this.mesh == null || !idleAnimationsToggle) {
+        if (this.mesh == null) {
             return
         }
         // Rotate idly
-        this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.01;
+        this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.005;
+
+        // Float around
+        if (movementToggle) {
+            this.mesh.position.x += this.velocity.x
+            this.mesh.position.y += this.velocity.y
+        }
     }
 }
 
 // Main render loop
 let activeAnimation = null;
-let idleAnimationsToggle = false
+let movementToggle = false
 function animate() {
     if (activeAnimation) cancelAnimationFrame(activeAnimation);
 
@@ -98,10 +219,10 @@ function animate() {
             }
             organism.updateMovement()
             // Bounce off edges regardless
-            if (organism.mesh.position.x > 6 || organism.mesh.position.x < -6) {
+            if (organism.mesh.position.x > 16 || organism.mesh.position.x < -16) {
                 organism.velocity.x = -organism.velocity.x;
             }
-            if (organism.mesh.position.y > 3 || organism.mesh.position.y < -3) {
+            if (organism.mesh.position.y > 4 || organism.mesh.position.y < -4) {
                 organism.velocity.y = -organism.velocity.y;
             }
         });
@@ -119,8 +240,34 @@ function addOrganism(dnaSequence) {
     return newOrganism
 }
 
-function setIdle(state) {
-    idleAnimationsToggle = state
+function rebuildAllOrganisms() {
+    organisms.forEach((organism) => {
+        organism.rebuildMesh()
+    })
 }
 
-export { addOrganism, setIdle };
+function clearScene() {
+    organisms.forEach((organism) => {
+        ThreeElements.scene.remove(organism.mesh)
+    })
+}
+
+function setMovementToggle(state, playerOrganism) {
+    movementToggle = state
+
+    clearScene()
+
+    if (movementToggle == false) {
+        // Permanently delete anything that might
+        // have been created in live mode
+        // And restore original player only
+        while (organisms.length > 0) {
+            organisms.pop();
+        }
+        organisms.push(playerOrganism)
+    }
+
+    rebuildAllOrganisms()
+}
+
+export { addOrganism, setMovementToggle, rebuildAllOrganisms, clearScene };
