@@ -112,13 +112,27 @@ function renderNodePoints(
     return pointMesh;
 }
 
+// Motion
+
+const STEP_SIZE = 0.05;
+function randomOffset() {
+    return (Math.random() * 2 - 1) * STEP_SIZE;
+}
+
 // Organism class
 
 class Organism {
-    constructor(dnaSequence) {
+    constructor(dnaSequence, combatStartPos = { x: 0, y: 0 }) {
+        this.id = String(Math.random()).split(".")[1]
         this.dnaSequence = dnaSequence;
         this.mesh = null;
-        this.membraneOutline = null;
+        this.meshOutline = null;
+        this.nodePositions = []
+        this.combatStartPos = combatStartPos
+        this.currentAnimations = {
+            highlight: false
+        }
+
         this.velocity = {
             x: Math.random() > 0.5 ? 0.01 : -0.01,
             y: Math.random() > 0.5 ? 0.01 : -0.01
@@ -149,6 +163,18 @@ class Organism {
                 this.dnaSequence,
                 /* allowDetachingParts: */ false
             );
+            this.mesh.position.set(
+                this.combatStartPos.x,
+                this.combatStartPos.y,
+                0
+            )
+
+            // Save positions of (attached) nodes for overlapping
+            // detection in combat
+            this.nodePositions = OrganismBuilder.gatherNodePositions(
+                this.dnaSequence,
+                /* allowDetachingParts: */ false
+            )
 
             // Separate detachable parts into individual organisms
             const detachedParts = OrganismBuilder.gatherNodePositions(
@@ -162,10 +188,15 @@ class Organism {
             detachedParts.forEach((detachedPartPos) => {
                 // Clone to prevent main DNA being corrupted
                 const detachedPartDNA = JSON.parse(JSON.stringify(detachedPartPos.node))
+                detachedPartDNA.color = this.dnaSequence.color
                 const detachedPartOrganism = addOrganism(detachedPartDNA)
 
                 // Move part to starting position
-                detachedPartOrganism.mesh.position.set(detachedPartPos.x, detachedPartPos.y, 0)
+                detachedPartOrganism.mesh.position.set(
+                    this.combatStartPos.x + detachedPartPos.x,
+                    this.combatStartPos.y + detachedPartPos.y,
+                    0
+                )
 
                 // Set velocity to spin away from parent
                 detachedPartOrganism.velocity.x = 0 - this.velocity.x
@@ -183,10 +214,20 @@ class Organism {
                 newMesh.rotation.copy(this.mesh.rotation)
             }
             this.mesh = newMesh
-
-            this.mesh.position.x = 0
-            this.mesh.position.y = 0
+            this.mesh.position.set(0, 0, 0)
         }
+        this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.color });
+
+        // Add mesh outline
+
+        // if (this.meshOutline) {
+        //     this.mesh.remove(this.meshOutline)
+        // }
+        // this.meshOutline = new THREE.LineSegments(
+        //     new THREE.EdgesGeometry(this.mesh.geometry),
+        //     new THREE.LineBasicMaterial({ color: 0x000000 })
+        // );
+        // this.mesh.add(this.meshOutline)
 
         ThreeElements.scene.add(this.mesh);
     }
@@ -194,14 +235,28 @@ class Organism {
         if (this.mesh == null) {
             return
         }
+
         // Rotate idly
         this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.005;
 
         // Float around
         if (movementToggle) {
-            this.mesh.position.x += this.velocity.x
-            this.mesh.position.y += this.velocity.y
+            this.mesh.position.x += this.velocity.x /* + randomOffset() */
+            this.mesh.position.y += this.velocity.y /* + randomOffset() */
         }
+    }
+    highlight() {
+        if (this.mesh == null || this.currentAnimations.highlight) {
+            return
+        }
+        this.currentAnimations.highlight = true;
+
+        this.mesh.material = new THREE.MeshBasicMaterial({ color: 'red' });
+
+        setTimeout(() => {
+            this.currentAnimations.highlight = false;
+            this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.color });
+        }, 250)
     }
 }
 
@@ -222,7 +277,7 @@ function animate() {
             if (organism.mesh.position.x > 16 || organism.mesh.position.x < -16) {
                 organism.velocity.x = -organism.velocity.x;
             }
-            if (organism.mesh.position.y > 4 || organism.mesh.position.y < -4) {
+            if (organism.mesh.position.y > 6 || organism.mesh.position.y < -6) {
                 organism.velocity.y = -organism.velocity.y;
             }
         });
@@ -234,8 +289,8 @@ function animate() {
 }
 animate()
 
-function addOrganism(dnaSequence) {
-    const newOrganism = new Organism(dnaSequence);
+function addOrganism(dnaSequence, combatStartPos = { x: 0, y: 0 }) {
+    const newOrganism = new Organism(dnaSequence, combatStartPos);
     organisms.push(newOrganism);
     return newOrganism
 }
@@ -270,4 +325,8 @@ function setMovementToggle(state, playerOrganism) {
     rebuildAllOrganisms()
 }
 
-export { addOrganism, setMovementToggle, rebuildAllOrganisms, clearScene };
+function getAllOrganisms() {
+    return organisms
+}
+
+export { addOrganism, setMovementToggle, rebuildAllOrganisms, clearScene, getAllOrganisms };

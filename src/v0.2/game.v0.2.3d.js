@@ -6,6 +6,9 @@
 
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 
 const gameStageWrapper = document.getElementById("game-stage-wrapper");
 
@@ -21,8 +24,33 @@ renderer.setSize(window.innerWidth, 300);
 renderer.domElement.setAttribute("id", "game-stage")
 gameStageWrapper.appendChild(renderer.domElement);
 
+// Outline filter
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const outlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, 300),
+    scene,
+    camera
+);
+composer.addPass(outlinePass);
+
+// Optionally configure the outline color, thickness, etc.
+outlinePass.edgeStrength = 10;
+outlinePass.edgeGlow = 0.0;
+outlinePass.edgeThickness = 0.5;
+outlinePass.visibleEdgeColor.set('#000000');
+outlinePass.hiddenEdgeColor.set('#ffffff');
+
+// Utility
+
 function renderScene() {
     renderer.render(scene, camera);
+
+    outlinePass.selectedObjects = scene.children;
+    composer.render();
 }
 
 async function loadModel(objUrl) {

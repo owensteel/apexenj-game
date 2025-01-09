@@ -7,6 +7,7 @@
 import * as DNA from "./game.v0.2.dna";
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
+import * as Combat from "./game.v0.2.combat"
 
 // Setup for the game canvas
 
@@ -15,7 +16,8 @@ const gameDnaWrapper = document.getElementById("game-dna-wrapper")
 
 // DNA sequence renderer
 
-const currentDNASequence = DNA.demoDnaSequence
+const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+currentDNASequence.color = "red"
 
 const scrollOffset = { x: 0, y: 0, zoom: 1 }
 
@@ -57,7 +59,7 @@ function createNodeElement(node, x, y) {
     return el;
 }
 
-function createConnection(parentX, parentY, childX, childY) {
+function createConnection(parentX, parentY, childX, childY, childNode) {
     const dx = childX - parentX;
     const dy = childY - parentY;
     const length = 50 * scrollOffset.zoom;
@@ -65,10 +67,24 @@ function createConnection(parentX, parentY, childX, childY) {
 
     const line = document.createElement('game-dna-node-joiner');
     line.classList.add('connection');
+
+    if (childNode.detach) {
+        line.classList.add('detached');
+    }
+
     line.style.width = `${length}px`;
     line.style.left = `${parentX}px`;
     line.style.top = `${parentY}px`;
     line.style.transform = `rotate(${angle}deg)`;
+
+    line.onclick = () => {
+        if (!childNode.detach /* since .detach could be null */) {
+            childNode.detach = true;
+        } else {
+            childNode.detach = false;
+        }
+        renderDnaSequence()
+    }
 
     return line;
 }
@@ -100,7 +116,7 @@ function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = M
         const childY = y + radius * Math.sin(childAngle);
 
         // Draw a line from parent to child
-        const lineEl = createConnection(x, y, childX, childY);
+        const lineEl = createConnection(x, y, childX, childY, child);
         gameDnaWrapper.appendChild(lineEl);
 
         // Recurse for the child
@@ -151,18 +167,11 @@ function bindCanvasScrolling() {
             renderDnaSequence()
         }
     }
-    gameDnaWrapper.addEventListener("wheel", function (e) {
-        e.preventDefault()
-        const percent = 0.05
-        if (Math.sign(e.deltaY) > 0) {
-            if (scrollOffset.zoom > 0.5) {
-                scrollOffset.zoom -= percent
-            }
-        } else {
-            scrollOffset.zoom += percent
-        }
+    const dnaVisualZoomInput = document.getElementById("game-dna-visual-zoom-input")
+    dnaVisualZoomInput.onmousemove = () => {
+        scrollOffset.zoom = (parseInt(dnaVisualZoomInput.value) * 2) / 100
         renderDnaSequence()
-    });
+    }
 }
 
 // Player organism
@@ -196,10 +205,17 @@ function initMain() {
 
     renderPlayerOrganism()
 
-    let liveModeToggle = false
-    document.querySelector(".live-mode-toggle-button").onclick = () => {
-        liveModeToggle = !liveModeToggle
-        Organisms.setMovementToggle(liveModeToggle, playerOrganism)
+    const combatToggleButton = document.querySelector(".combat-toggle-button")
+    combatToggleButton.toggleState = false
+    combatToggleButton.onclick = () => {
+        Combat.toggleCombat(playerOrganism)
+        if (!combatToggleButton.toggleState) {
+            combatToggleButton.toggleState = true
+            combatToggleButton.innerHTML = "Stop combat"
+        } else {
+            combatToggleButton.toggleState = false
+            combatToggleButton.innerHTML = "Start combat"
+        }
     }
 }
 

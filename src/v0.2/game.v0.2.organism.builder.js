@@ -72,8 +72,6 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     // Clone to prevent detachment caching from entering original input
     const rootNode = JSON.parse(JSON.stringify(rootNodeUncloned))
 
-    console.log(rootNode)
-
     // Collect all node positions
     const positions = gatherNodePositions(rootNode, allowDetachingParts);
 
@@ -102,7 +100,7 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
         const sphereMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const sphereMesh = new THREE.Mesh(sphereGeom, sphereMat);
         sphereMesh.position.set(pos.x, pos.y, pos.z);
-        sphereMesh.scale.z = 0.5
+        sphereMesh.scale.z = 0.05
 
         // Convert sphere to a CSG
         sphereMesh.updateMatrix();

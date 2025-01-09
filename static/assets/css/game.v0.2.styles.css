@@ -43,6 +43,12 @@ game-canvas game-dna-wrapper {
     overflow: hidden;
 }
 
+game-canvas game-dna-wrapper-toolbar {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+}
+
 game-canvas game-dna-wrapper game-dna-node {
     position: absolute;
     z-index: 1;
@@ -55,19 +61,26 @@ game-canvas game-dna-wrapper game-dna-node {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    border: 1px solid #000;
     cursor: pointer;
 }
 
 game-canvas game-dna-wrapper game-dna-node.root {
     background-color: #fff;
+    border: 4px solid #000;
 }
 
 game-canvas game-dna-wrapper game-dna-node-joiner {
     position: absolute;
     background-color: #000;
     transform-origin: 0 50%;
-    z-index: -1;
-    height: 1px;
+    z-index: 0;
+    height: 4px;
     /* thickness */
+}
+
+game-canvas game-dna-wrapper game-dna-node-joiner.detached {
+    background-color: #fff;
+    height: 0px;
+    border-top: dashed 2px #000;
+    border-bottom: dashed 2px #000;
 }

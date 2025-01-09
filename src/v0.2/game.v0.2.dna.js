@@ -6,14 +6,36 @@
 
 const demoDnaSequence = {
     role: "root",
+    color: "yellow",
     offshoots: [
         {
             role: "appendage",
-            offshoots: []
+            offshoots: [
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
+                {
+                    role: "appendage",
+                    offshoots: []
+                }
+            ]
         },
         {
             role: "appendage",
             offshoots: [
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
+                {
+                    role: "appendage",
+                    offshoots: []
+                },
                 {
                     role: "appendage",
                     offshoots: []
