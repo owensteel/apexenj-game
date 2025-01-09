@@ -13,10 +13,23 @@ import * as Combat from "./game.v0.2.combat"
 
 const gameCanvas = document.getElementById('game-canvas');
 const gameDnaWrapper = document.getElementById("game-dna-wrapper")
+const gameDnaWrapperToolbar = document.getElementById("game-dna-wrapper-toolbar")
 
 // DNA sequence renderer
 
-const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+const gotoPreviousNodeButton = document.createElement("button");
+gotoPreviousNodeButton.id = "game-dna-visual-node-back-button"
+gotoPreviousNodeButton.innerHTML = "« BACK"
+
+const dnaSequenceExportButton = document.createElement("button");
+dnaSequenceExportButton.innerHTML = "Export Sequence"
+
+// const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+const currentDNASequence = {
+    role: "root",
+    color: "yellow",
+    offshoots: []
+}
 currentDNASequence.color = "red"
 
 const sequenceRenderSettings = {
@@ -134,8 +147,6 @@ function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = M
     });
 }
 
-let gotoPreviousNodeButton;
-
 function renderDnaSequence() {
     // Redraw visual
 
@@ -181,12 +192,6 @@ function bindCanvasScrolling() {
             renderDnaSequence()
         }
     }
-    gotoPreviousNodeButton.onclick = () => {
-        if (sequenceRenderSettings.previousFocusedNode.length > 0) {
-            sequenceRenderSettings.focusedNode = sequenceRenderSettings.previousFocusedNode.pop()
-            renderDnaSequence()
-        }
-    }
 }
 
 // Player organism
@@ -203,10 +208,24 @@ function renderPlayerOrganism() {
 
 // Init
 
+gotoPreviousNodeButton.onclick = () => {
+    if (sequenceRenderSettings.previousFocusedNode.length > 0) {
+        sequenceRenderSettings.focusedNode = sequenceRenderSettings.previousFocusedNode.pop()
+        renderDnaSequence()
+    }
+}
+
+dnaSequenceExportButton.onclick = () => {
+    const txtarea = document.createElement("textarea")
+    txtarea.value = JSON.stringify(currentDNASequence)
+    document.body.appendChild(txtarea);
+}
+
 function initMain() {
     // Get DOM elements
 
-    gotoPreviousNodeButton = document.getElementById("game-dna-visual-node-back-button")
+    gameCanvas.appendChild(gotoPreviousNodeButton)
+    gameDnaWrapperToolbar.appendChild(dnaSequenceExportButton)
 
     // DNA renderer
 
