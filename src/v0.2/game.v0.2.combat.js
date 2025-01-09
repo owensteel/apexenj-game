@@ -150,6 +150,11 @@ function preventOverlap(organism, opponent) {
     const center1 = mesh1.geometry.boundingSphere.center.clone().applyMatrix4(mesh1.matrixWorld);
     const center2 = mesh2.geometry.boundingSphere.center.clone().applyMatrix4(mesh2.matrixWorld);
 
+    if (center1 == null || center2 == null) {
+        // Not finished computing yet
+        return false;
+    }
+
     // Estimate effective radii (assumes uniform scale for simplicity)
     const scale1 = mesh1.scale.x;
     const scale2 = mesh2.scale.x;

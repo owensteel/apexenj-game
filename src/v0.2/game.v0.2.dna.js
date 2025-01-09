@@ -24,41 +24,6 @@ const demoDnaSequence = {
                     offshoots: []
                 }
             ]
-        },
-        {
-            role: "appendage",
-            offshoots: [
-                {
-                    role: "appendage",
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    offshoots: []
-                }
-            ]
-        },
-        {
-            role: "appendage",
-            offshoots: [
-                {
-                    role: "appendage",
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    offshoots: []
-                }
-            ],
-            detach: true
         }
     ]
 }

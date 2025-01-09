@@ -5,11 +5,9 @@
 */
 
 import * as THREE from 'three';
-import { CSG } from 'three-csg-ts';
 
 const defaultMeshSize = 1;
 const defaultSpread = 1.5;
-const defaultSphereSegments = 4;
 
 // Recursively collect positions of all appendage/root nodes
 
@@ -70,10 +68,20 @@ function gatherNodePositions(
 
 function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = false) {
     // Clone to prevent detachment caching from entering original input
-    const rootNode = JSON.parse(JSON.stringify(rootNodeUncloned))
+    const newRootNode = {
+        role: "root",
+        color: rootNodeUncloned.color,
+        offshoots: []
+    }
+
+    // Directional symmetry 
+    for (let dirI = 0; dirI < 4; dirI++) {
+        const rootNodeClone = JSON.parse(JSON.stringify(rootNodeUncloned))
+        newRootNode.offshoots.push(rootNodeClone)
+    }
 
     // Collect all node positions
-    const positions = gatherNodePositions(rootNode, allowDetachingParts);
+    const positions = gatherNodePositions(newRootNode, allowDetachingParts);
 
     if (positions.length === 0) {
         // No appendage/root nodes
@@ -81,10 +89,9 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     }
 
     // Clear union
-    let csgUnion = null;
+    let meshUnion = null;
 
     // For each position, build a sphere mesh
-    // Then union it into a "running" CSG object
 
     positions.forEach((pos) => {
         // Don't add detaching parts to the union
@@ -94,35 +101,25 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
 
         const sphereGeom = new THREE.SphereGeometry(
             defaultMeshSize,
-            defaultSphereSegments,
-            defaultSphereSegments
+            4,
+            2
         );
-        const sphereMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const sphereMat = new THREE.MeshBasicMaterial({ color: newRootNode.color });
         const sphereMesh = new THREE.Mesh(sphereGeom, sphereMat);
         sphereMesh.position.set(pos.x, pos.y, pos.z);
         sphereMesh.scale.z = 0.05
-
-        // Convert sphere to a CSG
         sphereMesh.updateMatrix();
-        const sphereCSG = CSG.fromMesh(sphereMesh);
 
-        if (!csgUnion) {
+        if (!meshUnion) {
             // First shape
-            csgUnion = sphereCSG;
+            meshUnion = sphereMesh;
         } else {
             // Union with the accumulated shape
-            csgUnion = csgUnion.union(sphereCSG);
+            meshUnion.add(sphereMesh)
         }
     });
 
-    // Convert final CSG back to a Three.js mesh
-    const finalMesh = CSG.toMesh(
-        csgUnion,
-        new THREE.Matrix4(),
-        new THREE.MeshNormalMaterial()
-    );
-
-    return finalMesh;
+    return meshUnion;
 }
 
 export { buildSeamlessBodyFromNodes, gatherNodePositions }

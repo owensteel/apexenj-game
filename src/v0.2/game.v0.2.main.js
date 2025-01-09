@@ -56,7 +56,7 @@ function createNodeElement(node, x, y, level = 0) {
 
     // Node interactions
     el.onclick = () => {
-        if (level > 1) {
+        if (level > 1 || (level > 0 && node.offshoots.length > 2)) {
             // Focus on this node
             sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
             sequenceRenderSettings.focusedNode = node;
@@ -106,7 +106,14 @@ function createConnection(parentX, parentY, childX, childY, childNode) {
     return line;
 }
 
-function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = Math.PI) {
+function renderTree(
+    node,
+    x,
+    y,
+    level = 0,
+    angleStart = 0,
+    angleEnd = -Math.PI
+) {
     // Create a DOM element for the current node
     const nodeEl = createNodeElement(node, x, y, level);
     const nodeElSize = Math.max(5, (25 * (1 - (level / 10))));
