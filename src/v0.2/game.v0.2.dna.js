@@ -86,7 +86,9 @@ function createNode(parentNode = null) {
         return false
     }
 
-    parentNode.offshoots.push(node)
+    if (parentNode) {
+        parentNode.offshoots.push(node)
+    }
 
     return node
 }

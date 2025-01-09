@@ -45,8 +45,20 @@ game-canvas game-dna-wrapper {
 
 game-canvas game-dna-wrapper-toolbar {
     position: absolute;
+    z-index: 2;
     bottom: 0px;
     left: 0px;
+}
+
+game-canvas game-dna-wrapper-toolbar button,
+game-canvas game-dna-wrapper-toolbar input {
+    display: inline-block;
+}
+
+game-canvas #game-dna-visual-node-back-button {
+    position: absolute;
+    top: 25px;
+    left: 25px;
 }
 
 game-canvas game-dna-wrapper game-dna-node {

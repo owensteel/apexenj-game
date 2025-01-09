@@ -274,10 +274,18 @@ function animate() {
             }
             organism.updateMovement()
             // Bounce off edges regardless
-            if (organism.mesh.position.x > 16 || organism.mesh.position.x < -16) {
+            if (
+                (organism.mesh.position.x >= 16 && Math.sign(organism.mesh.position.x) > 0)
+                ||
+                (organism.mesh.position.x <= -16 && Math.sign(organism.mesh.position.x) < 0)
+            ) {
                 organism.velocity.x = -organism.velocity.x;
             }
-            if (organism.mesh.position.y > 6 || organism.mesh.position.y < -6) {
+            if (
+                (organism.mesh.position.y >= 7 && Math.sign(organism.mesh.position.y) > 0)
+                ||
+                (organism.mesh.position.y <= -7 && Math.sign(organism.mesh.position.y) < 0)
+            ) {
                 organism.velocity.y = -organism.velocity.y;
             }
         });

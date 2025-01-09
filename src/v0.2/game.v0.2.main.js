@@ -19,9 +19,14 @@ const gameDnaWrapper = document.getElementById("game-dna-wrapper")
 const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
 currentDNASequence.color = "red"
 
-const scrollOffset = { x: 0, y: 0, zoom: 1 }
+const sequenceRenderSettings = {
+    focusedNode: currentDNASequence,
+    previousFocusedNode: [],
+    x: 0,
+    y: 0
+}
 
-function createNodeElement(node, x, y) {
+function createNodeElement(node, x, y, level = 0) {
     const el = document.createElement('game-dna-node');
     el.classList.add('node');
     el.classList.add(node.role);
@@ -38,18 +43,17 @@ function createNodeElement(node, x, y) {
 
     // Node interactions
     el.onclick = () => {
-        // Offshoots are for DEFINING, NOT CHAINING
-        // i.e an appendage can be defined with a color, but a
-        // color cannot be defined further, hence this restriction
-        if (node.role == "appendage" || node.role == "root") {
-            if (DNA.createNode(node)) {
-                renderDnaSequence()
-                renderPlayerOrganism()
-            }
-        } else if (node.role == "color") {
-            const newValue = prompt("New color value:")
-            if (newValue) {
-                node.value = newValue
+        if (level > 1) {
+            // Focus on this node
+            sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
+            sequenceRenderSettings.focusedNode = node;
+            sequenceRenderSettings.x = 0;
+            sequenceRenderSettings.y = 0;
+            renderDnaSequence()
+        } else {
+            // Create node
+            if (node.role == "appendage" || node.role == "root") {
+                DNA.createNode(node)
                 renderDnaSequence()
                 renderPlayerOrganism()
             }
@@ -62,7 +66,7 @@ function createNodeElement(node, x, y) {
 function createConnection(parentX, parentY, childX, childY, childNode) {
     const dx = childX - parentX;
     const dy = childY - parentY;
-    const length = 50 * scrollOffset.zoom;
+    const length = 50;
     const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
     const line = document.createElement('game-dna-node-joiner');
@@ -90,9 +94,11 @@ function createConnection(parentX, parentY, childX, childY, childNode) {
 }
 
 function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = Math.PI) {
-
     // Create a DOM element for the current node
-    const nodeEl = createNodeElement(node, x, y);
+    const nodeEl = createNodeElement(node, x, y, level);
+    const nodeElSize = Math.max(5, (25 * (1 - (level / 10))));
+    nodeEl.style.width = `${nodeElSize}px`
+    nodeEl.style.height = `${nodeElSize}px`
     gameDnaWrapper.appendChild(nodeEl);
 
     // If there are no offshoots, no need to place children
@@ -104,12 +110,12 @@ function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = M
     const angleSlice = (angleEnd - angleStart) / childCount;
 
     // The distance from parent to child (radius).
-    const radius = 50 * scrollOffset.zoom;
+    const radius = 50;
 
     // Place each child
     node.offshoots.forEach((child, idx) => {
         // For multiple children, we subdivide the angle range
-        const childAngle = angleStart + angleSlice * (idx + /* branch offset: */ (0.5));
+        const childAngle = angleStart + angleSlice * (idx + 0.5 /* static value for radial pattern */);
 
         // Convert polar coords to cartesian
         const childX = x + radius * Math.cos(childAngle);
@@ -128,15 +134,23 @@ function renderTree(node, x, y, level = 0, angleStart = -(Math.PI), angleEnd = M
     });
 }
 
+let gotoPreviousNodeButton;
+
 function renderDnaSequence() {
     // Redraw visual
 
     gameDnaWrapper.innerHTML = ""
     renderTree(
-        currentDNASequence,
-        (gameDnaWrapper.clientWidth / 2) + scrollOffset.x,
-        (gameDnaWrapper.clientHeight / 2) + scrollOffset.y
+        sequenceRenderSettings.focusedNode,
+        (gameDnaWrapper.clientWidth / 2) + sequenceRenderSettings.x,
+        (gameDnaWrapper.clientHeight / 2) + sequenceRenderSettings.y
     );
+
+    if (sequenceRenderSettings.previousFocusedNode.length > 0) {
+        gotoPreviousNodeButton.style.display = ""
+    } else {
+        gotoPreviousNodeButton.style.display = "none"
+    }
 }
 
 // DNA sequence visual scrolling
@@ -158,8 +172,8 @@ function bindCanvasScrolling() {
     gameDnaWrapper.onmousemove = (e) => {
         if (scrollingCursor.down) {
             // Capture and add distance from cursor start point
-            scrollOffset.x += (e.pageX - scrollingCursor.startX)
-            scrollOffset.y += (e.pageY - scrollingCursor.startY)
+            sequenceRenderSettings.x += (e.pageX - scrollingCursor.startX)
+            sequenceRenderSettings.y += (e.pageY - scrollingCursor.startY)
             // Reset cursor start point
             scrollingCursor.startX = e.pageX
             scrollingCursor.startY = e.pageY
@@ -167,10 +181,11 @@ function bindCanvasScrolling() {
             renderDnaSequence()
         }
     }
-    const dnaVisualZoomInput = document.getElementById("game-dna-visual-zoom-input")
-    dnaVisualZoomInput.onmousemove = () => {
-        scrollOffset.zoom = (parseInt(dnaVisualZoomInput.value) * 2) / 100
-        renderDnaSequence()
+    gotoPreviousNodeButton.onclick = () => {
+        if (sequenceRenderSettings.previousFocusedNode.length > 0) {
+            sequenceRenderSettings.focusedNode = sequenceRenderSettings.previousFocusedNode.pop()
+            renderDnaSequence()
+        }
     }
 }
 
@@ -189,6 +204,10 @@ function renderPlayerOrganism() {
 // Init
 
 function initMain() {
+    // Get DOM elements
+
+    gotoPreviousNodeButton = document.getElementById("game-dna-visual-node-back-button")
+
     // DNA renderer
 
     gameCanvas.style.width = window.innerWidth

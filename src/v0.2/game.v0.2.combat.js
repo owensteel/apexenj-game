@@ -179,7 +179,7 @@ function preventOverlap(organism, opponent) {
 
         // For a “fair” push, move each one half the overlap
         // If you want only one mesh to move, shift overlap to one side.
-        const halfOverlap = overlap * 0.25;
+        const halfOverlap = overlap * 0.125;
 
         // shift mesh1 outward
         mesh1.position.add(distVec.clone().multiplyScalar(halfOverlap));
