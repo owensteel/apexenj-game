@@ -24,12 +24,12 @@ gotoPreviousNodeButton.innerHTML = "« BACK"
 const dnaSequenceExportButton = document.createElement("button");
 dnaSequenceExportButton.innerHTML = "Export Sequence"
 
-// const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
-const currentDNASequence = {
-    role: "root",
-    color: "yellow",
-    offshoots: []
-}
+const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+// const currentDNASequence = {
+//     role: "root",
+//     color: "yellow",
+//     offshoots: []
+// }
 currentDNASequence.color = "red"
 
 const sequenceRenderSettings = {
@@ -161,7 +161,7 @@ function renderDnaSequence() {
     renderTree(
         sequenceRenderSettings.focusedNode,
         (gameDnaWrapper.clientWidth / 2) + sequenceRenderSettings.x,
-        (gameDnaWrapper.clientHeight / 2) + sequenceRenderSettings.y
+        (gameDnaWrapper.clientHeight - 50) + sequenceRenderSettings.y
     );
 
     if (sequenceRenderSettings.previousFocusedNode.length > 0) {
@@ -179,11 +179,11 @@ const scrollingCursor = {
     startY: 0
 }
 function bindCanvasScrolling() {
-    gameDnaWrapper.onmousedown = (e) => {
+    gameDnaWrapper.addEventListener("mousedown", (e) => {
         scrollingCursor.startX = e.pageX
         scrollingCursor.startY = e.pageY
         scrollingCursor.down = true
-    }
+    })
     gameDnaWrapper.onmouseup = () => {
         scrollingCursor.down = false
     }

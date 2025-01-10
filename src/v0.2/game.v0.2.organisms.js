@@ -161,7 +161,8 @@ class Organism {
 
             this.mesh = OrganismBuilder.buildSeamlessBodyFromNodes(
                 this.dnaSequence,
-                /* allowDetachingParts: */ false
+                /* allowDetachingParts: */ false,
+                /* formUnionMesh: */ true
             );
             this.mesh.position.set(
                 this.combatStartPos.x,
@@ -218,17 +219,6 @@ class Organism {
         }
         this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.color });
 
-        // Add mesh outline
-
-        // if (this.meshOutline) {
-        //     this.mesh.remove(this.meshOutline)
-        // }
-        // this.meshOutline = new THREE.LineSegments(
-        //     new THREE.EdgesGeometry(this.mesh.geometry),
-        //     new THREE.LineBasicMaterial({ color: 0x000000 })
-        // );
-        // this.mesh.add(this.meshOutline)
-
         ThreeElements.scene.add(this.mesh);
     }
     updateMovement() {
@@ -275,16 +265,16 @@ function animate() {
             organism.updateMovement()
             // Bounce off edges regardless
             if (
-                (organism.mesh.position.x >= 16 && Math.sign(organism.mesh.position.x) > 0)
+                (organism.mesh.position.x >= 16 && Math.sign(organism.velocity.x) > 0)
                 ||
-                (organism.mesh.position.x <= -16 && Math.sign(organism.mesh.position.x) < 0)
+                (organism.mesh.position.x <= -16 && Math.sign(organism.velocity.x) < 0)
             ) {
                 organism.velocity.x = -organism.velocity.x;
             }
             if (
-                (organism.mesh.position.y >= 7 && Math.sign(organism.mesh.position.y) > 0)
+                (organism.mesh.position.y >= 7 && Math.sign(organism.velocity.y) > 0)
                 ||
-                (organism.mesh.position.y <= -7 && Math.sign(organism.mesh.position.y) < 0)
+                (organism.mesh.position.y <= -7 && Math.sign(organism.velocity.y) < 0)
             ) {
                 organism.velocity.y = -organism.velocity.y;
             }

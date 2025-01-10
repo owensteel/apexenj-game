@@ -91,7 +91,11 @@ function updateCombat(organism, opponent) {
         // opponent.highlight();
 
         // Bump
-        preventOverlap(organism, opponent);
+        // TODO Fix bounding problem (mesh children not being
+        // counted in mesh's bounding box)
+        try {
+            preventMeshOverlap(organism, opponent);
+        } catch (e) { }
     }
 
 }
@@ -138,7 +142,7 @@ function getOverlappingNodes(organism, opponent) {
     return result
 }
 
-function preventOverlap(organism, opponent) {
+function preventMeshOverlap(organism, opponent) {
     const mesh1 = organism.mesh;
     const mesh2 = opponent.mesh;
 
@@ -184,7 +188,7 @@ function preventOverlap(organism, opponent) {
 
         // For a “fair” push, move each one half the overlap
         // If you want only one mesh to move, shift overlap to one side.
-        const halfOverlap = overlap * 0.125;
+        const halfOverlap = overlap * Math.abs(organism.velocity.x);
 
         // shift mesh1 outward
         mesh1.position.add(distVec.clone().multiplyScalar(halfOverlap));
