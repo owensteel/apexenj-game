@@ -76,10 +76,10 @@ function createNodeElement(node, x, y, level = 0) {
     return el;
 }
 
-function createConnection(parentX, parentY, childX, childY, childNode) {
+function createConnection(parentX, parentY, childX, childY, childNode, radius) {
     const dx = childX - parentX;
     const dy = childY - parentY;
-    const length = 50;
+    const length = radius;
     const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
     const line = document.createElement('game-dna-node-joiner');
@@ -114,9 +114,11 @@ function renderTree(
     angleStart = 0,
     angleEnd = -Math.PI
 ) {
+    const levelElementSizePerc = (1 - (level / 10))
+
     // Create a DOM element for the current node
     const nodeEl = createNodeElement(node, x, y, level);
-    const nodeElSize = Math.max(5, (25 * (1 - (level / 10))));
+    const nodeElSize = Math.max(5, (25 * levelElementSizePerc));
     nodeEl.style.width = `${nodeElSize}px`
     nodeEl.style.height = `${nodeElSize}px`
     gameDnaWrapper.appendChild(nodeEl);
@@ -130,7 +132,7 @@ function renderTree(
     const angleSlice = (angleEnd - angleStart) / childCount;
 
     // The distance from parent to child (radius).
-    const radius = 50;
+    const radius = Math.max(5, (50 * levelElementSizePerc));
 
     // Place each child
     node.offshoots.forEach((child, idx) => {
@@ -142,7 +144,7 @@ function renderTree(
         const childY = y + radius * Math.sin(childAngle);
 
         // Draw a line from parent to child
-        const lineEl = createConnection(x, y, childX, childY, child);
+        const lineEl = createConnection(x, y, childX, childY, child, radius);
         gameDnaWrapper.appendChild(lineEl);
 
         // Recurse for the child

@@ -83,123 +83,102 @@ function toggleCombat(playerOrganismImport) {
 // Combat mechanics
 
 function updateCombat(organism, opponent) {
-
-    const overlappingNodes = getOverlappingNodes(organism, opponent)
+    const overlappingNodes = getOverlappingNodes(organism, opponent);
     if (overlappingNodes.length > 0) {
-        // Debug
-        // organism.highlight();
-        // opponent.highlight();
-
-        // Bump
-        // TODO Fix bounding problem (mesh children not being
-        // counted in mesh's bounding box)
-        try {
-            preventMeshOverlap(organism, opponent);
-        } catch (e) { }
+        // Bump them so that none of these overlapping node pairs remain overlapped
+        bumpEdges(organism, opponent, overlappingNodes);
     }
-
 }
 
 // Utility
 
 const overlapRadius = 1.5
 function getOverlappingNodes(organism, opponent) {
-    const organismNodes = organism.nodePositions
-    const opponentNodes = opponent.nodePositions
+    const organismNodes = organism.nodePositions;    // local coords of organism's nodes
+    const opponentNodes = opponent.nodePositions;    // local coords of opponent's nodes
 
-    const result = []
+    const result = [];
 
-    // TODO: speed up
+    // Naive O(N*M) check
     for (const orgNodePos of organismNodes) {
-        const orgNodeRealPos = {
+        // Convert local coords to world coords for the organism node
+        const orgNodeWorld = {
             x: orgNodePos.x + organism.mesh.position.x,
             y: orgNodePos.y + organism.mesh.position.y
-        }
+        };
         for (const oppNodePos of opponentNodes) {
-            const oppNodeRealPos = {
+            // Convert local coords to world coords for the opponent node
+            const oppNodeWorld = {
                 x: oppNodePos.x + opponent.mesh.position.x,
                 y: oppNodePos.y + opponent.mesh.position.y
-            }
+            };
+
+            // AABB overlap check (quick & dirty)
             if (
-                (orgNodeRealPos.x > oppNodeRealPos.x - overlapRadius)
-                &&
-                (orgNodeRealPos.x < oppNodeRealPos.x + overlapRadius)
-                &&
-                (orgNodeRealPos.y > oppNodeRealPos.y - overlapRadius)
-                &&
-                (orgNodeRealPos.y < oppNodeRealPos.y + overlapRadius)
+                (orgNodeWorld.x > oppNodeWorld.x - overlapRadius) &&
+                (orgNodeWorld.x < oppNodeWorld.x + overlapRadius) &&
+                (orgNodeWorld.y > oppNodeWorld.y - overlapRadius) &&
+                (orgNodeWorld.y < oppNodeWorld.y + overlapRadius)
             ) {
-                result.push(
-                    {
-                        organism: orgNodePos,
-                        opponent: oppNodePos
-                    }
-                )
+                result.push({
+                    orgNodePos,      // local coords in organism
+                    oppNodePos       // local coords in opponent
+                });
             }
         }
     }
-
-    return result
+    return result;
 }
 
-function preventMeshOverlap(organism, opponent) {
-    const mesh1 = organism.mesh;
-    const mesh2 = opponent.mesh;
+function bumpEdges(organism, opponent, overlappingNodes) {
+    for (const pair of overlappingNodes) {
+        // Convert each node to world coords again
+        const orgNodeWorld = {
+            x: pair.orgNodePos.x + organism.mesh.position.x,
+            y: pair.orgNodePos.y + organism.mesh.position.y
+        };
+        const oppNodeWorld = {
+            x: pair.oppNodePos.x + opponent.mesh.position.x,
+            y: pair.oppNodePos.y + opponent.mesh.position.y
+        };
 
-    // Update world transforms
-    mesh1.updateMatrixWorld(true);
-    mesh2.updateMatrixWorld(true);
+        // Do a more accurate circle-based overlap check: 
+        // distance < overlapRadius, then push them out
+        const dx = orgNodeWorld.x - oppNodeWorld.x;
+        const dy = orgNodeWorld.y - oppNodeWorld.y;
+        const distSq = dx * dx + dy * dy;
+        const minDistSq = overlapRadius * overlapRadius;
 
-    // Get bounding-sphere centers in world space
-    const center1 = mesh1.geometry.boundingSphere.center.clone().applyMatrix4(mesh1.matrixWorld);
-    const center2 = mesh2.geometry.boundingSphere.center.clone().applyMatrix4(mesh2.matrixWorld);
+        if (distSq < minDistSq) {
+            // They overlap
+            const dist = Math.sqrt(distSq);
+            const overlap = overlapRadius - dist;
 
-    if (center1 == null || center2 == null) {
-        // Not finished computing yet
-        return false;
+            // Direction from opponent node => organism node
+            // If dist=0 (exact same coords), offset slightly
+            let nx, ny;
+            if (dist > 0) {
+                nx = dx / dist; // normalized direction x
+                ny = dy / dist; // normalized direction y
+            } else {
+                // Rare exact overlap => pick an arbitrary direction
+                nx = 1;
+                ny = 0;
+            }
+
+            // Push them each half the overlap, 
+            // so total separation = overlap
+            const half = overlap * 0.5;
+
+            // Move organism mesh outward
+            organism.mesh.position.x += nx * half;
+            organism.mesh.position.y += ny * half;
+
+            // Move opponent mesh inward
+            opponent.mesh.position.x -= nx * half;
+            opponent.mesh.position.y -= ny * half;
+        }
     }
-
-    // Estimate effective radii (assumes uniform scale for simplicity)
-    const scale1 = mesh1.scale.x;
-    const scale2 = mesh2.scale.x;
-    const radius1 = mesh1.geometry.boundingSphere.radius * scale1;
-    const radius2 = mesh2.geometry.boundingSphere.radius * scale2;
-    const combinedRadii = (radius1 + radius2) * 0.75;
-
-    // Compute actual distance
-    const distVec = center1.clone().sub(center2);
-    let distance = distVec.length();
-
-    // If distance == 0, they’re in the exact same spot; give a small nudge
-    if (distance === 0) {
-        distVec.set(1e-6, 0, 0); // arbitrary tiny offset
-        distance = distVec.length();
-    }
-
-    // Check overlap
-    if (distance < combinedRadii) {
-        // They are overlapping. We push them apart so that distance = combinedRadii
-
-        // The amount we need to separate them
-        const overlap = combinedRadii - distance;
-
-        // Direction to push mesh1 away from mesh2
-        distVec.normalize();
-
-        // For a “fair” push, move each one half the overlap
-        // If you want only one mesh to move, shift overlap to one side.
-        const halfOverlap = overlap * Math.abs(organism.velocity.x);
-
-        // shift mesh1 outward
-        mesh1.position.add(distVec.clone().multiplyScalar(halfOverlap));
-        // shift mesh2 inward
-        mesh2.position.sub(distVec.clone().multiplyScalar(halfOverlap));
-
-        return true;
-    }
-
-    // No overlap => no collision
-    return false;
 }
 
 export { toggleCombat }
