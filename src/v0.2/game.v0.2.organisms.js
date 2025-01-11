@@ -162,6 +162,9 @@ class Organism {
             this.mesh = OrganismBuilder.buildSeamlessBodyFromNodes(
                 this.dnaSequence,
                 /* allowDetachingParts: */ false,
+                // In live mode, the organism is only built once, so we
+                // can afford the expensive operation to use CSG to union
+                // all nodes into one single mesh
                 /* formUnionMesh: */ true
             );
             this.mesh.position.set(
@@ -231,8 +234,8 @@ class Organism {
 
         // Float around
         if (movementToggle) {
-            this.mesh.position.x += this.velocity.x /* + randomOffset() */
-            this.mesh.position.y += this.velocity.y /* + randomOffset() */
+            this.mesh.position.x += this.velocity.x + randomOffset()
+            this.mesh.position.y += this.velocity.y + randomOffset()
         }
     }
     highlight() {
