@@ -39,6 +39,39 @@ const sequenceRenderSettings = {
     y: 0
 }
 
+function deleteNodeFromSequence(node) {
+    // Confirm
+    if (
+        node.offshoots.length > 0
+        &&
+        !confirm("Delete this node? This will also delete all of its branches.")
+    ) {
+        return
+    }
+
+    // Waste collection method
+    node.toBeRemoved = true;
+
+    // Nodes to be removed will be removed from main DNA
+    // sequence object when rendered
+    renderDnaSequence()
+    renderPlayerOrganism()
+}
+
+function focusOnNode(node) {
+    sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
+    sequenceRenderSettings.focusedNode = node;
+    sequenceRenderSettings.x = 0;
+    sequenceRenderSettings.y = 0;
+    renderDnaSequence()
+}
+
+function createNode(parentNode) {
+    DNA.createNode(parentNode)
+    renderDnaSequence()
+    renderPlayerOrganism()
+}
+
 function createNodeElement(node, x, y, level = 0) {
     const el = document.createElement('game-dna-node');
     el.classList.add('node');
@@ -55,20 +88,17 @@ function createNodeElement(node, x, y, level = 0) {
     el.style.top = `${y}px`;
 
     // Node interactions
-    el.onclick = () => {
-        if (level > 1 || (level > 0 && node.offshoots.length > 2)) {
-            // Focus on this node
-            sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
-            sequenceRenderSettings.focusedNode = node;
-            sequenceRenderSettings.x = 0;
-            sequenceRenderSettings.y = 0;
-            renderDnaSequence()
-        } else {
+    if (level > 1) {
+        // Focus on this node first
+        el.onclick = () => {
+            focusOnNode(node)
+        }
+    } else {
+        // Node can be edited directly
+        el.onclick = () => {
             // Create node
             if (node.role == "appendage" || node.role == "root") {
-                DNA.createNode(node)
-                renderDnaSequence()
-                renderPlayerOrganism()
+                createNode(node)
             }
         }
     }
@@ -128,6 +158,14 @@ function renderTree(
         return;
     }
 
+    // Remove any offshoots that require removing
+    node.offshoots.forEach((child, idx) => {
+        if (child.toBeRemoved) {
+            node.offshoots.splice(idx, 1)
+        }
+    })
+
+    // Render children
     const childCount = node.offshoots.length;
     const angleSlice = (angleEnd - angleStart) / childCount;
 
