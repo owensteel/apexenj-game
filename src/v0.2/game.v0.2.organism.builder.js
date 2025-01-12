@@ -31,22 +31,19 @@ function gatherNodePositions(
 
     // Create directional symmetry 
     if (currentNode.role == "root") {
-        // Clone and edit root node
+        // Clone root node before editing or it will affect
+        // original sequence
+        const rootNodeClone = cloneObject(currentNode)
         const newRootNode = {
             role: "root",
             block: currentNode.block,
             offshoots: []
         }
-        // Surround itself with 4 duplicates
-        const rootNodeClone = cloneObject(currentNode)
-        rootNodeClone.offshoots.forEach((cloneOffshoot) => {
-            for (let dirI = 0; dirI < 4; dirI++) {
-                rootNodeClone.role = "appendage"
-                rootNodeClone.detach = false;
-                newRootNode.offshoots.push(cloneOffshoot)
-            }
-        })
-
+        // Duplicate its single offshoot (there is only one
+        // allowed) 4 times for symmetry
+        for (let dirI = 0; dirI < 4; dirI++) {
+            newRootNode.offshoots.push(rootNodeClone.offshoots[0])
+        }
         currentNode = newRootNode;
     }
 
