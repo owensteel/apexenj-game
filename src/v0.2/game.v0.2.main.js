@@ -25,12 +25,6 @@ const dnaSequenceExportButton = document.createElement("button");
 dnaSequenceExportButton.innerHTML = "Export Sequence"
 
 const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
-// const currentDNASequence = {
-//     role: "root",
-//     color: "yellow",
-//     offshoots: []
-// }
-currentDNASequence.color = "red"
 
 const sequenceRenderSettings = {
     focusedNode: currentDNASequence,

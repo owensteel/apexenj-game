@@ -165,7 +165,7 @@ class Organism {
                 // In live mode, the organism is only built once, so we
                 // can afford the expensive operation to use CSG to union
                 // all nodes into one single mesh
-                /* formUnionMesh: */ true
+                /* formUnionMesh: */ false
             );
             this.mesh.position.set(
                 this.combatStartPos.x,
@@ -192,7 +192,6 @@ class Organism {
             detachedParts.forEach((detachedPartPos) => {
                 // Clone to prevent main DNA being corrupted
                 const detachedPartDNA = JSON.parse(JSON.stringify(detachedPartPos.node))
-                detachedPartDNA.color = this.dnaSequence.color
                 const detachedPartOrganism = addOrganism(detachedPartDNA)
 
                 // Move part to starting position
@@ -220,7 +219,7 @@ class Organism {
             this.mesh = newMesh
             this.mesh.position.set(0, 0, 0)
         }
-        this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.color });
+        this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
         ThreeElements.scene.add(this.mesh);
     }
@@ -248,7 +247,7 @@ class Organism {
 
         setTimeout(() => {
             this.currentAnimations.highlight = false;
-            this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.color });
+            this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
         }, 250)
     }
 }

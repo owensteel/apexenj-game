@@ -28,11 +28,12 @@ function gatherNodePositions(
         return
     }
 
+    // Create directional symmetry 
     if (currentNode.role == "root") {
-        // Directional symmetry 
+        // Clone and edit root node
         const newRootNode = {
             role: "root",
-            color: currentNode.color,
+            block: currentNode.block,
             offshoots: []
         }
 
@@ -101,7 +102,7 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
 
     // Clear union
     let meshUnion = null;
-    const meshMaterial = new THREE.MeshBasicMaterial({ color: rootNodeClone.color });
+    const meshMaterials = [];
 
     // For each position, build a sphere mesh
 
@@ -116,7 +117,16 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
             4,
             4
         );
-        const sphereMesh = new THREE.Mesh(sphereGeom, meshMaterial);
+        const sphereMaterial = new THREE.MeshBasicMaterial(
+            {
+                color: pos.node.block.color
+            }
+        )
+        meshMaterials.push(sphereMaterial)
+        const sphereMesh = new THREE.Mesh(
+            sphereGeom,
+            sphereMaterial
+        );
         sphereMesh.position.set(pos.x, pos.y, pos.z);
         sphereMesh.scale.z = 0.05
         sphereMesh.updateMatrix();
@@ -142,7 +152,7 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
         meshUnion = CSG.toMesh(
             meshUnion,
             new THREE.Matrix4(),
-            meshMaterial
+            meshMaterials
         );
 
     }

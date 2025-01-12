@@ -23,7 +23,6 @@ function startCombat() {
     // Set enemy
 
     const enemyDNA = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
-    enemyDNA.color = "blue"
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         { x: 15, y: 0 }
