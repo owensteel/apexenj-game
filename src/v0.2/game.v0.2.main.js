@@ -84,15 +84,12 @@ function createNodeElement(node, x, y, level = 0) {
     el.style.top = `${y}px`;
 
     // Node interactions
-    if (level > 1) {
-        // Focus on this node first
-        el.onclick = () => {
+    el.onclick = () => {
+        if (level > 1) {
+            // Focus on this node first
             focusOnNode(node)
-        }
-    } else {
-        // Node can be edited directly
-        el.onclick = () => {
-            // Create node
+        } else {
+            // Add a node
             if (node.role == "appendage" || node.role == "root") {
                 createNode(node)
             }
