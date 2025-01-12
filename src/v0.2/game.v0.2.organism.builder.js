@@ -11,8 +11,9 @@ import { cloneObject } from "./game.v0.2.utils";
 const defaultMeshSize = 1;
 const defaultSpread = 1.25;
 
+const maxLevel = 5
 const levelToSizePerc = (level) => {
-    return (1 - (level / 10))
+    return Math.max(0.1, (1 - (level / maxLevel)))
 }
 
 // Recursively collect positions of all appendage/root nodes
@@ -58,13 +59,13 @@ function gatherNodePositions(
 
     positionsArray.push({ x, y, z: 0, detach: (currentNode.detach == true), node: currentNode, level });
 
+    // The distance from parent to child (radius).
+    const radius = defaultSpread * levelToSizePerc(level);
+
     // If there are children, distribute them radially
     if (currentNode.offshoots && currentNode.offshoots.length > 0) {
         const childCount = currentNode.offshoots.length;
         const angleSlice = (angleEnd - angleStart) / childCount;
-
-        // The distance from parent to child (radius).
-        const radius = Math.max(0.01, (defaultSpread * levelToSizePerc(level)));
 
         for (let i = 0; i < childCount; i++) {
             const child = currentNode.offshoots[i];
