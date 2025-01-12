@@ -36,13 +36,15 @@ function gatherNodePositions(
             block: currentNode.block,
             offshoots: []
         }
-
-        for (let dirI = 0; dirI < 4; dirI++) {
-            const rootNodeClone = JSON.parse(JSON.stringify(currentNode))
-            rootNodeClone.role = "appendage"
-            rootNodeClone.detach = false;
-            newRootNode.offshoots.push(rootNodeClone)
-        }
+        // Surround itself with 4 duplicates
+        const rootNodeClone = JSON.parse(JSON.stringify(currentNode))
+        rootNodeClone.offshoots.forEach((cloneOffshoot) => {
+            for (let dirI = 0; dirI < 4; dirI++) {
+                rootNodeClone.role = "appendage"
+                rootNodeClone.detach = false;
+                newRootNode.offshoots.push(cloneOffshoot)
+            }
+        })
 
         currentNode = newRootNode;
     }

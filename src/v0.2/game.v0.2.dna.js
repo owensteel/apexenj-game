@@ -35,6 +35,10 @@ const demoDnaSequence = {
 }
 
 function createNode(parentNode = null) {
+    if (parentNode.role == "root" && parentNode.offshoots.length > 0) {
+        return false
+    }
+
     const node = {
         role: "appendage",
         block: new Blocks.DefaultBlock(),

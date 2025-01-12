@@ -61,9 +61,10 @@ function focusOnNode(node) {
 }
 
 function createNode(parentNode) {
-    DNA.createNode(parentNode)
-    renderDnaSequence()
-    renderPlayerOrganism()
+    if (DNA.createNode(parentNode)) {
+        renderDnaSequence()
+        renderPlayerOrganism()
+    }
 }
 
 function createNodeElement(node, x, y, level = 0) {
