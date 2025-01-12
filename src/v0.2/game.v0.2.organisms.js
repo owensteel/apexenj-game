@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import * as ThreeElements from './game.v0.2.3d.js'
 import * as OrganismBuilder from './game.v0.2.organism.builder.js'
+import { cloneObject } from './game.v0.2.utils.js';
 
 // Global variables
 
@@ -191,7 +192,7 @@ class Organism {
             )
             detachedParts.forEach((detachedPartPos) => {
                 // Clone to prevent main DNA being corrupted
-                const detachedPartDNA = JSON.parse(JSON.stringify(detachedPartPos.node))
+                const detachedPartDNA = cloneObject(detachedPartPos.node)
                 const detachedPartOrganism = addOrganism(detachedPartDNA)
 
                 // Move part to starting position

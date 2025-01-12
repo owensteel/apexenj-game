@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
+import { cloneObject } from "./game.v0.2.utils";
 
 const defaultMeshSize = 1;
 const defaultSpread = 1.25;
@@ -37,7 +38,7 @@ function gatherNodePositions(
             offshoots: []
         }
         // Surround itself with 4 duplicates
-        const rootNodeClone = JSON.parse(JSON.stringify(currentNode))
+        const rootNodeClone = cloneObject(currentNode)
         rootNodeClone.offshoots.forEach((cloneOffshoot) => {
             for (let dirI = 0; dirI < 4; dirI++) {
                 rootNodeClone.role = "appendage"
@@ -92,7 +93,7 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     console.log("building body...", { formUnionMesh })
 
     // Clone to prevent detachment caching from entering original input
-    const rootNodeClone = JSON.parse(JSON.stringify(rootNodeUncloned))
+    const rootNodeClone = cloneObject(rootNodeUncloned)
 
     // Collect all node positions
     const positions = gatherNodePositions(rootNodeClone, allowDetachingParts);

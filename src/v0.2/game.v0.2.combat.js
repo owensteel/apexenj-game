@@ -6,6 +6,7 @@
 
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
+import { cloneObject } from "./game.v0.2.utils";
 
 let liveModeToggle = false;
 let combatRunning = false;
@@ -22,7 +23,7 @@ function startCombat() {
 
     // Set enemy
 
-    const enemyDNA = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+    const enemyDNA = cloneObject(DNA.demoDnaSequence)
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         { x: 15, y: 0 }

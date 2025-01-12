@@ -8,6 +8,7 @@ import * as DNA from "./game.v0.2.dna";
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
+import { cloneObject } from "./game.v0.2.utils";
 
 // Setup for the game canvas
 
@@ -24,7 +25,7 @@ gotoPreviousNodeButton.innerHTML = "« BACK"
 const dnaSequenceExportButton = document.createElement("button");
 dnaSequenceExportButton.innerHTML = "Export Sequence"
 
-const currentDNASequence = JSON.parse(JSON.stringify(DNA.demoDnaSequence))
+const currentDNASequence = cloneObject(DNA.demoDnaSequence)
 
 const sequenceRenderSettings = {
     focusedNode: currentDNASequence,
