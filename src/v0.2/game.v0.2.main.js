@@ -207,36 +207,6 @@ function renderDnaSequence() {
     }
 }
 
-// DNA sequence visual scrolling
-
-const scrollingCursor = {
-    down: false,
-    startX: 0,
-    startY: 0
-}
-function bindCanvasScrolling() {
-    gameDnaWrapper.addEventListener("mousedown", (e) => {
-        scrollingCursor.startX = e.pageX
-        scrollingCursor.startY = e.pageY
-        scrollingCursor.down = true
-    })
-    gameDnaWrapper.onmouseup = () => {
-        scrollingCursor.down = false
-    }
-    gameDnaWrapper.onmousemove = (e) => {
-        if (scrollingCursor.down) {
-            // Capture and add distance from cursor start point
-            sequenceRenderSettings.x += (e.pageX - scrollingCursor.startX)
-            sequenceRenderSettings.y += (e.pageY - scrollingCursor.startY)
-            // Reset cursor start point
-            scrollingCursor.startX = e.pageX
-            scrollingCursor.startY = e.pageY
-            // Re-render with new scroll offset
-            renderDnaSequence()
-        }
-    }
-}
-
 // Player organism
 
 let playerOrganism;
@@ -276,7 +246,6 @@ function initMain() {
     gameCanvas.style.height = 300
 
     renderDnaSequence()
-    bindCanvasScrolling()
 
     // 3D renderer
 
