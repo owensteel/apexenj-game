@@ -144,7 +144,7 @@ function renderTree(
     angleStart = 0,
     angleEnd = -Math.PI
 ) {
-    const levelElementSizePerc = (1 - (level / 10))
+    const levelElementSizePerc = (1 - (level / 5))
 
     // Create a DOM element for the current node
     const nodeEl = createNodeElement(node, x, y, level);
