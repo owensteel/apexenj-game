@@ -11,6 +11,10 @@ import { cloneObject } from "./game.v0.2.utils";
 const defaultMeshSize = 1;
 const defaultSpread = 1.25;
 
+const levelToSizePerc = (level) => {
+    return (1 - (level / 10))
+}
+
 // Recursively collect positions of all appendage/root nodes
 
 function gatherNodePositions(
@@ -52,20 +56,23 @@ function gatherNodePositions(
         return
     }
 
-    positionsArray.push({ x, y, z: 0, detach: (currentNode.detach == true), node: currentNode });
+    positionsArray.push({ x, y, z: 0, detach: (currentNode.detach == true), node: currentNode, level });
 
     // If there are children, distribute them radially
     if (currentNode.offshoots && currentNode.offshoots.length > 0) {
         const childCount = currentNode.offshoots.length;
         const angleSlice = (angleEnd - angleStart) / childCount;
 
+        // The distance from parent to child (radius).
+        const radius = Math.max(0.01, (defaultSpread * levelToSizePerc(level)));
+
         for (let i = 0; i < childCount; i++) {
             const child = currentNode.offshoots[i];
             const childAngle = angleStart + angleSlice * (i + 0.5);
 
             // Convert polar to cartesian
-            const childX = x + defaultSpread * Math.cos(childAngle);
-            const childY = y + defaultSpread * Math.sin(childAngle);
+            const childX = x + radius * Math.cos(childAngle);
+            const childY = y + radius * Math.sin(childAngle);
 
             const subAngleStart = angleStart + angleSlice * i;
             const subAngleEnd = angleStart + angleSlice * (i + 1);
@@ -128,7 +135,12 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
             sphereMaterial
         );
         sphereMesh.position.set(pos.x, pos.y, pos.z);
-        sphereMesh.scale.z = 0.05
+
+        // Child nodes reduce in size
+        sphereMesh.scale.x = levelToSizePerc(pos.level)
+        sphereMesh.scale.y = levelToSizePerc(pos.level)
+
+        // Required for correct placing in a union
         sphereMesh.updateMatrix();
 
         if (!meshUnion) {
