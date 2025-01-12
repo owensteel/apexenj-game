@@ -227,14 +227,13 @@ class Organism {
         if (this.mesh == null) {
             return
         }
-
-        // Rotate idly
-        this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.005;
-
-        // Float around
         if (movementToggle) {
+            // Float around
             this.mesh.position.x += this.velocity.x + randomOffset()
             this.mesh.position.y += this.velocity.y + randomOffset()
+        } else {
+            // Rotate idly
+            this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.005;
         }
     }
     highlight() {
