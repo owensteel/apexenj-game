@@ -93,6 +93,13 @@ function focusOnNode(node) {
     renderDnaSequence()
 }
 
+function goToPreviousNode() {
+    if (sequenceRenderSettings.previousFocusedNode.length > 0) {
+        sequenceRenderSettings.focusedNode = sequenceRenderSettings.previousFocusedNode.pop()
+        renderDnaSequence()
+    }
+}
+
 // Node dragging
 
 const nodeDragging = {
@@ -133,6 +140,11 @@ nodeDraggingOverlay.onmouseup = (e) => {
         // Check if user has put node in the bin
         if (isInBin(e.pageX, e.pageY)) {
             deleteNodeFromSequence(nodeDragging.currentNode)
+
+            // If focused node was deleted, return to parent
+            if (sequenceRenderSettings.focusedNode.beingDragged) {
+                goToPreviousNode()
+            }
         }
 
         // Remove drag visuals
@@ -362,12 +374,7 @@ function setNodeToolbar() {
 
 // Init
 
-gotoPreviousNodeButton.onclick = () => {
-    if (sequenceRenderSettings.previousFocusedNode.length > 0) {
-        sequenceRenderSettings.focusedNode = sequenceRenderSettings.previousFocusedNode.pop()
-        renderDnaSequence()
-    }
-}
+gotoPreviousNodeButton.onclick = goToPreviousNode
 
 dnaSequenceExportButton.onclick = () => {
     const txtarea = document.createElement("textarea")
