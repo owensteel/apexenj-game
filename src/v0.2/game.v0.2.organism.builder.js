@@ -11,8 +11,12 @@ import { cloneObject } from "./game.v0.2.utils";
 const defaultMeshSize = 1;
 const defaultSpread = 1.25;
 
-const maxLevel = 5
+const shrinkingChildrenFlag = true
+const maxLevel = 10
 const levelToSizePerc = (level) => {
+    if (!shrinkingChildrenFlag) {
+        return 1
+    }
     return Math.max(0.1, (1 - (level / maxLevel)))
 }
 

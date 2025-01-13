@@ -9,6 +9,7 @@ import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
 import { cloneObject } from "./game.v0.2.utils";
+import * as Blocks from "./game.v0.2.blocks";
 
 // Setup for the game canvas
 
@@ -34,6 +35,10 @@ const sequenceRenderSettings = {
     y: 0
 }
 
+// Node manipulating
+
+let selectedBlockType = "default"
+
 function deleteNodeFromSequence(node) {
     // Confirm
     if (
@@ -53,6 +58,29 @@ function deleteNodeFromSequence(node) {
     renderPlayerOrganism()
 }
 
+function createNode(parentNode) {
+    const createdNode = DNA.createNode(parentNode)
+    if (createdNode) {
+        // Set node block
+        if (selectedBlockType !== "default") {
+            switch (selectedBlockType) {
+                case "bonding":
+                    createdNode.block = new Blocks.BondingBlock()
+                    break
+                case "motor":
+                    createdNode.block = new Blocks.MotorBlock()
+                    break
+            }
+        }
+
+        renderDnaSequence()
+        renderPlayerOrganism()
+    }
+    return createdNode
+}
+
+// Map visual
+
 function focusOnNode(node) {
     sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
     sequenceRenderSettings.focusedNode = node;
@@ -61,17 +89,10 @@ function focusOnNode(node) {
     renderDnaSequence()
 }
 
-function createNode(parentNode) {
-    if (DNA.createNode(parentNode)) {
-        renderDnaSequence()
-        renderPlayerOrganism()
-    }
-}
-
 function createNodeElement(node, x, y, level = 0) {
     const el = document.createElement('game-dna-node');
     el.classList.add('node');
-    el.classList.add(node.role);
+    el.style.backgroundColor = node.block.color;
 
     // If this node has a "value" (e.g. color), apply styling
     if (node.value) {
@@ -216,6 +237,23 @@ function renderPlayerOrganism() {
     }
 }
 
+// Node toolbar
+
+function setNodeToolbar() {
+    const nodeBlockSelector = document.createElement("select")
+    gameDnaWrapperToolbar.appendChild(nodeBlockSelector)
+
+    Blocks.BlockTypeList.forEach((BlockType) => {
+        const nodeBlockSelectorOption = document.createElement("option")
+        nodeBlockSelectorOption.innerText = BlockType
+        nodeBlockSelector.appendChild(nodeBlockSelectorOption)
+    })
+
+    nodeBlockSelector.onchange = () => {
+        selectedBlockType = nodeBlockSelector.value
+    }
+}
+
 // Init
 
 gotoPreviousNodeButton.onclick = () => {
@@ -264,6 +302,10 @@ function initMain() {
             combatToggleButton.innerHTML = "Start combat"
         }
     }
+
+    // Set node toolbar
+
+    setNodeToolbar()
 }
 
 export { initMain }

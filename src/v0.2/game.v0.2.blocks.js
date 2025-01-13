@@ -4,6 +4,9 @@
 
 */
 
+// Types of block the player can use
+const BlockTypeList = []
+
 class DefaultBlock {
     constructor() {
         this.magnetism = {
@@ -22,15 +25,17 @@ class DefaultBlock {
         this.color = color
     }
 }
+BlockTypeList.push("default")
 
 class BondingBlock extends DefaultBlock {
     constructor() {
         super();
         this.to = 0
         this.strength = 0
-        this.setColor("green")
+        this.setColor("lightgreen")
     }
 }
+BlockTypeList.push("bonding")
 
 class MotorBlock extends DefaultBlock {
     constructor() {
@@ -40,6 +45,7 @@ class MotorBlock extends DefaultBlock {
         this.setColor("yellow")
     }
 }
+BlockTypeList.push("motor")
 
 class HeartBlock extends DefaultBlock {
     constructor() {
@@ -50,4 +56,4 @@ class HeartBlock extends DefaultBlock {
     }
 }
 
-export { DefaultBlock, BondingBlock, MotorBlock, HeartBlock }
+export { DefaultBlock, BondingBlock, MotorBlock, HeartBlock, BlockTypeList }
