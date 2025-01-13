@@ -17,16 +17,44 @@ const gameCanvas = document.getElementById('game-canvas');
 const gameDnaWrapper = document.getElementById("game-dna-wrapper")
 const gameDnaWrapperToolbar = document.getElementById("game-dna-wrapper-toolbar")
 
-// Globally-used elements
+// Set up globally-used elements
+
+const nodeBin = document.createElement("game-node-bin")
+gameCanvas.appendChild(nodeBin)
+
+// Buttons
 
 const gotoPreviousNodeButton = document.createElement("button");
 gotoPreviousNodeButton.id = "game-dna-visual-node-back-button"
 gotoPreviousNodeButton.innerHTML = "« BACK"
+gotoPreviousNodeButton.onclick = goToPreviousNode
+gameCanvas.appendChild(gotoPreviousNodeButton)
 
 const dnaSequenceExportButton = document.createElement("button");
-dnaSequenceExportButton.innerHTML = "Export Sequence"
+dnaSequenceExportButton.innerHTML = "Export sequence"
+dnaSequenceExportButton.onclick = () => {
+    const txtarea = document.createElement("textarea")
+    txtarea.value = JSON.stringify(currentDNASequence)
+    document.body.appendChild(txtarea);
+}
+// TODO remove, debugging only
+document.body.appendChild(dnaSequenceExportButton)
 
-const nodeBin = document.createElement("game-node-bin")
+const combatToggleButton = document.createElement("button");
+combatToggleButton.innerHTML = "Start combat"
+combatToggleButton.toggleState = false
+combatToggleButton.onclick = () => {
+    Combat.toggleCombat(playerOrganism)
+    if (!combatToggleButton.toggleState) {
+        combatToggleButton.toggleState = true
+        combatToggleButton.innerHTML = "Stop combat"
+    } else {
+        combatToggleButton.toggleState = false
+        combatToggleButton.innerHTML = "Start combat"
+    }
+}
+// TODO remove, debugging only
+document.body.appendChild(combatToggleButton)
 
 // DNA sequence renderer
 
@@ -114,8 +142,6 @@ const isInBin = (x, y) => {
 }
 
 const nodeDraggingOverlay = document.createElement("game-node-dragging-overlay")
-gameCanvas.appendChild(nodeBin)
-
 nodeDraggingOverlay.onmousemove = (e) => {
     if (nodeDragging.currentNode) {
         // Highlight bin on hover
@@ -374,20 +400,7 @@ function setNodeToolbar() {
 
 // Init
 
-gotoPreviousNodeButton.onclick = goToPreviousNode
-
-dnaSequenceExportButton.onclick = () => {
-    const txtarea = document.createElement("textarea")
-    txtarea.value = JSON.stringify(currentDNASequence)
-    document.body.appendChild(txtarea);
-}
-
 function initMain() {
-    // Get DOM elements
-
-    gameCanvas.appendChild(gotoPreviousNodeButton)
-    gameDnaWrapperToolbar.appendChild(dnaSequenceExportButton)
-
     // DNA renderer
 
     gameCanvas.style.width = window.innerWidth
@@ -402,19 +415,6 @@ function initMain() {
     // Init organism stage
 
     renderPlayerOrganism()
-
-    const combatToggleButton = document.querySelector(".combat-toggle-button")
-    combatToggleButton.toggleState = false
-    combatToggleButton.onclick = () => {
-        Combat.toggleCombat(playerOrganism)
-        if (!combatToggleButton.toggleState) {
-            combatToggleButton.toggleState = true
-            combatToggleButton.innerHTML = "Stop combat"
-        } else {
-            combatToggleButton.toggleState = false
-            combatToggleButton.innerHTML = "Start combat"
-        }
-    }
 
     // Set node toolbar
 
