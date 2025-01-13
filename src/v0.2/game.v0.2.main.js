@@ -243,7 +243,7 @@ function setNodeToolbar() {
     const nodeBlockSelector = document.createElement("select")
     gameDnaWrapperToolbar.appendChild(nodeBlockSelector)
 
-    Blocks.BlockTypeList.forEach((BlockType) => {
+    Blocks.PlayerAccessibleBlockTypeNamesList.forEach((BlockType) => {
         const nodeBlockSelectorOption = document.createElement("option")
         nodeBlockSelectorOption.innerText = BlockType
         nodeBlockSelector.appendChild(nodeBlockSelectorOption)
