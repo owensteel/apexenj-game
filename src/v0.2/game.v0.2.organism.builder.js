@@ -32,6 +32,11 @@ function gatherNodePositions(
     angleEnd = -Math.PI,
     positionsArray = []
 ) {
+    // Prevent null crash
+    if (!currentNode) {
+        return
+    }
+
     // If node is "appendage" or "root", record its position
     if (currentNode.role !== "appendage" && currentNode.role !== "root") {
         // Cannot be added to union

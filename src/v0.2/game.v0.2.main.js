@@ -8,7 +8,7 @@ import * as DNA from "./game.v0.2.dna";
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
-import { cloneObject } from "./game.v0.2.utils";
+import { cloneObject, getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 import * as Blocks from "./game.v0.2.blocks";
 
 // Setup for the game canvas
@@ -17,7 +17,7 @@ const gameCanvas = document.getElementById('game-canvas');
 const gameDnaWrapper = document.getElementById("game-dna-wrapper")
 const gameDnaWrapperToolbar = document.getElementById("game-dna-wrapper-toolbar")
 
-// DNA sequence renderer
+// Globally-used elements
 
 const gotoPreviousNodeButton = document.createElement("button");
 gotoPreviousNodeButton.id = "game-dna-visual-node-back-button"
@@ -25,6 +25,10 @@ gotoPreviousNodeButton.innerHTML = "« BACK"
 
 const dnaSequenceExportButton = document.createElement("button");
 dnaSequenceExportButton.innerHTML = "Export Sequence"
+
+const nodeBin = document.createElement("game-node-bin")
+
+// DNA sequence renderer
 
 const currentDNASequence = cloneObject(DNA.demoDnaSequence)
 
@@ -79,7 +83,7 @@ function createNode(parentNode) {
     return createdNode
 }
 
-// Map visual
+// Node map visual
 
 function focusOnNode(node) {
     sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
@@ -89,32 +93,125 @@ function focusOnNode(node) {
     renderDnaSequence()
 }
 
+// Node dragging
+
+const nodeDragging = {
+    currentNode: null
+}
+
+let binBoundingBox = null
+const isInBin = (x, y) => {
+    return (
+        x > binBoundingBox.left && y > binBoundingBox.top
+    )
+}
+
+const nodeDraggingOverlay = document.createElement("game-node-dragging-overlay")
+gameCanvas.appendChild(nodeBin)
+
+nodeDraggingOverlay.onmousemove = (e) => {
+    if (nodeDragging.currentNode) {
+        // Highlight bin on hover
+        if (isInBin(e.pageX, e.pageY)) {
+            nodeBin.style.transform = "scale(2)"
+        } else {
+            nodeBin.style.transform = "scale(1)"
+        }
+
+        // Render drag visuals
+        nodeDraggingOverlay.innerHTML = ""
+        renderTree(
+            nodeDragging.currentNode,
+            nodeDraggingOverlay,
+            e.pageX,
+            e.pageY
+        )
+    }
+}
+nodeDraggingOverlay.onmouseup = (e) => {
+    if (nodeDragging.currentNode) {
+        // Check if user has put node in the bin
+        if (isInBin(e.pageX, e.pageY)) {
+            deleteNodeFromSequence(nodeDragging.currentNode)
+        }
+
+        // Remove drag visuals
+        nodeBin.style.transform = "scale(1)"
+        nodeDraggingOverlay.remove()
+        nodeDraggingOverlay.innerHTML = ""
+
+        // Reset node tree to original state
+        delete nodeDragging.currentNode["beingDragged"]
+        nodeDragging.currentNode = null
+        renderDnaSequence()
+    }
+}
+
+function startDraggingNode(node, e) {
+    // Setup bin
+    binBoundingBox = getGlobalBoundingBoxOfHTMLElement(nodeBin)
+
+    node.beingDragged = true
+    nodeDragging.currentNode = node
+
+    // Re-render main sequence so this node has
+    // appears "removed"
+    renderDnaSequence()
+
+    // Initial render of dragged object
+    gameCanvas.appendChild(nodeDraggingOverlay)
+    renderTree(
+        nodeDragging.currentNode,
+        nodeDraggingOverlay,
+        e.pageX,
+        e.pageY
+    )
+}
+
 function createNodeElement(node, x, y, level = 0) {
     const el = document.createElement('game-dna-node');
     el.classList.add('node');
     el.style.backgroundColor = node.block.color;
-
-    // If this node has a "value" (e.g. color), apply styling
-    if (node.value) {
-        el.classList.add('color-node');
-        el.style.backgroundColor = node.value;
-    }
 
     // Position the node with global coords
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
 
     // Node interactions
-    el.onclick = () => {
-        if (level > 1) {
-            // Focus on this node first
-            focusOnNode(node)
-        } else {
-            // Add a node
-            if (node.role == "appendage" || node.role == "root") {
-                createNode(node)
+
+    if (nodeDragging.currentNode == null) {
+
+        // Sub-tree dragging ability
+        if (node.role !== "root") {
+
+            let isMouseDownOnNodeEl = false
+            el.onmousedown = (e) => {
+                isMouseDownOnNodeEl = true
+                setTimeout(() => {
+                    if (isMouseDownOnNodeEl) {
+                        startDraggingNode(node, e)
+                    }
+                }, 250)
+            }
+            el.onmouseup = () => {
+                isMouseDownOnNodeEl = false
+            }
+
+        }
+
+        // Click to add a branch
+        el.onclick = () => {
+            if (level > 1) {
+                // Focus on this node first
+                focusOnNode(node)
+            } else {
+                // Add a node
+                if (node.role == "appendage" || node.role == "root") {
+                    createNode(node)
+                }
             }
         }
+
     }
 
     return el;
@@ -152,12 +249,19 @@ function createConnection(parentX, parentY, childX, childY, childNode, radius) {
 
 function renderTree(
     node,
+    htmlContainer,
     x,
     y,
     level = 0,
     angleStart = 0,
     angleEnd = -Math.PI
 ) {
+    // Skip nodes currently being dragged
+    if (node.beingDragged && htmlContainer.tagName !== nodeDraggingOverlay.tagName) {
+        return;
+    }
+
+    // Size of node decreases with distance for graphical purposes
     const levelElementSizePerc = (1 - (level / 5))
 
     // Create a DOM element for the current node
@@ -165,7 +269,7 @@ function renderTree(
     const nodeElSize = Math.max(5, (25 * levelElementSizePerc));
     nodeEl.style.width = `${nodeElSize}px`
     nodeEl.style.height = `${nodeElSize}px`
-    gameDnaWrapper.appendChild(nodeEl);
+    htmlContainer.appendChild(nodeEl);
 
     // If there are no offshoots, no need to place children
     if (!node.offshoots || node.offshoots.length === 0) {
@@ -197,14 +301,14 @@ function renderTree(
 
         // Draw a line from parent to child
         const lineEl = createConnection(x, y, childX, childY, child, radius);
-        gameDnaWrapper.appendChild(lineEl);
+        htmlContainer.appendChild(lineEl);
 
         // Recurse for the child
         // Confine each child to its own angle segment
         const subAngleStart = angleStart + angleSlice * idx;
         const subAngleEnd = angleStart + angleSlice * (idx + 1);
 
-        renderTree(child, childX, childY, level + 1, subAngleStart, subAngleEnd);
+        renderTree(child, htmlContainer, childX, childY, level + 1, subAngleStart, subAngleEnd);
     });
 }
 
@@ -214,6 +318,7 @@ function renderDnaSequence() {
     gameDnaWrapper.innerHTML = ""
     renderTree(
         sequenceRenderSettings.focusedNode,
+        gameDnaWrapper,
         (gameDnaWrapper.clientWidth / 2) + sequenceRenderSettings.x,
         (gameDnaWrapper.clientHeight - 50) + sequenceRenderSettings.y
     );
@@ -229,7 +334,6 @@ function renderDnaSequence() {
 
 let playerOrganism;
 function renderPlayerOrganism() {
-    console.log("player organism updated")
     if (playerOrganism) {
         playerOrganism.updateTraitsFromDNA(currentDNASequence);
     } else {
@@ -240,6 +344,8 @@ function renderPlayerOrganism() {
 // Node toolbar
 
 function setNodeToolbar() {
+    // TODO: proper node type selector
+
     const nodeBlockSelector = document.createElement("select")
     gameDnaWrapperToolbar.appendChild(nodeBlockSelector)
 
