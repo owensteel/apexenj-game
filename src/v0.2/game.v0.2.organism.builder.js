@@ -8,10 +8,10 @@ import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 import { cloneObject } from "./game.v0.2.utils";
 
-const defaultMeshSize = 1;
+const nodeMeshSize = 1;
 const defaultSpread = 1.25;
 
-const shrinkingChildrenFlag = true
+const shrinkingChildrenFlag = false;
 const maxLevel = 10
 const levelToSizePerc = (level) => {
     if (!shrinkingChildrenFlag) {
@@ -47,7 +47,6 @@ function gatherNodePositions(
     if (currentNode.role == "root") {
         // Clone root node before editing or it will affect
         // original sequence
-        const rootNodeClone = cloneObject(currentNode)
         const newRootNode = {
             role: "root",
             block: currentNode.block,
@@ -56,6 +55,8 @@ function gatherNodePositions(
         // Duplicate its single offshoot (there is only one
         // allowed) 4 times for symmetry
         for (let dirI = 0; dirI < 4; dirI++) {
+            // Individual clone for each offshoot
+            const rootNodeClone = cloneObject(currentNode)
             newRootNode.offshoots.push(rootNodeClone.offshoots[0])
         }
         currentNode = newRootNode;
@@ -66,7 +67,17 @@ function gatherNodePositions(
         return
     }
 
-    positionsArray.push({ x, y, z: 0, detach: (currentNode.detach == true), node: currentNode, level });
+    const currentNodePosIndex = positionsArray.length
+    positionsArray.push(
+        {
+            x,
+            y,
+            z: 0,
+            detach: (currentNode.detach == true),
+            node: currentNode, level,
+            index: currentNodePosIndex
+        }
+    );
 
     // The distance from parent to child (radius).
     const radius = defaultSpread * levelToSizePerc(level);
@@ -103,15 +114,7 @@ function gatherNodePositions(
     return positionsArray;
 }
 
-function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = false, formUnionMesh = false) {
-    console.log("building body...", { formUnionMesh })
-
-    // Clone to prevent detachment caching from entering original input
-    const rootNodeClone = cloneObject(rootNodeUncloned)
-
-    // Collect all node positions
-    const positions = gatherNodePositions(rootNodeClone, allowDetachingParts);
-
+function buildBodyFromNodePositions(positions, allowDetachingParts = false, formUnionMesh = false) {
     if (positions.length === 0) {
         // No appendage/root nodes
         return null;
@@ -130,7 +133,7 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
         }
 
         const sphereGeom = new THREE.SphereGeometry(
-            defaultMeshSize,
+            nodeMeshSize,
             4,
             4
         );
@@ -152,6 +155,8 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
 
         // Required for correct placing in a union
         sphereMesh.updateMatrix();
+
+        pos.mesh = sphereMesh
 
         if (!meshUnion) {
             // First shape
@@ -182,4 +187,18 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     return meshUnion;
 }
 
-export { buildSeamlessBodyFromNodes, gatherNodePositions }
+function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = false, formUnionMesh = false) {
+    console.log("building body...", { formUnionMesh })
+
+    // Clone to prevent detachment caching from entering original input
+    const rootNodeClone = cloneObject(rootNodeUncloned)
+
+    // Collect all node positions
+    return buildBodyFromNodePositions(
+        gatherNodePositions(rootNodeClone, allowDetachingParts),
+        allowDetachingParts,
+        formUnionMesh
+    )
+}
+
+export { buildSeamlessBodyFromNodes, gatherNodePositions, buildBodyFromNodePositions, nodeMeshSize }

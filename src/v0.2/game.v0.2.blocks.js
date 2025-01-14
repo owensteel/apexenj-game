@@ -9,6 +9,8 @@ const PlayerAccessibleBlockTypeNamesList = []
 
 class DefaultBlock {
     constructor() {
+        this.typeName = "default"
+        this.color = "red"
         this.magnetism = {
             power: 0,
             polarity: 0
@@ -19,7 +21,9 @@ class DefaultBlock {
         this.repulsion = {
             to: 0
         }
-        this.color = "red"
+    }
+    setTypeName(typeName) {
+        this.typeName = typeName
     }
     setColor(color) {
         this.color = color
@@ -32,6 +36,8 @@ class BondingBlock extends DefaultBlock {
         super();
         this.to = 0
         this.strength = 0
+
+        this.setTypeName("bonding")
         this.setColor("lightgreen")
     }
 }
@@ -42,6 +48,8 @@ class MotorBlock extends DefaultBlock {
         super();
         this.isMotor = true
         this.speed = 0 /* (angle / sec) */
+
+        this.setTypeName("motor")
         this.setColor("yellow")
     }
 }
@@ -52,6 +60,8 @@ class HeartBlock extends DefaultBlock {
         super();
         this.isHeart = true
         this.healthbar = 100
+
+        this.setTypeName("heart")
         this.setColor("pink")
     }
 }

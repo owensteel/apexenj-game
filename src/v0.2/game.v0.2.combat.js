@@ -6,6 +6,7 @@
 
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
+import * as Blocks from "./game.v0.2.blocks"
 import { cloneObject } from "./game.v0.2.utils";
 
 let liveModeToggle = false;
@@ -16,7 +17,17 @@ let combatUpdatesPerTick = 1;
 let playerOrganism = null;
 let enemyOrganism = null;
 
+function isBondedTo(organism, id) {
+    if (organism.bondedTo.length < 1) {
+        return false
+    }
+    return organism.bondedTo.every((orgBondedTo) => orgBondedTo.id == id)
+}
+
 // Combat setup
+
+const combatTimeouts = []
+let enableBondingBlocks = false
 
 function startCombat() {
     console.log("starting combat...")
@@ -33,7 +44,13 @@ function startCombat() {
 
     combatLoop()
 
+    // Set tick values
+
     combatRunning = true
+
+    combatTimeouts.push(setTimeout(() => {
+        enableBondingBlocks = true
+    }, 1000))
 }
 
 function endCombat() {
@@ -42,7 +59,22 @@ function endCombat() {
     cancelAnimationFrame(combatLoopCycle)
     combatLoopCycle = null
 
+    // Reset tick values
+
     combatRunning = false
+    enableBondingBlocks = false
+
+    // Cancel any timeouts
+
+    combatTimeouts.forEach((timeout) => {
+        clearTimeout(timeout)
+    })
+
+    // Reset all nodes
+
+    for (const org of [playerOrganism, enemyOrganism]) {
+        org.bondedTo = []
+    }
 }
 
 function combatLoop() {
@@ -56,8 +88,12 @@ function combatLoop() {
         for (const organism of currentOrganisms) {
             // Sync with all opponents
             for (const opponent of currentOrganisms) {
-                // Prevent colliding with self
-                if (opponent.id !== organism.id) {
+                if (
+                    // Prevent colliding with self
+                    organism.id !== opponent.id &&
+                    // Prevent colliding with a bonded child
+                    !isBondedTo(organism, opponent.id)
+                ) {
                     updateCombat(organism, opponent);
                 }
             }
@@ -69,15 +105,15 @@ function toggleCombat(playerOrganismImport) {
     playerOrganism = playerOrganismImport
     liveModeToggle = !liveModeToggle
 
-    // Start/end 'living' mode
-    Organisms.setMovementToggle(liveModeToggle, playerOrganism)
-
     // Begin/end combat mechanics
     if (liveModeToggle && !combatRunning) {
         startCombat()
     } else {
         endCombat()
     }
+
+    // Start/end 'living' mode
+    Organisms.setMovementToggle(liveModeToggle, playerOrganism)
 }
 
 // Combat mechanics
@@ -87,6 +123,47 @@ function updateCombat(organism, opponent) {
     if (overlappingNodes.length > 0) {
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpEdges(organism, opponent, overlappingNodes);
+
+        // Check block types
+        for (const nodePair of overlappingNodes) {
+            const nodeOrg = nodePair.orgNodePos.node
+            const nodeOpp = nodePair.oppNodePos.node
+
+            if (
+                enableBondingBlocks &&
+                (
+                    (nodeOrg.block.typeName == "bonding") ||
+                    (nodeOpp.block.typeName == "bonding")
+                )
+            ) {
+                if (!nodeOrg.block.isBonded && !nodeOpp.block.isBonded) {
+                    let toJoin, joinedTo;
+                    if (nodeOrg.block.typeName == "bonding") {
+                        nodeOrg.block.isBonded = true
+
+                        toJoin = nodePair.oppNodePos
+                        toJoin.instance = opponent
+
+                        joinedTo = nodePair.orgNodePos
+                        joinedTo.instance = organism
+                    }
+                    if (nodeOpp.block.typeName == "bonding") {
+                        nodeOpp.block.isBonded = true
+
+                        toJoin = nodePair.orgNodePos
+                        toJoin.instance = organism
+
+                        joinedTo = nodePair.oppNodePos
+                        joinedTo.instance = opponent
+                    }
+                    // Find join position
+                    Organisms.bondOrganisms(
+                        toJoin,
+                        joinedTo
+                    )
+                }
+            }
+        }
     }
 }
 
