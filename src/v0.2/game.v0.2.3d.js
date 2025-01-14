@@ -15,7 +15,7 @@ const gameStageWrapper = document.getElementById("game-stage-wrapper");
 // Initialize Three.js scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / 300, 0.1, 1000);
-camera.position.set(0, 0, 20);
+camera.position.set(0, 0, 30);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
