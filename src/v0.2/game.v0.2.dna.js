@@ -17,12 +17,6 @@ const demoDnaSequence = {
                 {
                     role: "appendage",
                     block: new Blocks.DefaultBlock(),
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    block: new Blocks.DefaultBlock(),
-                    detach: true,
                     offshoots: [
                         {
                             role: "appendage",
@@ -34,11 +28,24 @@ const demoDnaSequence = {
                 {
                     role: "appendage",
                     block: new Blocks.DefaultBlock(),
-                    offshoots: []
+                    offshoots: [
+                        {
+                            role: "appendage",
+                            block: new Blocks.BondingBlock(),
+                            offshoots: []
+                        }
+                    ]
                 }
             ]
         }
     ]
+}
+
+const placeholderDefaultRootNode = {
+    role: "root",
+    block: new Blocks.HeartBlock(),
+    detach: false,
+    offshoots: []
 }
 
 function createNode(parentNode = null) {
@@ -59,4 +66,4 @@ function createNode(parentNode = null) {
     return node
 }
 
-export { createNode, demoDnaSequence }
+export { createNode, demoDnaSequence, placeholderDefaultRootNode }

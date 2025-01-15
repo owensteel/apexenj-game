@@ -8,112 +8,12 @@ import * as THREE from 'three';
 import * as ThreeElements from './game.v0.2.3d.js'
 import * as OrganismBuilder from './game.v0.2.organism.builder.js'
 import { cloneObject } from './game.v0.2.utils.js';
-import * as Utils from './game.v0.2.utils.js'
+import * as DNA from './game.v0.2.dna.js';
 import * as Blocks from './game.v0.2.blocks.js';
 
 // Global variables
 
 const organisms = [];
-const defaultMeshEdges = 6;
-const defaultMeshSize = 0.75;
-
-// Render nodes as points
-
-function renderNodePoints(
-    currentNode,
-    x = 0,
-    y = 0,
-    level = 0,
-    angleStart = -(Math.PI),
-    angleEnd = Math.PI,
-    parentNodeMesh = null
-) {
-    // Check node type
-
-    if (currentNode.role !== "appendage" && currentNode.role !== "root") {
-        // Apply any properties to parent
-
-        if (currentNode.role == "color") {
-            parentNodeMesh.material = new THREE.MeshBasicMaterial({ color: currentNode.value });
-        }
-
-        return null
-    }
-
-    // Create point geometry
-
-    const pointShape = new THREE.Shape();
-    const angleStep = (2 * Math.PI) / defaultMeshEdges;
-
-    // Point is represented by a simple flat hexagon currently
-    // but only for the sake of being visible in Three JS
-
-    for (let i = 0; i < defaultMeshEdges; i++) {
-        const angle = i * angleStep;
-        const drawX = (Math.cos(angle) * defaultMeshSize);
-        const drawY = (Math.sin(angle) * defaultMeshSize);
-
-        if (i === 0) {
-            pointShape.moveTo(drawX, drawY);
-        } else {
-            pointShape.lineTo(drawX, drawY);
-        }
-    }
-    pointShape.closePath();
-    const pointMesh = new THREE.Mesh(
-        new THREE.ExtrudeGeometry(pointShape, {
-            depth: 1,
-            bevelEnabled: false
-        }),
-        new THREE.MeshBasicMaterial({ color: 'black' })
-    );
-    pointMesh.position.x = x
-    pointMesh.position.y = y
-
-    // Offshoots
-
-    // If there are no offshoots, stop
-    if (!currentNode.offshoots || currentNode.offshoots.length === 0) {
-        return pointMesh;
-    }
-
-    const childCount = currentNode.offshoots.length;
-    const angleSlice = (angleEnd - angleStart) / childCount;
-
-    // The distance from parent to child (radius).
-    const radius = defaultMeshSize;
-
-    // Place each child
-
-    currentNode.offshoots.forEach((child, idx) => {
-        // For multiple children, we subdivide the angle range
-        const childAngle = angleStart + angleSlice * (idx + /* branch offset: */ (0.5));
-
-        // Convert polar coords to cartesian
-        const childX = radius * Math.cos(childAngle);
-        const childY = radius * Math.sin(childAngle);
-
-        // Recurse for the child
-        // Confine each child to its own angle segment
-        const subAngleStart = angleStart + angleSlice * idx;
-        const subAngleEnd = angleStart + angleSlice * (idx + 1);
-
-        const offshootNodeMesh = renderNodePoints(
-            child,
-            childX,
-            childY,
-            level + 1,
-            subAngleStart,
-            subAngleEnd,
-            pointMesh
-        );
-        if (offshootNodeMesh) {
-            pointMesh.add(offshootNodeMesh)
-        }
-    });
-
-    return pointMesh;
-}
 
 // Motion
 
@@ -161,27 +61,22 @@ class Organism {
 
         if (movementToggle) {
 
-            // Live mode
-
-            this.mesh = OrganismBuilder.buildSeamlessBodyFromNodes(
-                this.dnaSequence,
-                /* allowDetachingParts: */ false,
-                // In live mode, the organism is only built once, so we
-                // can afford the expensive operation to use CSG to union
-                // all nodes into one single mesh
-                /* formUnionMesh: */ false
-            );
-            this.mesh.position.set(
-                this.combatStartPos.x,
-                this.combatStartPos.y,
-                0
-            )
-
             // Save positions of (attached) nodes for overlapping
             // detection in combat
             this.nodePositions = OrganismBuilder.gatherNodePositions(
                 this.dnaSequence,
                 /* allowDetachingParts: */ false
+            )
+
+            this.mesh = OrganismBuilder.buildBodyFromNodePositions(
+                this.nodePositions,
+                /* allowDetachingParts: */ false,
+                /* formUnionMesh: */ false
+            )
+            this.mesh.position.set(
+                this.combatStartPos.x,
+                this.combatStartPos.y,
+                0
             )
 
             // Separate detachable parts into individual organisms
@@ -231,9 +126,15 @@ class Organism {
         if (this.mesh == null) {
             return
         }
-        if (this.dnaSequence.block.typeName == "motor") {
-            this.mesh.rotation.x += 0.1
+
+        // Rotate motor blocks
+        for (const nodePos of this.nodePositions) {
+            if (nodePos.node.block.typeName == "motor") {
+                nodePos.mesh.rotation.y += 0.1
+            }
         }
+
+        // Idle animation
         if (this.bondedTo.length < 1) {
             if (movementToggle) {
                 // Float around
@@ -241,7 +142,7 @@ class Organism {
                 this.mesh.position.y += this.velocity.y + randomOffset()
             } else {
                 // Rotate idly
-                this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.005;
+                this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.0025;
             }
         }
     }
@@ -340,100 +241,150 @@ function getAllOrganisms() {
     return organisms
 }
 
-// TODO: Fix disappearing root node problem
+function getNodeRoot(node) {
+    let nodeRoot = node;
+    while (nodeRoot.parentNodePos) {
+        nodeRoot = nodeRoot.parentNodePos
+    }
+    return nodeRoot
+}
+
+function clearUpOrganism(instance) {
+    instance.nodePositions = [];
+    instance.bondedTo.push(instance);
+    ThreeElements.scene.remove(instance.mesh);
+}
+
 function bondOrganisms(joineeNode, joinerNode) {
-    // Find the pivot in world coords (the joinerNode).
-    // This is the position to remain fixed after bonding.
-    const joinerPivotWorld = {
-        x: joinerNode.instance.mesh.position.x + joinerNode.x,
-        y: joinerNode.instance.mesh.position.y + joinerNode.y
-    };
 
-    // Convert all joinee nodes to the new local coords (relative to the pivot).
-    const newJoineeNodes = joineeNode.instance.nodePositions.map(nodePos => {
-        // Current world coords of this node
-        const worldX = joineeNode.instance.mesh.position.x + nodePos.x;
-        const worldY = joineeNode.instance.mesh.position.y + nodePos.y;
+    const joinerInstance = joinerNode.instance
+    const joineeInstance = joineeNode.instance
 
-        // Shift so that pivot becomes (0,0) in the new local space
-        return {
-            x: worldX - joinerPivotWorld.x,
-            y: worldY - joinerPivotWorld.y,
-            z: 0,
-            detach: (nodePos.node.detach == true),
-            node: nodePos.node,
-            level: nodePos.level
-        };
-    });
+    const joinerMesh = joinerInstance.mesh
+    const joineeMesh = joineeInstance.mesh
 
-    // Convert all joiner nodes to the same new local coords
-    const newJoinerNodes = joinerNode.instance.nodePositions.map(nodePos => {
-        const worldX = joinerNode.instance.mesh.position.x + nodePos.x;
-        const worldY = joinerNode.instance.mesh.position.y + nodePos.y;
+    const joinerRoot = getNodeRoot(joinerNode)
+    const joineeRoot = getNodeRoot(joineeNode)
 
-        return {
-            x: worldX - joinerPivotWorld.x,
-            y: worldY - joinerPivotWorld.y,
-            z: 0,
-            detach: (nodePos.node.detach == true),
-            node: nodePos.node,
-            level: nodePos.level
-        };
-    });
+    // World positions
 
-    // Combine the two sets of local nodes
-    const combinedNodes = [...newJoineeNodes, ...newJoinerNodes];
+    const joinerRootWorld = {
+        x: joinerRoot.x + joinerMesh.position.x,
+        y: joinerRoot.y + joinerMesh.position.y
+    }
+    const joineeRootWorld = {
+        x: joineeRoot.x + joineeMesh.position.x,
+        y: joineeRoot.y + joineeMesh.position.y
+    }
+    const pivotWorld = {
+        x: joinerNode.x + joinerMesh.position.x,
+        y: joinerNode.y + joinerMesh.position.y
+    }
 
-    // Clean up old organisms
-    joineeNode.instance.nodePositions = [];
-    joinerNode.instance.nodePositions = [];
-    joineeNode.instance.bondedTo.push(joinerNode.instance);
-    joinerNode.instance.bondedTo.push(joineeNode.instance);
-    ThreeElements.scene.remove(joineeNode.instance.mesh);
-    ThreeElements.scene.remove(joinerNode.instance.mesh);
+    // Reposition nodes
+    // All nodes must be repositioned as nodePositions is a flattened 2D
+    // array — in the Organism Builder, the positions of node meshes are
+    // made relevant to their parents dynamically, and the relevance does
+    // not apply here. Furthermore, the positions in nodePositions should
+    // be "world-ready" or the node overlapping detection will not work.
 
-    // Configure nodes
+    const newJoinerNodes = joinerInstance.nodePositions
+    const newJoineeNodes = joineeInstance.nodePositions
+
+    newJoinerNodes.map(nodePos => {
+
+        const nodeWorldX = joinerMesh.position.x + nodePos.x
+        const nodeWorldY = joinerMesh.position.y + nodePos.y
+
+        // Distance from the pivot
+
+        const distancedWorldX = (nodeWorldX - pivotWorld.x)
+        const distancedWorldY = (nodeWorldY - pivotWorld.y)
+
+        // Convert back to local
+
+        nodePos.x = distancedWorldX
+        nodePos.y = distancedWorldY
+
+        return nodePos
+
+    })
+
+    newJoineeNodes.map(nodePos => {
+
+        const nodeWorldX = joineeMesh.position.x + nodePos.x
+        const nodeWorldY = joineeMesh.position.y + nodePos.y
+
+        // Distance from the pivot
+
+        const distancedWorldX = (nodeWorldX - pivotWorld.x)
+        const distancedWorldY = (nodeWorldY - pivotWorld.y)
+
+        // Convert back to local
+
+        nodePos.x = distancedWorldX + joinerNode.x // I don't know why adding this makes it work better
+        nodePos.y = distancedWorldY + joinerNode.y
+
+        return nodePos
+
+    })
+
+    // Combine nodes
+
+    const combinedNodes = [
+        ...newJoinerNodes,
+        ...newJoineeNodes
+    ];
+    console.log(combinedNodes)
+
+    // Configure new nodes for rendering
+
     combinedNodes.forEach((n) => {
         // Scrub
         delete n["instance"]
 
-        // For any "bonded" blocks, change their color
+        // For any "used" bonding blocks, change their color
         if (n.node.block.isBonded) {
             n.node.block.color = "green";
         }
     });
 
-    // Create the new (combined) organism
-    const placeholderDefaultRootNode = {
-        role: "root",
-        block: new Blocks.HeartBlock(),  // arbitrary temp root definition
-        detach: false,
-        offshoots: []
-    }
-    const combinedOrganism = addOrganism(placeholderDefaultRootNode);
+    // Clear old organisms before creating new combined one
+
+    clearUpOrganism(joinerInstance)
+    clearUpOrganism(joineeInstance)
+
+    // Create the new combined organism in the system
+
+    const combinedOrganism = addOrganism(DNA.placeholderDefaultRootNode);
 
     // Remove its default mesh from the scene
+
     ThreeElements.scene.remove(combinedOrganism.mesh);
 
     // Assign the merged nodePositions & build a new mesh
+
     combinedOrganism.nodePositions = combinedNodes;
     combinedOrganism.mesh = OrganismBuilder.buildBodyFromNodePositions(
         combinedOrganism.nodePositions
     );
-
     if (!combinedOrganism.mesh) {
-        console.warn("Failed to build combined mesh; probably empty node array.");
+        console.warn(
+            "Failed to build combined mesh; probably empty node array.",
+            combinedNodes
+        );
         return;
+    } else {
+        console.log("built combined mesh", combinedOrganism)
     }
 
     // Place the new mesh so that pivot remains at the same world position
     // i.e. pivot is now local (0,0), so put the mesh at pivot's old coords.
-    combinedOrganism.mesh.position.set(joinerPivotWorld.x, joinerPivotWorld.y, 0);
+    combinedOrganism.mesh.position.set(pivotWorld.x, pivotWorld.y, 0);
 
     // Add the combined mesh to the scene
     ThreeElements.scene.add(combinedOrganism.mesh);
 
-    console.log("Bonded organisms...", combinedNodes);
 }
 
 export { addOrganism, setMovementToggle, rebuildAllOrganisms, clearScene, getAllOrganisms, bondOrganisms };

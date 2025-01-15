@@ -30,7 +30,9 @@ function gatherNodePositions(
     level = 0,
     angleStart = Math.PI,
     angleEnd = -Math.PI,
-    positionsArray = []
+    positionsArray = [],
+    parentNodePos = null,
+    currentNodeAngle = 0
 ) {
     // Prevent null crash
     if (!currentNode) {
@@ -68,16 +70,19 @@ function gatherNodePositions(
     }
 
     const currentNodePosIndex = positionsArray.length
-    positionsArray.push(
-        {
-            x,
-            y,
-            z: 0,
-            detach: (currentNode.detach == true),
-            node: currentNode, level,
-            index: currentNodePosIndex
-        }
-    );
+    const currentNodePosFinal = {
+        x,
+        y,
+        z: 0,
+        detach: (currentNode.detach == true),
+        node: currentNode,
+        level,
+        index: currentNodePosIndex,
+        parentNodePos,
+        mesh: null,
+        angle: currentNodeAngle
+    }
+    positionsArray.push(currentNodePosFinal);
 
     // The distance from parent to child (radius).
     const radius = defaultSpread * levelToSizePerc(level);
@@ -106,13 +111,17 @@ function gatherNodePositions(
                 level + 1,
                 subAngleStart,
                 subAngleEnd,
-                positionsArray
+                positionsArray,
+                currentNodePosFinal,
+                childAngle
             );
         }
     }
 
     return positionsArray;
 }
+
+// Build either a union mesh or tree of parent and child meshes from nodes
 
 function buildBodyFromNodePositions(positions, allowDetachingParts = false, formUnionMesh = false) {
     if (positions.length === 0) {
@@ -156,6 +165,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
         // Required for correct placing in a union
         sphereMesh.updateMatrix();
 
+        // Reference to node's mesh
         pos.mesh = sphereMesh
 
         if (!meshUnion) {
@@ -170,7 +180,18 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             if (formUnionMesh) {
                 meshUnion = meshUnion.union(CSG.fromMesh(sphereMesh));
             } else {
-                meshUnion.add(sphereMesh)
+                if (pos.parentNodePos && pos.parentNodePos.mesh) {
+                    const parentMesh = pos.parentNodePos.mesh
+                    sphereMesh.position.set(
+                        pos.x - pos.parentNodePos.x,
+                        pos.y - pos.parentNodePos.y,
+                        pos.z
+                    );
+                    parentMesh.add(sphereMesh)
+                } else {
+                    console.warn("Could not add node mesh to a parent mesh, added to main mesh instead with global position")
+                    meshUnion.add(sphereMesh)
+                }
             }
         }
     });
