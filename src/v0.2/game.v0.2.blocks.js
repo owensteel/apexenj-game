@@ -31,6 +31,7 @@ class DefaultBlock {
 }
 PlayerAccessibleBlockTypeNamesList.push("default")
 
+// NOTE: This block is currently not allowed.
 class BondingBlock extends DefaultBlock {
     constructor() {
         super();
@@ -41,7 +42,7 @@ class BondingBlock extends DefaultBlock {
         this.setColor("lightgreen")
     }
 }
-PlayerAccessibleBlockTypeNamesList.push("bonding")
+// PlayerAccessibleBlockTypeNamesList.push("bonding")
 
 class MotorBlock extends DefaultBlock {
     constructor() {

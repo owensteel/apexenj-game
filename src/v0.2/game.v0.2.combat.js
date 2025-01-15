@@ -129,6 +129,7 @@ function updateCombat(organism, opponent) {
             const nodeOrg = nodePair.orgNodePos.node
             const nodeOpp = nodePair.oppNodePos.node
 
+            // Bonding
             if (
                 enableBondingBlocks &&
                 (
