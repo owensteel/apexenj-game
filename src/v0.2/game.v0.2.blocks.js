@@ -7,20 +7,17 @@
 // Types of block the player can use
 const PlayerAccessibleBlockTypeNamesList = []
 
+/*
+
+    Default
+
+*/
+
 class DefaultBlock {
     constructor() {
         this.typeName = "default"
         this.color = "red"
-        this.magnetism = {
-            power: 0,
-            polarity: 0
-        }
-        this.attraction = {
-            to: 0
-        }
-        this.repulsion = {
-            to: 0
-        }
+        this.symbol = ""
     }
     setTypeName(typeName) {
         this.typeName = typeName
@@ -28,10 +25,19 @@ class DefaultBlock {
     setColor(color) {
         this.color = color
     }
+    setSymbol(symbol) {
+        this.symbol = symbol
+    }
 }
 PlayerAccessibleBlockTypeNamesList.push("default")
 
-// NOTE: This block is currently not allowed.
+/*
+
+    Bonding
+
+*/
+
+// NOTE: Bonding is currently disabled.
 class BondingBlock extends DefaultBlock {
     constructor() {
         super();
@@ -42,7 +48,56 @@ class BondingBlock extends DefaultBlock {
         this.setColor("lightgreen")
     }
 }
-// PlayerAccessibleBlockTypeNamesList.push("bonding")
+
+/*
+
+    Attractor blocks
+
+*/
+
+class AttractorBlock extends DefaultBlock {
+    constructor() {
+        super();
+        this.targetBlock = null
+
+        this.setTypeName("attractor")
+        this.setColor("blue")
+    }
+    setTargetBlock(targetBlock) {
+        this.targetBlock = targetBlock
+    }
+}
+// NOTE: AttractorBlock on its own is not accessible.
+
+class AttractorAlphaBlock extends AttractorBlock {
+    constructor() {
+        super();
+
+        this.setSymbol("α")
+        this.setTargetBlock({
+            typeName: "default"
+        })
+    }
+}
+PlayerAccessibleBlockTypeNamesList.push("attractor-alpha")
+
+class AttractorBetaBlock extends AttractorBlock {
+    constructor() {
+        super();
+
+        this.setSymbol("β")
+        this.setTargetBlock({
+            typeName: "default"
+        })
+    }
+}
+PlayerAccessibleBlockTypeNamesList.push("attractor-beta")
+
+/*
+
+    Motor
+
+*/
 
 class MotorBlock extends DefaultBlock {
     constructor() {
@@ -56,6 +111,12 @@ class MotorBlock extends DefaultBlock {
 }
 PlayerAccessibleBlockTypeNamesList.push("motor")
 
+/*
+
+    Heart
+
+*/
+
 class HeartBlock extends DefaultBlock {
     constructor() {
         super();
@@ -67,4 +128,12 @@ class HeartBlock extends DefaultBlock {
     }
 }
 
-export { DefaultBlock, BondingBlock, MotorBlock, HeartBlock, PlayerAccessibleBlockTypeNamesList }
+export {
+    DefaultBlock,
+    BondingBlock,
+    MotorBlock,
+    HeartBlock,
+    AttractorAlphaBlock,
+    AttractorBetaBlock,
+    PlayerAccessibleBlockTypeNamesList
+}

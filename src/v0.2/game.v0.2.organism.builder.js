@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 import { cloneObject } from "./game.v0.2.utils";
+import { enforceSymmetry } from './game.v0.2.dna';
 
 const nodeMeshSize = 1;
 const defaultSpread = 1.25;
@@ -46,7 +47,7 @@ function gatherNodePositions(
     }
 
     // Create directional symmetry 
-    if (currentNode.role == "root") {
+    if (enforceSymmetry && currentNode.role == "root") {
         // Clone root node before editing or it will affect
         // original sequence
         const newRootNode = {

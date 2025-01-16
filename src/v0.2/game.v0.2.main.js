@@ -102,6 +102,12 @@ function createNode(parentNode) {
                 case "motor":
                     createdNode.block = new Blocks.MotorBlock()
                     break
+                case "attractor-alpha":
+                    createdNode.block = new Blocks.AttractorAlphaBlock()
+                    break
+                case "attractor-beta":
+                    createdNode.block = new Blocks.AttractorBetaBlock()
+                    break
             }
         }
 
@@ -116,8 +122,6 @@ function createNode(parentNode) {
 function focusOnNode(node) {
     sequenceRenderSettings.previousFocusedNode.push(sequenceRenderSettings.focusedNode)
     sequenceRenderSettings.focusedNode = node;
-    sequenceRenderSettings.x = 0;
-    sequenceRenderSettings.y = 0;
     renderDnaSequence()
 }
 
@@ -357,8 +361,8 @@ function renderDnaSequence() {
     renderTree(
         sequenceRenderSettings.focusedNode,
         gameDnaWrapper,
-        (gameDnaWrapper.clientWidth / 2) + sequenceRenderSettings.x,
-        (gameDnaWrapper.clientHeight - 50) + sequenceRenderSettings.y
+        (gameDnaWrapper.clientWidth / 2),
+        (gameDnaWrapper.clientHeight - 50),
     );
 
     if (sequenceRenderSettings.previousFocusedNode.length > 0) {

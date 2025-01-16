@@ -6,6 +6,8 @@
 
 import * as Blocks from './game.v0.2.blocks'
 
+const enforceSymmetry = false
+
 const demoDnaSequence = {
     role: "root",
     block: new Blocks.HeartBlock(),
@@ -13,18 +15,23 @@ const demoDnaSequence = {
         {
             role: "appendage",
             block: new Blocks.DefaultBlock(),
+            offshoots: []
+        },
+        {
+            role: "appendage",
+            block: new Blocks.DefaultBlock(),
             offshoots: [
                 {
                     role: "appendage",
-                    block: new Blocks.DefaultBlock(),
-                    offshoots: []
-                },
-                {
-                    role: "appendage",
-                    block: new Blocks.DefaultBlock(),
+                    block: new Blocks.AttractorAlphaBlock(),
                     offshoots: []
                 }
             ]
+        },
+        {
+            role: "appendage",
+            block: new Blocks.DefaultBlock(),
+            offshoots: []
         }
     ]
 }
@@ -37,7 +44,7 @@ const placeholderDefaultRootNode = {
 }
 
 function createNode(parentNode = null) {
-    if (parentNode.role == "root" && parentNode.offshoots.length > 0) {
+    if (enforceSymmetry && parentNode.role == "root" && parentNode.offshoots.length > 0) {
         return false
     }
 
@@ -54,4 +61,4 @@ function createNode(parentNode = null) {
     return node
 }
 
-export { createNode, demoDnaSequence, placeholderDefaultRootNode }
+export { createNode, demoDnaSequence, placeholderDefaultRootNode, enforceSymmetry }

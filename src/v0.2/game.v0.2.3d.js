@@ -83,4 +83,62 @@ function addCubeAtPos(x, y, z) {
     cube.position.set(x, y, z);
 }
 
-export { scene, renderScene, loadModel }
+function translateMeshInWorld(mesh, offsetX, offsetY) {
+    // Step 1: Build the offset in world space
+    const offsetWorld = new THREE.Vector3(offsetX, offsetY, 0);
+
+    // Step 2: We want to transform this world-space offset 
+    //         back into the mesh’s local coordinate space,
+    //         so adding it to mesh.position will move the mesh in world space 
+    //         the way we want.
+    // 
+    // We'll extract the mesh’s rotation & scale from its matrixWorld, invert that,
+    // and apply it to offsetWorld.
+
+    // Make sure matrixWorld is updated
+    mesh.updateMatrixWorld(true);
+
+    // Extract rotation+scale from matrixWorld
+    const rotScaleMatrix = new THREE.Matrix4().extractRotation(mesh.matrixWorld);
+    // If there's a uniform scale you might do:
+    //   rotScaleMatrix.extractRotation(mesh.matrixWorld).scale(...);
+    // For non-uniform scale, you'd want a more advanced approach.
+
+    // Invert to go from world to local direction
+    const invRot = new THREE.Matrix4().copy(rotScaleMatrix).invert();
+
+    // Apply inverse to offset
+    offsetWorld.applyMatrix4(invRot);
+
+    // Step 3: Now offsetWorld is the correct local offset to achieve that world shift
+    mesh.position.x += offsetWorld.x;
+    mesh.position.y += offsetWorld.y;
+    mesh.position.z += offsetWorld.z;
+}
+
+function convertNodePosIntoWorldPos(nodePos, organismMesh) {
+    const nodeClone = {}
+    for (const key of Object.keys(nodePos)) {
+        nodeClone[key] = nodePos[key]
+    }
+    nodeClone.localX = nodePos.x
+    nodeClone.localY = nodePos.y
+
+    // Calc real world positions, factoring in mesh position and rotation
+
+    const localVec = new THREE.Vector3(nodePos.x, nodePos.y, 0);
+    localVec.applyMatrix4(organismMesh.matrixWorld);
+
+    nodeClone.x = localVec.x
+    nodeClone.y = localVec.y
+
+    return nodeClone
+}
+
+export {
+    scene,
+    renderScene,
+    loadModel,
+    translateMeshInWorld,
+    convertNodePosIntoWorldPos
+}

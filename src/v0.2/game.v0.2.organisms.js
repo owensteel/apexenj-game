@@ -14,6 +14,8 @@ import * as Blocks from './game.v0.2.blocks.js';
 // Global variables
 
 const organisms = [];
+const defaultCombatStartPos = { x: -15, y: 0 }
+const slowDowPerc = 0.001
 
 // Motion
 
@@ -25,7 +27,7 @@ function randomOffset() {
 // Organism class
 
 class Organism {
-    constructor(dnaSequence, combatStartPos = { x: 0, y: 0 }) {
+    constructor(dnaSequence, combatStartPos = defaultCombatStartPos) {
         this.id = String(Math.random()).split(".")[1]
         this.bondedTo = [];
         this.dnaSequence = dnaSequence;
@@ -38,8 +40,8 @@ class Organism {
         }
 
         this.velocity = {
-            x: Math.random() > 0.5 ? 0.01 : -0.01,
-            y: Math.random() > 0.5 ? 0.01 : -0.01
+            x: 0,
+            y: 0
         }; // Default velocity
 
         if (this.dnaSequence.detach == true) {
@@ -117,6 +119,7 @@ class Organism {
             }
             this.mesh = newMesh
             this.mesh.position.set(0, 0, 0)
+            this.mesh.rotation.set(0, 0, 0)
         }
         this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
@@ -135,15 +138,21 @@ class Organism {
         }
 
         // Idle animation
-        if (this.bondedTo.length < 1) {
-            if (movementToggle) {
-                // Float around
-                this.mesh.position.x += this.velocity.x + randomOffset()
-                this.mesh.position.y += this.velocity.y + randomOffset()
-            } else {
-                // Rotate idly
-                this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.0025;
+        if (movementToggle) {
+            // Float around
+            this.mesh.position.x += this.velocity.x + randomOffset()
+            this.mesh.position.y += this.velocity.y + randomOffset()
+
+            // Naturally slow down any velocity
+            if (Math.abs(this.velocity.x) > 0) {
+                this.velocity.x -= slowDowPerc * Math.sign(this.velocity.x)
             }
+            if (Math.abs(this.velocity.y) > 0) {
+                this.velocity.y -= slowDowPerc * Math.sign(this.velocity.y)
+            }
+        } else {
+            // Rotate idly
+            this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.0025;
         }
     }
     highlight() {
@@ -201,7 +210,7 @@ function animate() {
 }
 animate()
 
-function addOrganism(dnaSequence, combatStartPos = { x: 0, y: 0 }) {
+function addOrganism(dnaSequence, combatStartPos = defaultCombatStartPos) {
     const newOrganism = new Organism(dnaSequence, combatStartPos);
     organisms.push(newOrganism);
     return newOrganism

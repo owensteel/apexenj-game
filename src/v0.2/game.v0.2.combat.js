@@ -4,10 +4,10 @@
 
 */
 
+import * as ThreeElements from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Blocks from "./game.v0.2.blocks"
-import { cloneObject } from "./game.v0.2.utils";
+import * as Utils from "./game.v0.2.utils"
 
 let liveModeToggle = false;
 let combatRunning = false;
@@ -27,14 +27,19 @@ function isBondedTo(organism, id) {
 // Combat setup
 
 const combatTimeouts = []
-let enableBondingBlocks = false
+const enableBondingBlocks = false
+
+// Cache for the combat session
+const combatSessionCache = {
+    attractorTargets: {}
+}
 
 function startCombat() {
     console.log("starting combat...")
 
     // Set enemy
 
-    const enemyDNA = cloneObject(DNA.demoDnaSequence)
+    const enemyDNA = Utils.cloneObject(DNA.demoDnaSequence)
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         { x: 15, y: 0 }
@@ -47,10 +52,6 @@ function startCombat() {
     // Set tick values
 
     combatRunning = true
-
-    combatTimeouts.push(setTimeout(() => {
-        enableBondingBlocks = true
-    }, 1000))
 }
 
 function endCombat() {
@@ -59,10 +60,14 @@ function endCombat() {
     cancelAnimationFrame(combatLoopCycle)
     combatLoopCycle = null
 
+    // Reset player values
+
+    playerOrganism.velocity.x = 0
+    playerOrganism.velocity.y = 0
+
     // Reset tick values
 
     combatRunning = false
-    enableBondingBlocks = false
 
     // Cancel any timeouts
 
@@ -70,16 +75,46 @@ function endCombat() {
         clearTimeout(timeout)
     })
 
-    // Reset all nodes
+    // Reset session cache
 
-    for (const org of [playerOrganism, enemyOrganism]) {
-        org.bondedTo = []
-    }
+    combatSessionCache.attractorTargets = {}
 }
 
-function combatLoop() {
-    combatLoopCycle = requestAnimationFrame(combatLoop)
+function toggleCombat(playerOrganismImport) {
+    playerOrganism = playerOrganismImport
+    liveModeToggle = !liveModeToggle
 
+    // Begin/end combat mechanics
+    if (liveModeToggle && !combatRunning) {
+        startCombat()
+    } else {
+        endCombat()
+    }
+
+    // Start/end 'living' mode
+    Organisms.setMovementToggle(liveModeToggle, playerOrganism)
+}
+
+// Combat loop
+
+// Cache for an update, so to prevent the same things (e.g the world positions
+// of nodes) being needlessly recalculated in the same update
+const combatUpdateCache = {
+    nodeWorldPositions: {}
+}
+
+// Each calling of this loop is an update
+
+const combatLoopFps = 12
+function combatLoop() {
+    // Control FPS for debugging purposes
+    setTimeout(() => {
+        if (combatRunning) {
+            combatLoopCycle = requestAnimationFrame(combatLoop)
+        }
+    }, (1000 / combatLoopFps))
+
+    // Organisms are changing constantly
     const currentOrganisms = Organisms.getAllOrganisms()
 
     // Updates per tick = speed of play
@@ -99,35 +134,40 @@ function combatLoop() {
             }
         }
     }
-}
 
-function toggleCombat(playerOrganismImport) {
-    playerOrganism = playerOrganismImport
-    liveModeToggle = !liveModeToggle
-
-    // Begin/end combat mechanics
-    if (liveModeToggle && !combatRunning) {
-        startCombat()
-    } else {
-        endCombat()
-    }
-
-    // Start/end 'living' mode
-    Organisms.setMovementToggle(liveModeToggle, playerOrganism)
+    // Clear cache for next update
+    combatUpdateCache.nodeWorldPositions = {}
 }
 
 // Combat mechanics
 
+const maxAttractionVelocity = 0.02
+
 function updateCombat(organism, opponent) {
-    const overlappingNodes = getOverlappingNodes(organism, opponent);
+    // Calc world positions of all nodes, if not yet done in this update
+    [organism, opponent].forEach((org) => {
+        if (!(org.id in combatUpdateCache.nodeWorldPositions)) {
+            org.mesh.updateMatrixWorld(true);
+            combatUpdateCache.nodeWorldPositions[org.id] = org.nodePositions.map(nodePos => {
+                return ThreeElements.convertNodePosIntoWorldPos(nodePos, org.mesh)
+            })
+        }
+    })
+
+    // Get world positions of nodes in the current update
+    const organismNodesWorld = combatUpdateCache.nodeWorldPositions[organism.id]
+    const opponentNodesWorld = combatUpdateCache.nodeWorldPositions[opponent.id]
+
+    // Check overlapping nodes for bumping and any block functions
+    const overlappingNodes = getOverlappingNodes(organismNodesWorld, opponentNodesWorld);
     if (overlappingNodes.length > 0) {
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpEdges(organism, opponent, overlappingNodes);
 
-        // Check block types
+        // Check block types for block interactions
         for (const nodePair of overlappingNodes) {
-            const nodeOrg = nodePair.orgNodePos.node
-            const nodeOpp = nodePair.oppNodePos.node
+            const nodeOrg = nodePair.orgNodeWorldPos.node
+            const nodeOpp = nodePair.oppNodeWorldPos.node
 
             // Bonding
             if (
@@ -142,19 +182,19 @@ function updateCombat(organism, opponent) {
                     if (nodeOrg.block.typeName == "bonding") {
                         nodeOrg.block.isBonded = true
 
-                        toJoin = nodePair.oppNodePos
+                        toJoin = nodePair.oppNodeWorldPos
                         toJoin.instance = opponent
 
-                        joinedTo = nodePair.orgNodePos
+                        joinedTo = nodePair.orgNodeWorldPos
                         joinedTo.instance = organism
                     }
                     if (nodeOpp.block.typeName == "bonding") {
                         nodeOpp.block.isBonded = true
 
-                        toJoin = nodePair.orgNodePos
+                        toJoin = nodePair.orgNodeWorldPos
                         toJoin.instance = organism
 
-                        joinedTo = nodePair.oppNodePos
+                        joinedTo = nodePair.oppNodeWorldPos
                         joinedTo.instance = opponent
                     }
                     // Find join position
@@ -166,31 +206,118 @@ function updateCombat(organism, opponent) {
             }
         }
     }
+
+    // Process nodes
+    organismNodesWorld.forEach(orgNodeWorldPos => {
+        /*
+        
+            Attraction blocks
+
+        */
+        if (orgNodeWorldPos.node.block.typeName == "attractor") {
+            // Find target
+
+            const thisAttractorBlock = orgNodeWorldPos.node.block
+
+            let targetNodeWorldPos = null
+
+            const getProximityToThisAttractor = (a) => {
+                // distance^2 for point
+                return (a.x - orgNodeWorldPos.x) ** 2 + (a.y - orgNodeWorldPos.y) ** 2;
+            }
+
+            const sortByProximityToThisAttractor = (a, b) => {
+                // distance^2 for point a
+                const distA = getProximityToThisAttractor(a);
+                // distance^2 for point b
+                const distB = getProximityToThisAttractor(b);
+
+                // sort ascending by distance^2
+                return distA - distB;
+            }
+
+            const findAttractorTargetNodeInThisOpp = () => {
+                const oppNodesWithMatchingBlocks = opponentNodesWorld.filter(
+                    (nP) => {
+                        // Find a node with a block that matches targetBlock requirements
+                        const nPBlock = nP.node.block
+                        for (const key in Object.keys(thisAttractorBlock.targetBlock)) {
+                            if (nPBlock[key] !== thisAttractorBlock.targetBlock[key]) {
+                                return false
+                            }
+                        }
+                        return true
+                    }
+                )
+                if (oppNodesWithMatchingBlocks.length < 1) {
+                    return false
+                } else if (oppNodesWithMatchingBlocks.length === 1) {
+                    return oppNodesWithMatchingBlocks[0]
+                } else {
+                    // Find closest target
+                    return oppNodesWithMatchingBlocks.sort(sortByProximityToThisAttractor)[0]
+                }
+            }
+
+            // Check if attractor has ID
+            if (!("attractorId" in thisAttractorBlock)) {
+                // Give attractor a complex ID
+                thisAttractorBlock.attractorId = String(Math.random()).split(".")[1]
+            }
+
+            // Check if attractor has target or not
+            if (!(thisAttractorBlock.attractorId in combatSessionCache.attractorTargets)) {
+                // Give attractor an initial target in this opponent
+                targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
+            } else {
+                // Attractor already has a target — see if there's a closer one in this opponent
+                const existingTarget = combatSessionCache.attractorTargets[thisAttractorBlock.attractorId]
+                const targetInThisOpponent = findAttractorTargetNodeInThisOpp()
+                if (
+                    getProximityToThisAttractor(targetInThisOpponent) < getProximityToThisAttractor(existingTarget)
+                ) {
+                    // New target is closer, change to this target instead
+                    targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
+                }
+            }
+
+            if (!targetNodeWorldPos) {
+                // Attractor has no target and thus is useless as a node, move onto next node
+                return;
+            }
+
+            // Update cache
+            combatSessionCache.attractorTargets[thisAttractorBlock.attractorId] = targetNodeWorldPos
+
+            // Draw organism closer to target
+
+            const worldDist = {
+                x: targetNodeWorldPos.x - orgNodeWorldPos.x,
+                y: targetNodeWorldPos.y - orgNodeWorldPos.y
+            }
+            organism.velocity.x = Math.sign(worldDist.x) * maxAttractionVelocity
+            organism.velocity.y = Math.sign(worldDist.y) * maxAttractionVelocity
+
+            Utils.rotateMeshToTarget(
+                organism.mesh,
+                orgNodeWorldPos.localX,
+                orgNodeWorldPos.localY,
+                targetNodeWorldPos.x,
+                targetNodeWorldPos.y
+            )
+        }
+    })
 }
 
 // Utility
 
 const overlapRadius = 1.5
-function getOverlappingNodes(organism, opponent) {
-    const organismNodes = organism.nodePositions;    // local coords of organism's nodes
-    const opponentNodes = opponent.nodePositions;    // local coords of opponent's nodes
-
+function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     const result = [];
 
     // Naive O(N*M) check
-    for (const orgNodePos of organismNodes) {
-        // Convert local coords to world coords for the organism node
-        const orgNodeWorld = {
-            x: orgNodePos.x + organism.mesh.position.x,
-            y: orgNodePos.y + organism.mesh.position.y
-        };
-        for (const oppNodePos of opponentNodes) {
-            // Convert local coords to world coords for the opponent node
-            const oppNodeWorld = {
-                x: oppNodePos.x + opponent.mesh.position.x,
-                y: oppNodePos.y + opponent.mesh.position.y
-            };
-
+    for (const orgNodeWorld of organismNodesWorld) {
+        for (const oppNodeWorld of opponentNodesWorld) {
             // AABB overlap check (quick & dirty)
             if (
                 (orgNodeWorld.x > oppNodeWorld.x - overlapRadius) &&
@@ -199,8 +326,8 @@ function getOverlappingNodes(organism, opponent) {
                 (orgNodeWorld.y < oppNodeWorld.y + overlapRadius)
             ) {
                 result.push({
-                    orgNodePos,      // local coords in organism
-                    oppNodePos       // local coords in opponent
+                    orgNodeWorldPos: orgNodeWorld,
+                    oppNodeWorldPos: oppNodeWorld
                 });
             }
         }
@@ -210,20 +337,12 @@ function getOverlappingNodes(organism, opponent) {
 
 function bumpEdges(organism, opponent, overlappingNodes) {
     for (const pair of overlappingNodes) {
-        // Convert each node to world coords again
-        const orgNodeWorld = {
-            x: pair.orgNodePos.x + organism.mesh.position.x,
-            y: pair.orgNodePos.y + organism.mesh.position.y
-        };
-        const oppNodeWorld = {
-            x: pair.oppNodePos.x + opponent.mesh.position.x,
-            y: pair.oppNodePos.y + opponent.mesh.position.y
-        };
+        const orgNode = pair.orgNodeWorldPos;
+        const oppNode = pair.oppNodeWorldPos;
 
-        // Do a more accurate circle-based overlap check: 
-        // distance < overlapRadius, then push them out
-        const dx = orgNodeWorld.x - oppNodeWorld.x;
-        const dy = orgNodeWorld.y - oppNodeWorld.y;
+        // circle-based overlap check
+        const dx = orgNode.x - oppNode.x;
+        const dy = orgNode.y - oppNode.y;
         const distSq = dx * dx + dy * dy;
         const minDistSq = overlapRadius * overlapRadius;
 
@@ -232,31 +351,28 @@ function bumpEdges(organism, opponent, overlappingNodes) {
             const dist = Math.sqrt(distSq);
             const overlap = overlapRadius - dist;
 
-            // Direction from opponent node => organism node
-            // If dist=0 (exact same coords), offset slightly
+            // Normal from oppNode => orgNode
             let nx, ny;
             if (dist > 0) {
-                nx = dx / dist; // normalized direction x
-                ny = dy / dist; // normalized direction y
+                nx = dx / dist;
+                ny = dy / dist;
             } else {
-                // Rare exact overlap => pick an arbitrary direction
+                // exact same coords => arbitrary direction
                 nx = 1;
                 ny = 0;
             }
 
-            // Push them each half the overlap, 
-            // so total separation = overlap
-            const half = overlap * 0.5;
+            // Each gets half the push
+            const half = (overlap * 0.75);
 
-            // Move organism mesh outward
-            organism.mesh.position.x += nx * half;
-            organism.mesh.position.y += ny * half;
+            // We push the organism by (nx*half, ny*half) in world space
+            ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);
 
-            // Move opponent mesh inward
-            opponent.mesh.position.x -= nx * half;
-            opponent.mesh.position.y -= ny * half;
+            // We push the opponent by -(nx*half, ny*half)
+            ThreeElements.translateMeshInWorld(opponent.mesh, -nx * half, -ny * half);
         }
     }
 }
+
 
 export { toggleCombat }
