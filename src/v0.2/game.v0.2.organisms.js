@@ -14,11 +14,11 @@ import * as DNA from './game.v0.2.dna.js';
 
 const organisms = [];
 const defaultCombatStartPos = { x: -15, y: 0 }
-const slowDowPerc = 0.001
+const slowDownPerc = 0.01
 
 // Motion
 
-const STEP_SIZE = 0.05;
+const STEP_SIZE = 0.025;
 function randomOffset() {
     return (Math.random() * 2 - 1) * STEP_SIZE;
 }
@@ -148,7 +148,7 @@ class Organism {
         }
 
         // Motor blocks
-        let motorVelocityEffect = 0;
+        let motorVelocityEffect = 1;
 
         // Rotate meshes
         if ("motor" in this.nodesByBlockTypeCache) {
@@ -164,16 +164,26 @@ class Organism {
 
         // Idle animation
         if (movementToggle) {
-            // Float around
+            // Apply movement
             this.mesh.position.x += (this.velocity.x * motorVelocityEffect) + randomOffset()
             this.mesh.position.y += (this.velocity.y * motorVelocityEffect) + randomOffset()
 
-            // Naturally slow down any velocity
+            // Naturally slow down any residue velocity
             if (Math.abs(this.velocity.x) > 0) {
-                this.velocity.x -= slowDowPerc * Math.sign(this.velocity.x)
+                if (Math.abs(this.velocity.x) < slowDownPerc) {
+                    // If the velocity is smaller than the slow-down, clamp to 0
+                    this.velocity.x = 0;
+                } else {
+                    // Otherwise, subtract
+                    this.velocity.x -= slowDownPerc * Math.sign(this.velocity.x);
+                }
             }
             if (Math.abs(this.velocity.y) > 0) {
-                this.velocity.y -= slowDowPerc * Math.sign(this.velocity.y)
+                if (Math.abs(this.velocity.y) < slowDownPerc) {
+                    this.velocity.y = 0;
+                } else {
+                    this.velocity.y -= slowDownPerc * Math.sign(this.velocity.y);
+                }
             }
         } else {
             // Rotate idly
