@@ -30,9 +30,7 @@ const combatTimeouts = []
 const enableBondingBlocks = false
 
 // Cache for the combat session
-const combatSessionCache = {
-    attractorTargets: {}
-}
+const combatSessionCache = {}
 
 function startCombat() {
     console.log("starting combat...")
@@ -74,10 +72,6 @@ function endCombat() {
     combatTimeouts.forEach((timeout) => {
         clearTimeout(timeout)
     })
-
-    // Reset session cache
-
-    combatSessionCache.attractorTargets = {}
 }
 
 function toggleCombat(playerOrganismImport) {
@@ -100,12 +94,13 @@ function toggleCombat(playerOrganismImport) {
 // Cache for an update, so to prevent the same things (e.g the world positions
 // of nodes) being needlessly recalculated in the same update
 const combatUpdateCache = {
-    nodeWorldPositions: {}
+    nodeWorldPositions: {},
+    attractorTargets: {}
 }
 
 // Each calling of this loop is an update
 
-const combatLoopFps = 12
+const combatLoopFps = 3
 function combatLoop() {
     // Control FPS for debugging purposes
     setTimeout(() => {
@@ -137,11 +132,12 @@ function combatLoop() {
 
     // Clear cache for next update
     combatUpdateCache.nodeWorldPositions = {}
+    combatUpdateCache.attractorTargets = {}
 }
 
 // Combat mechanics
 
-const maxAttractionVelocity = 0.01
+const maxAttractionVelocity = 0.05
 
 function updateCombat(organism, opponent) {
     // Calc world positions of all nodes, if not yet done in this update
@@ -266,12 +262,12 @@ function updateCombat(organism, opponent) {
             }
 
             // Check if attractor has target or not
-            if (!(thisAttractorBlock.attractorId in combatSessionCache.attractorTargets)) {
+            if (!(thisAttractorBlock.attractorId in combatUpdateCache.attractorTargets)) {
                 // Give attractor an initial target in this opponent
                 targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
             } else {
                 // Attractor already has a target — see if there's a closer one in this opponent
-                const existingTarget = combatSessionCache.attractorTargets[thisAttractorBlock.attractorId]
+                const existingTarget = combatUpdateCache.attractorTargets[thisAttractorBlock.attractorId]
                 const targetInThisOpponent = findAttractorTargetNodeInThisOpp()
                 if (
                     getProximityToThisAttractor(targetInThisOpponent) < getProximityToThisAttractor(existingTarget)
@@ -290,7 +286,7 @@ function updateCombat(organism, opponent) {
             }
 
             // Update cache
-            combatSessionCache.attractorTargets[thisAttractorBlock.attractorId] = targetNodeWorldPos
+            combatUpdateCache.attractorTargets[thisAttractorBlock.attractorId] = targetNodeWorldPos
 
             // Draw organism closer to target
 
@@ -303,8 +299,8 @@ function updateCombat(organism, opponent) {
 
             Utils.rotateMeshToTarget(
                 organism.mesh,
-                orgNodeWorldPos.localX,
-                orgNodeWorldPos.localY,
+                orgNodeWorldPos.localNode.x,
+                orgNodeWorldPos.localNode.y,
                 targetNodeWorldPos.x,
                 targetNodeWorldPos.y
             )

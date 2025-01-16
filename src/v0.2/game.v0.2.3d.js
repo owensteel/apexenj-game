@@ -121,8 +121,12 @@ function convertNodePosIntoWorldPos(nodePos, organismMesh) {
     for (const key of Object.keys(nodePos)) {
         nodeClone[key] = nodePos[key]
     }
-    nodeClone.localX = nodePos.x
-    nodeClone.localY = nodePos.y
+
+    // We clone the node because otherwise the X and Y of the original
+    // node will be updated to the world X and Y, and we will lose the
+    // local positions
+
+    nodeClone.localNode = nodePos
 
     // Calc real world positions, factoring in mesh position and rotation
 
