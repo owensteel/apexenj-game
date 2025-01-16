@@ -147,18 +147,26 @@ class Organism {
             return
         }
 
-        // Rotate motor blocks
+        // Motor blocks
+        let motorVelocityEffect = 0;
+
+        // Rotate meshes
         if ("motor" in this.nodesByBlockTypeCache) {
             for (const motorNodePos of this.nodesByBlockTypeCache["motor"]) {
-                motorNodePos.mesh.rotation.y += 0.1
+                if (!motorNodePos.rotZUpdated) {
+                    motorNodePos.mesh.rotation.z = Math.atan2(motorNodePos.y, motorNodePos.x)
+                    motorNodePos.rotZUpdated = true
+                }
+                motorNodePos.mesh.rotation.x += 0.1
             }
+            motorVelocityEffect = 1 + (0.1 * this.nodesByBlockTypeCache["motor"].length)
         }
 
         // Idle animation
         if (movementToggle) {
             // Float around
-            this.mesh.position.x += this.velocity.x + randomOffset()
-            this.mesh.position.y += this.velocity.y + randomOffset()
+            this.mesh.position.x += (this.velocity.x * motorVelocityEffect) + randomOffset()
+            this.mesh.position.y += (this.velocity.y * motorVelocityEffect) + randomOffset()
 
             // Naturally slow down any velocity
             if (Math.abs(this.velocity.x) > 0) {
