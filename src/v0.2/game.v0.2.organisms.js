@@ -27,32 +27,52 @@ function randomOffset() {
 
 class Organism {
     constructor(dnaSequence, combatStartPos = defaultCombatStartPos) {
+        // Unique ID for tracking and debugging purposes
         this.id = String(Math.random()).split(".")[1]
-        this.bondedTo = [];
+
+        // DNA sequence input
         this.dnaSequence = dnaSequence;
+
+        // Three.Js mesh
         this.mesh = null;
-        this.meshOutline = null;
+
+        // Cache node positions for use in combat updates
         this.nodePositions = []
+
+        // Organise nodes by block type for quick access
+        this.nodesByBlockTypeCache = {}
+
+        // Set the organism's starting place in the scene
         this.combatStartPos = combatStartPos
+
+        // Prevents overriding
         this.currentAnimations = {
             highlight: false
         }
 
+        // Default velocity
         this.velocity = {
             x: 0,
             y: 0
-        }; // Default velocity
+        };
 
+        // The actual velocity ultimately applied
+        this.appliedVelocity = {
+            x: 0,
+            y: 0
+        }
+
+        // Root can never detach (obviously) so prevent such
+        // from happening, e.g if this is a recently detached
+        // node itself
         if (this.dnaSequence.detach == true) {
-            // Root can never detach (obviously)
             // WARNING: This will permanently corrupt DNA
             // so this is why a child node's sequence must
             // be cloned before being used
             this.dnaSequence.detach = false
         }
 
-        this.nodesByBlockTypeCache = {}
-
+        // Build initial mesh
         this.rebuildMesh();
     }
     updateTraitsFromDNA(dnaSequence) {
@@ -134,6 +154,11 @@ class Organism {
         ThreeElements.scene.add(this.mesh);
 
         // Update cache of blocks by type, e.g motor blocks
+
+        // Clear old cache
+        this.nodesByBlockTypeCache = {}
+
+        // Populate new cache
         for (const nodePos of this.nodePositions) {
             const typeName = nodePos.node.block.typeName
             if (!(typeName in this.nodesByBlockTypeCache)) {
@@ -158,15 +183,21 @@ class Organism {
                     motorNodePos.rotZUpdated = true
                 }
                 motorNodePos.mesh.rotation.x += 0.1
+
+                // Add this motor's effect to velocity
+                motorVelocityEffect += 0.1
             }
-            motorVelocityEffect = 1 + (0.1 * this.nodesByBlockTypeCache["motor"].length)
         }
 
         // Idle animation
         if (movementToggle) {
             // Apply movement
-            this.mesh.position.x += (this.velocity.x * motorVelocityEffect) + randomOffset()
-            this.mesh.position.y += (this.velocity.y * motorVelocityEffect) + randomOffset()
+
+            this.appliedVelocity.x = (this.velocity.x * motorVelocityEffect)
+            this.appliedVelocity.y = (this.velocity.y * motorVelocityEffect)
+
+            this.mesh.position.x += this.appliedVelocity.x + randomOffset()
+            this.mesh.position.y += this.appliedVelocity.y + randomOffset()
 
             // Naturally slow down any residue velocity
             if (Math.abs(this.velocity.x) > 0) {
@@ -219,22 +250,20 @@ function animate() {
             }
             organism.updateMovement()
 
-            if (organism.bondedTo.length < 1) {
-                // Bounce off edges regardless
-                if (
-                    (organism.mesh.position.x >= 16 && Math.sign(organism.velocity.x) > 0)
-                    ||
-                    (organism.mesh.position.x <= -16 && Math.sign(organism.velocity.x) < 0)
-                ) {
-                    organism.velocity.x = -organism.velocity.x;
-                }
-                if (
-                    (organism.mesh.position.y >= 7 && Math.sign(organism.velocity.y) > 0)
-                    ||
-                    (organism.mesh.position.y <= -7 && Math.sign(organism.velocity.y) < 0)
-                ) {
-                    organism.velocity.y = -organism.velocity.y;
-                }
+            // Bounce off edges regardless
+            if (
+                (organism.mesh.position.x >= 16 && Math.sign(organism.velocity.x) > 0)
+                ||
+                (organism.mesh.position.x <= -16 && Math.sign(organism.velocity.x) < 0)
+            ) {
+                organism.velocity.x = -organism.velocity.x;
+            }
+            if (
+                (organism.mesh.position.y >= 7 && Math.sign(organism.velocity.y) > 0)
+                ||
+                (organism.mesh.position.y <= -7 && Math.sign(organism.velocity.y) < 0)
+            ) {
+                organism.velocity.y = -organism.velocity.y;
             }
         });
         ThreeElements.renderScene();
@@ -295,7 +324,6 @@ function getNodeRoot(node) {
 
 function clearUpOrganism(instance) {
     instance.nodePositions = [];
-    instance.bondedTo.push(instance);
     ThreeElements.scene.remove(instance.mesh);
 }
 

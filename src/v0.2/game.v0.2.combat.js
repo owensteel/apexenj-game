@@ -17,13 +17,6 @@ let combatUpdatesPerTick = 1;
 let playerOrganism = null;
 let enemyOrganism = null;
 
-function isBondedTo(organism, id) {
-    if (organism.bondedTo.length < 1) {
-        return false
-    }
-    return organism.bondedTo.every((orgBondedTo) => orgBondedTo.id == id)
-}
-
 // Combat setup
 
 const combatTimeouts = []
@@ -120,9 +113,7 @@ function combatLoop() {
             for (const opponent of currentOrganisms) {
                 if (
                     // Prevent colliding with self
-                    organism.id !== opponent.id &&
-                    // Prevent colliding with a bonded child
-                    !isBondedTo(organism, opponent.id)
+                    organism.id !== opponent.id
                 ) {
                     updateCombat(organism, opponent);
                 }
@@ -361,8 +352,11 @@ function bumpEdges(organism, opponent, overlappingNodes) {
                 ny = 0;
             }
 
-            // Each gets half the push
-            const half = (overlap * 0.5);
+            // Each gets half the push, plus its own velocity
+            const half = (overlap * 0.5) + (
+                (organism.appliedVelocity.x) +
+                (opponent.appliedVelocity.x)
+            );
 
             // We push the organism by (nx*half, ny*half) in world space
             ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);
