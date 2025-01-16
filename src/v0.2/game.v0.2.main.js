@@ -311,6 +311,7 @@ function renderTree(
     const nodeElSize = Math.max(5, (25 * levelElementSizePerc));
     nodeEl.style.width = `${nodeElSize}px`
     nodeEl.style.height = `${nodeElSize}px`
+    nodeEl.innerHTML = `<span>${node.block.symbol}</span>`
     htmlContainer.appendChild(nodeEl);
 
     // If there are no offshoots, no need to place children

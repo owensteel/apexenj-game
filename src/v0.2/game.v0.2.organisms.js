@@ -9,7 +9,6 @@ import * as ThreeElements from './game.v0.2.3d.js'
 import * as OrganismBuilder from './game.v0.2.organism.builder.js'
 import { cloneObject } from './game.v0.2.utils.js';
 import * as DNA from './game.v0.2.dna.js';
-import * as Blocks from './game.v0.2.blocks.js';
 
 // Global variables
 
@@ -51,6 +50,8 @@ class Organism {
             // be cloned before being used
             this.dnaSequence.detach = false
         }
+
+        this.nodesByBlockTypeCache = {}
 
         this.rebuildMesh();
     }
@@ -109,21 +110,37 @@ class Organism {
         } else {
             // Build mode, static
 
-            const newMesh = OrganismBuilder.buildSeamlessBodyFromNodes(
+            this.nodePositions = OrganismBuilder.gatherNodePositions(
                 this.dnaSequence,
                 /* allowDetachingParts: */ true
-            );
+            )
+
+            const newMesh = OrganismBuilder.buildBodyFromNodePositions(
+                this.nodePositions,
+                /* allowDetachingParts: */ true,
+                /* formUnionMesh: */ false
+            )
             if (this.mesh) {
                 ThreeElements.scene.remove(this.mesh)
                 newMesh.rotation.copy(this.mesh.rotation)
             }
             this.mesh = newMesh
+
             this.mesh.position.set(0, 0, 0)
             this.mesh.rotation.set(0, 0, 0)
         }
         this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
         ThreeElements.scene.add(this.mesh);
+
+        // Update cache of blocks by type, e.g motor blocks
+        for (const nodePos of this.nodePositions) {
+            const typeName = nodePos.node.block.typeName
+            if (!(typeName in this.nodesByBlockTypeCache)) {
+                this.nodesByBlockTypeCache[typeName] = []
+            }
+            this.nodesByBlockTypeCache[typeName].push(nodePos)
+        }
     }
     updateMovement() {
         if (this.mesh == null) {
@@ -131,9 +148,9 @@ class Organism {
         }
 
         // Rotate motor blocks
-        for (const nodePos of this.nodePositions) {
-            if (nodePos.node.block.typeName == "motor") {
-                nodePos.mesh.rotation.y += 0.1
+        if ("motor" in this.nodesByBlockTypeCache) {
+            for (const motorNodePos of this.nodesByBlockTypeCache["motor"]) {
+                motorNodePos.mesh.rotation.y += 0.1
             }
         }
 

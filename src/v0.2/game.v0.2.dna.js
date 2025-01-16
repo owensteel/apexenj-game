@@ -20,13 +20,7 @@ const demoDnaSequence = {
         {
             role: "appendage",
             block: new Blocks.DefaultBlock(),
-            offshoots: [
-                {
-                    role: "appendage",
-                    block: new Blocks.AttractorAlphaBlock(),
-                    offshoots: []
-                }
-            ]
+            offshoots: []
         },
         {
             role: "appendage",

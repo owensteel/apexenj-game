@@ -141,7 +141,7 @@ function combatLoop() {
 
 // Combat mechanics
 
-const maxAttractionVelocity = 0.02
+const maxAttractionVelocity = 0.01
 
 function updateCombat(organism, opponent) {
     // Calc world positions of all nodes, if not yet done in this update
@@ -278,6 +278,9 @@ function updateCombat(organism, opponent) {
                 ) {
                     // New target is closer, change to this target instead
                     targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
+                } else {
+                    // Keep existing target
+                    targetNodeWorldPos = existingTarget
                 }
             }
 
@@ -363,7 +366,7 @@ function bumpEdges(organism, opponent, overlappingNodes) {
             }
 
             // Each gets half the push
-            const half = (overlap * 0.75);
+            const half = (overlap * 0.5);
 
             // We push the organism by (nx*half, ny*half) in world space
             ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);

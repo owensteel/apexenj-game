@@ -216,8 +216,11 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     const rootNodeClone = cloneObject(rootNodeUncloned)
 
     // Collect all node positions
+    const organismNodePositions = gatherNodePositions(rootNodeClone, allowDetachingParts)
+
+    // Build
     return buildBodyFromNodePositions(
-        gatherNodePositions(rootNodeClone, allowDetachingParts),
+        organismNodePositions,
         allowDetachingParts,
         formUnionMesh
     )
