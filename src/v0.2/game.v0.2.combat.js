@@ -100,7 +100,7 @@ const combatUpdateCache = {
 
 // Each calling of this loop is an update
 
-const combatLoopFps = 3
+const combatLoopFps = 12
 function combatLoop() {
     // Control FPS for debugging purposes
     setTimeout(() => {
