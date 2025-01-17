@@ -93,7 +93,7 @@ const combatUpdateCache = {
 
 // Each calling of this loop is an update
 
-const combatLoopFps = 12
+const combatLoopFps = 3
 function combatLoop() {
     // Control FPS for debugging purposes
     setTimeout(() => {
@@ -228,7 +228,7 @@ function updateCombat(organism, opponent) {
                     (nP) => {
                         // Find a node with a block that matches targetBlock requirements
                         const nPBlock = nP.node.block
-                        for (const key in Object.keys(thisAttractorBlock.targetBlock)) {
+                        for (const key of Object.keys(thisAttractorBlock.targetBlock)) {
                             if (nPBlock[key] !== thisAttractorBlock.targetBlock[key]) {
                                 return false
                             }
@@ -261,6 +261,7 @@ function updateCombat(organism, opponent) {
                 const existingTarget = combatUpdateCache.attractorTargets[thisAttractorBlock.attractorId]
                 const targetInThisOpponent = findAttractorTargetNodeInThisOpp()
                 if (
+                    targetInThisOpponent !== false &&
                     getProximityToThisAttractor(targetInThisOpponent) < getProximityToThisAttractor(existingTarget)
                 ) {
                     // New target is closer, change to this target instead
