@@ -12,13 +12,13 @@ import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
 import { cloneObject } from "./game.v0.2.utils";
 
-// Temporary combat button
+// Init (temporary) combat toggle button
 // TODO: remove, debugging only
+
 const combatToggleButton = document.createElement("button");
 combatToggleButton.innerHTML = "Start combat"
 combatToggleButton.toggleState = false
 combatToggleButton.onclick = () => {
-    Combat.toggleCombat(playerOrganism)
     if (!combatToggleButton.toggleState) {
         combatToggleButton.toggleState = true
         combatToggleButton.innerHTML = "Stop combat"
@@ -27,7 +27,6 @@ combatToggleButton.onclick = () => {
         combatToggleButton.innerHTML = "Start combat"
     }
 }
-document.body.appendChild(combatToggleButton)
 
 // Init all
 
@@ -38,12 +37,22 @@ function init() {
     gameCanvas.style.width = window.innerWidth
     gameCanvas.style.height = 300
 
-    // Init DNA and player
+    // Init player
 
     const playerOrganism = Organisms.addOrganism(
         cloneObject(DNA.demoDnaSequence)
     )
+
+    // Init DNA renderer
+
     DNARenderer.init(playerOrganism)
+
+    // Init combat button
+
+    combatToggleButton.addEventListener("click", () => {
+        Combat.toggleCombat(playerOrganism)
+    })
+    document.body.appendChild(combatToggleButton)
 }
 
 export { init }
