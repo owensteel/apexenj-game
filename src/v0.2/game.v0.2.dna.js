@@ -57,7 +57,7 @@ function createNode(parentNode = null) {
     }
 
     // Attractors cannot have children as that defeats their purpose
-    if (parentNode.block.typeName.split("-")[0] == "attractor") {
+    if (parentNode.block.typeName == Blocks.BLOCK_TYPENAME_ATTRACTOR) {
         return false
     }
 

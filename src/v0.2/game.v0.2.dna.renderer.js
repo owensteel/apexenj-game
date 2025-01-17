@@ -47,7 +47,7 @@ document.body.appendChild(dnaSequenceExportButton)
 
 // Node manipulating
 
-let selectedBlockType = "default"
+let selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT
 
 function deleteNodeFromSequence(node) {
     // Confirm
@@ -72,18 +72,18 @@ function createNode(parentNode) {
     const createdNode = DNA.createNode(parentNode)
     if (createdNode) {
         // Set node block
-        if (selectedBlockType !== "default") {
+        if (selectedBlockType !== Blocks.BLOCK_TYPENAME_DEFAULT) {
             switch (selectedBlockType) {
-                case "bonding":
+                case Blocks.BLOCK_TYPENAME_BONDING:
                     createdNode.block = new Blocks.BondingBlock()
                     break
-                case "motor":
+                case Blocks.BLOCK_TYPENAME_MOTOR:
                     createdNode.block = new Blocks.MotorBlock()
                     break
-                case "attractor-alpha":
+                case Blocks.BLOCK_ATTRACTOR_TYPEID_ALPHA:
                     createdNode.block = new Blocks.AttractorAlphaBlock()
                     break
-                case "attractor-beta":
+                case Blocks.BLOCK_ATTRACTOR_TYPEID_BETA:
                     createdNode.block = new Blocks.AttractorBetaBlock()
                     break
             }
@@ -103,9 +103,9 @@ function setNodeToolbar() {
     const nodeBlockSelector = document.createElement("select")
     gameDnaWrapperToolbar.appendChild(nodeBlockSelector)
 
-    Blocks.PlayerAccessibleBlockTypeNamesList.forEach((BlockType) => {
+    Blocks.PlayerAccessibleBlockTypeNamesList.forEach((blockTypeName) => {
         const nodeBlockSelectorOption = document.createElement("option")
-        nodeBlockSelectorOption.innerText = BlockType
+        nodeBlockSelectorOption.innerText = blockTypeName
         nodeBlockSelector.appendChild(nodeBlockSelectorOption)
     })
 

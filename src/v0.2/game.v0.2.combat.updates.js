@@ -9,6 +9,7 @@
 
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
+import * as Blocks from "./game.v0.2.blocks"
 
 // Cache for an update, so to prevent the same things (e.g the
 // world positions of nodes) being needlessly recalculated in
@@ -58,13 +59,13 @@ function updateOrganismInCombat(organism, opponent) {
             if (
                 enableBondingBlocks &&
                 (
-                    (nodeOrg.block.typeName == "bonding") ||
-                    (nodeOpp.block.typeName == "bonding")
+                    (nodeOrg.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) ||
+                    (nodeOpp.block.typeName == Blocks.BLOCK_TYPENAME_BONDING)
                 )
             ) {
                 if (!nodeOrg.block.isBonded && !nodeOpp.block.isBonded) {
                     let toJoin, joinedTo;
-                    if (nodeOrg.block.typeName == "bonding") {
+                    if (nodeOrg.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) {
                         nodeOrg.block.isBonded = true
 
                         toJoin = nodePair.oppNodeWorldPos
@@ -73,7 +74,7 @@ function updateOrganismInCombat(organism, opponent) {
                         joinedTo = nodePair.orgNodeWorldPos
                         joinedTo.instance = organism
                     }
-                    if (nodeOpp.block.typeName == "bonding") {
+                    if (nodeOpp.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) {
                         nodeOpp.block.isBonded = true
 
                         toJoin = nodePair.orgNodeWorldPos
@@ -99,7 +100,7 @@ function updateOrganismInCombat(organism, opponent) {
             Attraction blocks
 
         */
-        if (orgNodeWorldPos.node.block.typeName == "attractor") {
+        if (orgNodeWorldPos.node.block.typeName == Blocks.BLOCK_TYPENAME_ATTRACTOR) {
             // Find target
 
             const thisAttractorBlock = orgNodeWorldPos.node.block
