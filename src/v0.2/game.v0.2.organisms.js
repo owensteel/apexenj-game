@@ -191,7 +191,7 @@ class Organism {
         // Should be just enough that the effect is visible
         // to the player, but not too much so as to make it
         // out of control
-        const motorIncreaseEffect = 0.15
+        const motorIncreaseEffect = 0.5
 
         // The total of all the effects ultimately applied
         let totalMotorVelocityEffect = 1;
