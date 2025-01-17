@@ -56,6 +56,11 @@ function createNode(parentNode = null) {
         return false
     }
 
+    // Attractors cannot have children as that defeats their purpose
+    if (parentNode.block.typeName.split("-")[0] == "attractor") {
+        return false
+    }
+
     // Default state, will be changed dynamically when returned
     // if a differentblock type is intended
     const node = {
