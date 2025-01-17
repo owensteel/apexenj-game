@@ -173,7 +173,15 @@ class Organism {
         }
 
         // Motor blocks
-        let motorVelocityEffect = 1;
+
+        // A single motor increases velocity by a percent
+        // Should be just enough that the effect is visible
+        // to the player, but not too much so as to make it
+        // out of control
+        const motorIncreaseEffect = 0.15
+
+        // The total of all the effects ultimately applied
+        let totalMotorVelocityEffect = 1;
 
         // Rotate meshes
         if ("motor" in this.nodesByBlockTypeCache) {
@@ -185,7 +193,7 @@ class Organism {
                 motorNodePos.mesh.rotation.x += 0.1
 
                 // Add this motor's effect to velocity
-                motorVelocityEffect += 0.1
+                totalMotorVelocityEffect += motorIncreaseEffect
             }
         }
 
@@ -193,8 +201,8 @@ class Organism {
         if (movementToggle) {
             // Apply movement
 
-            this.appliedVelocity.x = (this.velocity.x * motorVelocityEffect)
-            this.appliedVelocity.y = (this.velocity.y * motorVelocityEffect)
+            this.appliedVelocity.x = (this.velocity.x * totalMotorVelocityEffect)
+            this.appliedVelocity.y = (this.velocity.y * totalMotorVelocityEffect)
 
             this.mesh.position.x += this.appliedVelocity.x + randomOffset()
             this.mesh.position.y += this.appliedVelocity.y + randomOffset()
