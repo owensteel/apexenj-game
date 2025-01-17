@@ -1,6 +1,9 @@
 /*
 
-    Blocks (properties)
+    Blocks
+
+    Provides a library of blocks (properties and functions) for nodes
+    in the form of classes.
 
 */
 

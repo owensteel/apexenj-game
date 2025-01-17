@@ -2,6 +2,9 @@
 
     Organism builder
 
+    Constructs a Three JS mesh for an organism by converting
+    its DNA sequence into nodes.
+
 */
 
 import * as THREE from 'three';
@@ -122,7 +125,8 @@ function gatherNodePositions(
     return positionsArray;
 }
 
-// Build either a union mesh or tree of parent and child meshes from nodes
+// Build either a union mesh or tree of parent and child meshes
+// from nodes or node positions
 
 function buildBodyFromNodePositions(positions, allowDetachingParts = false, formUnionMesh = false) {
     if (positions.length === 0) {
@@ -226,4 +230,9 @@ function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = fals
     )
 }
 
-export { buildSeamlessBodyFromNodes, gatherNodePositions, buildBodyFromNodePositions, nodeMeshSize }
+export {
+    buildSeamlessBodyFromNodes,
+    gatherNodePositions,
+    buildBodyFromNodePositions,
+    nodeMeshSize
+}

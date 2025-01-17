@@ -2,6 +2,9 @@
 
     Organism
 
+    Provides access to the creation and updating of organisms in
+    the game scene, both at data and visible Three JS level.
+
 */
 
 import * as THREE from 'three';
@@ -10,20 +13,23 @@ import * as OrganismBuilder from './game.v0.2.organism.builder.js'
 import { cloneObject } from './game.v0.2.utils.js';
 import * as DNA from './game.v0.2.dna.js';
 
-// Global variables
+// Global variables for setup
 
 const organisms = [];
 const defaultCombatStartPos = { x: -15, y: 0 }
 const slowDownPerc = 0.01
 
-// Motion
-
+// Provide Brownian-esque motion
 const STEP_SIZE = 0.025;
 function randomOffset() {
     return (Math.random() * 2 - 1) * STEP_SIZE;
 }
 
-// Organism class
+/*
+
+    Organism class
+
+*/
 
 class Organism {
     constructor(dnaSequence, combatStartPos = defaultCombatStartPos) {
@@ -45,10 +51,9 @@ class Organism {
         // Set the organism's starting place in the scene
         this.combatStartPos = combatStartPos
 
-        // Prevents overriding
-        this.currentAnimations = {
-            highlight: false
-        }
+        // Prevents animations overriding each other
+        // NOTE: Animations are currently not in use
+        this.currentAnimations = {}
 
         // Default velocity
         this.velocity = {
@@ -75,10 +80,16 @@ class Organism {
         // Build initial mesh
         this.rebuildMesh();
     }
+
+    // Update the DNA sequence and subsequently update
+    // the mesh
     updateTraitsFromDNA(dnaSequence) {
         this.dnaSequence = dnaSequence;
         this.rebuildMesh();
     }
+
+    // Creates mesh for this organism out of its current
+    // DNA sequence (converted into nodes)
     rebuildMesh() {
         // Create mesh for all nodes
 
@@ -167,6 +178,8 @@ class Organism {
             this.nodesByBlockTypeCache[typeName].push(nodePos)
         }
     }
+
+    // Provides "visible life" to organism mesh
     updateMovement() {
         if (this.mesh == null) {
             return
@@ -229,22 +242,17 @@ class Organism {
             this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.0025;
         }
     }
-    highlight() {
-        if (this.mesh == null || this.currentAnimations.highlight) {
-            return
-        }
-        this.currentAnimations.highlight = true;
-
-        this.mesh.material = new THREE.MeshBasicMaterial({ color: 'red' });
-
-        setTimeout(() => {
-            this.currentAnimations.highlight = false;
-            this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
-        }, 250)
-    }
 }
 
-// Main render loop
+/*
+
+    Animation render loop
+
+*/
+
+// This runs constantly, regardless of combat, so the
+// organisms are visibly updated
+
 let activeAnimation = null;
 let movementToggle = false
 function animate() {
@@ -282,11 +290,22 @@ function animate() {
 }
 animate()
 
+/*
+
+    Organism utilities
+
+*/
+
+// Create and return a new instance of an organism with
+// a set DNA sequence
+
 function addOrganism(dnaSequence, combatStartPos = defaultCombatStartPos) {
     const newOrganism = new Organism(dnaSequence, combatStartPos);
     organisms.push(newOrganism);
     return newOrganism
 }
+
+// Update the mesh of every organism in the cache
 
 function rebuildAllOrganisms() {
     organisms.forEach((organism) => {
@@ -294,11 +313,16 @@ function rebuildAllOrganisms() {
     })
 }
 
+// Clear the visible presences of organisms from the
+// scene
+
 function clearScene() {
     organisms.forEach((organism, index) => {
         ThreeElements.scene.remove(organism.mesh)
     })
 }
+
+// Controls whether the organisms are "alive" or not
 
 function setMovementToggle(state, playerOrganism) {
     movementToggle = state
@@ -318,9 +342,13 @@ function setMovementToggle(state, playerOrganism) {
     rebuildAllOrganisms()
 }
 
+// Gets all organisms currently cached
+
 function getAllOrganisms() {
     return organisms
 }
+
+// Get the root of a node's DNA sequence
 
 function getNodeRoot(node) {
     let nodeRoot = node;
@@ -330,10 +358,18 @@ function getNodeRoot(node) {
     return nodeRoot
 }
 
+// Clear organism mesh (visible presence) and node positions ("invisible"
+// presence) to prevent it from continuing to exist in any form
+
 function clearUpOrganism(instance) {
     instance.nodePositions = [];
     ThreeElements.scene.remove(instance.mesh);
 }
+
+// Bond organisms, i.e create a new combined organism by merging their two
+// meshes around a pivot
+// NOTE: This function has many bugs and is part of the Bonding Block feature,
+// which is not in the live game
 
 function bondOrganisms(joineeNode, joinerNode) {
 
@@ -467,4 +503,11 @@ function bondOrganisms(joineeNode, joinerNode) {
 
 }
 
-export { addOrganism, setMovementToggle, rebuildAllOrganisms, clearScene, getAllOrganisms, bondOrganisms };
+export {
+    addOrganism,
+    setMovementToggle,
+    rebuildAllOrganisms,
+    clearScene,
+    getAllOrganisms,
+    bondOrganisms
+};

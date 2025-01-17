@@ -1,12 +1,14 @@
 /*
 
-    Combat Update
+    Combat Updates
+
+    The system for operating combat mechanics and updating organisms
+    in a single combat session update.
 
 */
 
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Utils from "./game.v0.2.utils"
 
 // Cache for an update, so to prevent the same things (e.g the
 // world positions of nodes) being needlessly recalculated in
@@ -185,7 +187,7 @@ function updateOrganismInCombat(organism, opponent) {
             organism.velocity.x = Math.sign(worldDist.x) * maxAttractionVelocity
             organism.velocity.y = Math.sign(worldDist.y) * maxAttractionVelocity
 
-            Utils.rotateMeshToTarget(
+            ThreeElements.rotateMeshToTarget(
                 organism.mesh,
                 orgNodeWorldPos.localNode.x,
                 orgNodeWorldPos.localNode.y,

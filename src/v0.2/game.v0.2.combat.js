@@ -2,6 +2,8 @@
 
     Combat
 
+    The system for controlling combat sessions.
+
 */
 
 import * as DNA from "./game.v0.2.dna";

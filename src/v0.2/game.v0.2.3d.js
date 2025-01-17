@@ -2,6 +2,8 @@
 
     3D elements
 
+    Provides access to Three JS elements and utilities for the 3D world.
+
 */
 
 import * as THREE from 'three';
@@ -13,6 +15,7 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 const gameStageWrapper = document.getElementById("game-stage-wrapper");
 
 // Initialize Three.js scene
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / 300, 0.1, 1000);
 camera.position.set(0, 0, 30);
@@ -37,14 +40,14 @@ const outlinePass = new OutlinePass(
 );
 composer.addPass(outlinePass);
 
-// Optionally configure the outline color, thickness, etc.
 outlinePass.edgeStrength = 10;
 outlinePass.edgeGlow = 0.0;
 outlinePass.edgeThickness = 0.5;
 outlinePass.visibleEdgeColor.set('#000000');
 outlinePass.hiddenEdgeColor.set('#ffffff');
 
-// Utility
+// Main renderer, called in the organism animation rendering
+// loop
 
 function renderScene() {
     renderer.render(scene, camera);
@@ -53,6 +56,8 @@ function renderScene() {
     composer.render();
 }
 
+// Loads an OBJ model from a URL and returns it as a "scene"
+// NOTE: Currently not used anywhere
 async function loadModel(objUrl) {
     const loader = new OBJLoader();
 
@@ -73,7 +78,7 @@ async function loadModel(objUrl) {
     }
 }
 
-// Debug purposes, to check camera can see far enough
+// For debugging purposes, to check camera can see far enough
 function addCubeAtPos(x, y, z) {
     const cube = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1, 1),
@@ -83,6 +88,8 @@ function addCubeAtPos(x, y, z) {
     cube.position.set(x, y, z);
 }
 
+// A solution for "bumping" organisms when they have complicated positions
+// and rotations
 function translateMeshInWorld(mesh, offsetX, offsetY) {
     // Build the offset in world space
     const offsetWorld = new THREE.Vector3(offsetX, offsetY, 0);
@@ -111,6 +118,8 @@ function translateMeshInWorld(mesh, offsetX, offsetY) {
     mesh.position.z += offsetWorld.z;
 }
 
+// Gets the position of a node in the 3D space, factoring in instance's and
+// parent's rotations
 function convertNodePosIntoWorldPos(nodePos, organismMesh) {
     const nodeClone = {}
     for (const key of Object.keys(nodePos)) {
@@ -134,10 +143,33 @@ function convertNodePosIntoWorldPos(nodePos, organismMesh) {
     return nodeClone
 }
 
+// For rotating meshes on a 2D axis in 3D space
+function rotateMeshToTarget(mesh, nx, ny, targetX, targetY) {
+    // 1) localAngle: The angle from the mesh's origin to the node in local space
+    const localAngle = Math.atan2(ny, nx);
+
+    // 2) node's current world coords (assuming no prior rotation on mesh)
+    //    If the mesh is at mesh.position.x, mesh.position.y:
+    const nodeWorldX = mesh.position.x + nx;
+    const nodeWorldY = mesh.position.y + ny;
+
+    // 3) angle from the node's world position to the target
+    const targetAngle = Math.atan2(targetY - nodeWorldY, targetX - nodeWorldX);
+
+    // 4) the rotation needed so node points at the target
+    const deltaTheta = targetAngle - localAngle;
+
+    // Set the mesh's Z rotation in radians
+    if (!isNaN(deltaTheta)) {
+        mesh.rotation.z = deltaTheta;
+    }
+}
+
 export {
     scene,
     renderScene,
     loadModel,
     translateMeshInWorld,
-    convertNodePosIntoWorldPos
+    convertNodePosIntoWorldPos,
+    rotateMeshToTarget
 }
