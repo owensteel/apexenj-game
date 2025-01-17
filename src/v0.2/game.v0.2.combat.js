@@ -11,19 +11,24 @@ import * as Utils from "./game.v0.2.utils"
 
 let liveModeToggle = false;
 let combatRunning = false;
-let combatLoopCycle;
-let combatUpdatesPerTick = 1;
+let combatTickCycle;
 
 let playerOrganism = null;
 let enemyOrganism = null;
 
-// Combat setup
+/*
+
+    Combat setup
+
+*/
 
 const combatTimeouts = []
 const enableBondingBlocks = false
 
-// Cache for the combat session
-const combatSessionCache = {}
+// Cache for the entire combat session
+const combatSessionCache = {
+    originalEnemy: null
+}
 
 function startCombat() {
     console.log("starting combat...")
@@ -35,12 +40,13 @@ function startCombat() {
         enemyDNA,
         { x: 15, y: 0 }
     )
+    combatSessionCache.originalEnemy = enemyOrganism
 
     // Start tick updates
 
-    combatLoop()
+    combatTick()
 
-    // Set tick values
+    // Set session values
 
     combatRunning = true
 }
@@ -48,15 +54,17 @@ function startCombat() {
 function endCombat() {
     console.log("ending combat...")
 
-    cancelAnimationFrame(combatLoopCycle)
-    combatLoopCycle = null
+    // Stop combat tick loop
+
+    cancelAnimationFrame(combatTickCycle)
+    combatTickCycle = null
 
     // Reset player values
 
     playerOrganism.velocity.x = 0
     playerOrganism.velocity.y = 0
 
-    // Reset tick values
+    // Reset session values
 
     combatRunning = false
 
@@ -65,24 +73,34 @@ function endCombat() {
     combatTimeouts.forEach((timeout) => {
         clearTimeout(timeout)
     })
+
+    // Clear combat session cache
+
+    combatSessionCache.originalEnemy = {}
 }
 
 function toggleCombat(playerOrganismImport) {
     playerOrganism = playerOrganismImport
     liveModeToggle = !liveModeToggle
 
-    // Begin/end combat mechanics
+    // Begin/end combat session
+
     if (liveModeToggle && !combatRunning) {
         startCombat()
     } else {
         endCombat()
     }
 
-    // Start/end 'living' mode
+    // Start/end 'living' mode for individual organisms
+
     Organisms.setMovementToggle(liveModeToggle, playerOrganism)
 }
 
-// Combat loop
+/*
+
+    Combat ticks and updates loop
+
+*/
 
 // Cache for an update, so to prevent the same things (e.g the world positions
 // of nodes) being needlessly recalculated in the same update
@@ -91,32 +109,20 @@ const combatUpdateCache = {
     attractorTargets: {}
 }
 
-// Each calling of this loop is an update
-
-const combatLoopFps = 12
-function combatLoop() {
-    // Control FPS for debugging purposes
-    setTimeout(() => {
-        if (combatRunning) {
-            combatLoopCycle = requestAnimationFrame(combatLoop)
-        }
-    }, (1000 / combatLoopFps))
-
+// Updates each organism, syncs it with all its opponents
+function combatUpdate() {
     // Organisms are changing constantly
     const currentOrganisms = Organisms.getAllOrganisms()
 
-    // Updates per tick = speed of play
-    for (let i = 0; i < combatUpdatesPerTick; i++) {
-        // Each organism must be updated
-        for (const organism of currentOrganisms) {
-            // Sync with all opponents
-            for (const opponent of currentOrganisms) {
-                if (
-                    // Prevent colliding with self
-                    organism.id !== opponent.id
-                ) {
-                    updateCombat(organism, opponent);
-                }
+    // Each organism must be updated
+    for (const organism of currentOrganisms) {
+        // Sync with all opponents
+        for (const opponent of currentOrganisms) {
+            if (
+                // Prevent "fighting with self"
+                organism.id !== opponent.id
+            ) {
+                updateOrganismInCombat(organism, opponent);
             }
         }
     }
@@ -126,11 +132,37 @@ function combatLoop() {
     combatUpdateCache.attractorTargets = {}
 }
 
-// Combat mechanics
+// Control TPS for debugging purposes
+const combatTicksPerSec = 12
+
+// Updates per tick = speed of play
+// As a UPT value higher than 1 allows updates/movements to "happen
+// between frames"
+const combatUpdatesPerTick = 1;
+
+function combatTick() {
+    // Delay next tick until TPS fraction has elapsed
+    setTimeout(() => {
+        if (combatRunning) {
+            combatTickCycle = requestAnimationFrame(combatTick)
+        }
+    }, (1000 / combatTicksPerSec))
+
+    // Execute as many updates in this tick as UPT specifies
+    for (let i = 0; i < combatUpdatesPerTick; i++) {
+        combatUpdate()
+    }
+}
+
+/*
+
+    Combat mechanics
+
+*/
 
 const maxAttractionVelocity = 0.05
 
-function updateCombat(organism, opponent) {
+function updateOrganismInCombat(organism, opponent) {
     // Calc world positions of all nodes, if not yet done in this update
     [organism, opponent].forEach((org) => {
         if (!(org.id in combatUpdateCache.nodeWorldPositions)) {
