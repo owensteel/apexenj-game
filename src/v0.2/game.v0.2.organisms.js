@@ -36,6 +36,9 @@ class Organism {
         // Unique ID for tracking and debugging purposes
         this.id = String(Math.random()).split(".")[1]
 
+        // Unique randomness
+        this.random = Math.random()
+
         // DNA sequence input
         this.dnaSequence = dnaSequence;
 
@@ -237,10 +240,12 @@ class Organism {
                     this.velocity.y -= slowDownPerc * Math.sign(this.velocity.y);
                 }
             }
-        } else {
-            // Rotate idly
-            this.mesh.rotation.z += Math.sin(Date.now() * 0.001) * Math.random() * 0.0025;
         }
+
+        // Rotate idly
+        this.mesh.rotation.z += Math.sin(
+            (this.random * Date.now()) * 0.001
+        ) * Math.random() * 0.025;
     }
 }
 

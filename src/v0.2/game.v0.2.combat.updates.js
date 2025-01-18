@@ -14,8 +14,7 @@ import * as Organisms from "./game.v0.2.organisms"
 // world positions of nodes) being needlessly recalculated in
 // the same update. Is cleared after every combatUpdate
 const combatUpdateCache = {
-    nodeWorldPositions: {},
-    orgAttractionTargets: {}
+    nodeWorldPositions: {}
 }
 
 /*
@@ -52,22 +51,22 @@ function updateOrganismInCombat(organism, opponent) {
     }
 
     /*
-    
-        Process nodes
-
-    */
-
-    organismNodesWorld.forEach(orgNodeWorldPos => {
-        // TODO: remove placeholder
-    });
-
-    /*
         
-        Attraction
+        Natural attraction to center for "bashing" mechanic
 
     */
 
-    // TODO: attraction mechanic
+    const orgWorldPos = organism.mesh.position
+    const targetWorldPos = { x: 0, y: 0 }
+
+    // Draw organism closer to center
+
+    const worldDist = {
+        x: targetWorldPos.x - orgWorldPos.x,
+        y: targetWorldPos.y - orgWorldPos.y
+    }
+    organism.velocity.x = Math.sign(worldDist.x) * maxAttractionVelocity
+    organism.velocity.y = Math.sign(worldDist.y) * maxAttractionVelocity
 }
 
 /*
@@ -76,7 +75,7 @@ function updateOrganismInCombat(organism, opponent) {
 
 */
 
-const overlapRadius = 1.5
+const overlapRadius = 2
 function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     const result = [];
 
@@ -127,8 +126,8 @@ function bumpEdges(organism, opponent, overlappingNodes) {
                 ny = 0;
             }
 
-            // Each gets half the push, plus its own velocity
-            const half = (overlap * 0.5);
+            // Each is pushed back
+            const half = (overlap);
 
             // We push the organism by (nx*half, ny*half) in world space
             ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);
@@ -165,7 +164,6 @@ function combatUpdate() {
 
     // Clear cache for next update
     combatUpdateCache.nodeWorldPositions = {}
-    combatUpdateCache.orgAttractionTargets = {}
 }
 
 export { combatUpdate }
