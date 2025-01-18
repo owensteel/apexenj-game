@@ -10,6 +10,7 @@ import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
+import { stageEdges3D } from "./game.v0.2.3d";
 
 /*
 
@@ -41,7 +42,10 @@ function startCombat() {
     const enemyDNA = Utils.cloneObject(DNA.demoDnaSequence)
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
-        { x: 15, y: 0 }
+        {
+            x: stageEdges3D.top.right.x,
+            y: 0
+        }
     )
     combatSessionCache.originalEnemy = enemyOrganism
 

@@ -75,7 +75,7 @@ function updateOrganismInCombat(organism, opponent) {
 
 */
 
-const overlapRadius = 2
+const overlapRadius = 25
 function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     const result = [];
 
@@ -122,12 +122,12 @@ function bumpEdges(organism, opponent, overlappingNodes) {
                 ny = dy / dist;
             } else {
                 // exact same coords => arbitrary direction
-                nx = 1;
-                ny = 0;
+                nx = Math.random();
+                ny = Math.random();
             }
 
             // Each is pushed back
-            const half = (overlap);
+            const half = overlap * 0.75;
 
             // We push the organism by (nx*half, ny*half) in world space
             ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);

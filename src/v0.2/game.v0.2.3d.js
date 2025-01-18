@@ -95,7 +95,7 @@ async function loadModel(objUrl) {
 // For debugging purposes, to check camera can see far enough
 function addCubeAtPos(x, y, z) {
     const cube = new THREE.Mesh(
-        new THREE.BoxGeometry(10, 10, 10),
+        new THREE.BoxGeometry(15, 15, 15),
         new THREE.MeshBasicMaterial({ color: 'red' })
     )
     scene.add(cube)
@@ -204,34 +204,27 @@ function hit3DFromCanvasClickPos(clickPos) {
 
 // Get 3D stage edges
 const stageBorder = 15;
+
 const stageEdges3D = {
     top: {
-        left: hit3DFromCanvasClickPos(
-            {
-                x: stageBorder,
-                y: stageBorder
-            }
-        ),
-        right: hit3DFromCanvasClickPos(
-            {
-                x: canvasWidth - stageBorder,
-                y: stageBorder
-            }
-        )
+        left: {
+            x: -(canvasWidth / 2) + stageBorder,
+            y: (canvasHeight / 2) - stageBorder
+        },
+        right: {
+            x: (canvasWidth / 2) - stageBorder,
+            y: (canvasHeight / 2) - stageBorder
+        }
     },
     bottom: {
-        left: hit3DFromCanvasClickPos(
-            {
-                x: stageBorder,
-                y: canvasHeight - stageBorder
-            }
-        ),
-        right: hit3DFromCanvasClickPos(
-            {
-                x: canvasWidth - stageBorder,
-                y: canvasHeight - stageBorder
-            }
-        )
+        left: {
+            x: -(canvasWidth / 2) + stageBorder,
+            y: -(canvasHeight / 2) + stageBorder
+        },
+        right: {
+            x: (canvasWidth / 2) - stageBorder,
+            y: -(canvasHeight / 2) + stageBorder
+        }
     }
 }
 

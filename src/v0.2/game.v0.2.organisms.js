@@ -16,7 +16,10 @@ import * as DNA from './game.v0.2.dna.js';
 // Global variables for setup
 
 const organisms = [];
-const defaultCombatStartPos = { x: -15, y: 0 }
+const defaultCombatStartPos = {
+    x: ThreeElements.stageEdges3D.top.left.x,
+    y: 0
+}
 const slowDownPerc = 0.01
 
 // Provide Brownian-esque motion
@@ -100,7 +103,7 @@ class Organism {
 
             // Save positions of (attached) nodes for overlapping
             // detection in combat
-            this.nodePositions = OrganismBuilder.gatherNodePositions(
+            this.nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
                 this.dnaSequence,
                 /* allowDetachingParts: */ false
             )
@@ -117,7 +120,7 @@ class Organism {
             )
 
             // Separate detachable parts into individual organisms
-            const detachedParts = OrganismBuilder.gatherNodePositions(
+            const detachedParts = OrganismBuilder.generateAbsoluteNodePositions(
                 this.dnaSequence,
                 /* allowDetachingParts: */ true
             ).filter(
@@ -144,7 +147,7 @@ class Organism {
         } else {
             // Build mode, static
 
-            this.nodePositions = OrganismBuilder.gatherNodePositions(
+            this.nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
                 this.dnaSequence,
                 /* allowDetachingParts: */ true
             )
@@ -220,8 +223,15 @@ class Organism {
             this.appliedVelocity.x = (this.velocity.x * totalMotorVelocityEffect)
             this.appliedVelocity.y = (this.velocity.y * totalMotorVelocityEffect)
 
-            this.mesh.position.x += this.appliedVelocity.x + randomOffset()
-            this.mesh.position.y += this.appliedVelocity.y + randomOffset()
+            const maxXDistInTick = Math.abs(
+                ThreeElements.stageEdges3D.top.left.x -
+                ThreeElements.stageEdges3D.top.right.x) * 0.025;
+            const maxYDistInTick = Math.abs(
+                ThreeElements.stageEdges3D.top.left.y -
+                ThreeElements.stageEdges3D.bottom.left.y) * 0.025;
+
+            this.mesh.position.x += (maxXDistInTick * this.appliedVelocity.x) + randomOffset()
+            this.mesh.position.y += (maxYDistInTick * this.appliedVelocity.y) + randomOffset()
 
             // Naturally slow down any residue velocity
             if (Math.abs(this.velocity.x) > 0) {
@@ -240,12 +250,12 @@ class Organism {
                     this.velocity.y -= slowDownPerc * Math.sign(this.velocity.y);
                 }
             }
-        }
 
-        // Rotate idly
-        this.mesh.rotation.z += Math.sin(
-            (this.random * Date.now()) * 0.001
-        ) * Math.random() * 0.025;
+            // Rotate idly
+            this.mesh.rotation.z += Math.sin(
+                (this.random * Date.now()) * 0.001
+            ) * Math.random() * 0.025;
+        }
     }
 }
 
@@ -273,16 +283,26 @@ function animate() {
 
             // Bounce off edges regardless
             if (
-                (organism.mesh.position.x >= 16 && Math.sign(organism.velocity.x) > 0)
+                (
+                    organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x &&
+                    Math.sign(organism.velocity.x) > 0)
                 ||
-                (organism.mesh.position.x <= -16 && Math.sign(organism.velocity.x) < 0)
+                (
+                    organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x &&
+                    Math.sign(organism.velocity.x) < 0)
             ) {
                 organism.velocity.x = -organism.velocity.x;
             }
             if (
-                (organism.mesh.position.y >= 7 && Math.sign(organism.velocity.y) > 0)
+                (
+                    organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y &&
+                    Math.sign(organism.velocity.y) > 0
+                )
                 ||
-                (organism.mesh.position.y <= -7 && Math.sign(organism.velocity.y) < 0)
+                (
+                    organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.right.y &&
+                    Math.sign(organism.velocity.y) < 0
+                )
             ) {
                 organism.velocity.y = -organism.velocity.y;
             }
