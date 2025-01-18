@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 
 const nodeSize = 11;
+const nodeDepth = 5;
 
 // Hexagon
 
@@ -41,7 +42,7 @@ function generateHexagonGeometry() {
     // Configure extrude settings (depth, no bevel, etc.)
     const extrudeSettings = {
         steps: 1,
-        depth: 0.5,
+        depth: nodeDepth,
         bevelEnabled: false
     };
 
