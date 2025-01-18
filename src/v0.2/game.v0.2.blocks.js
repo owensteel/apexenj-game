@@ -56,53 +56,6 @@ class BondingBlock extends DefaultBlock {
 
 /*
 
-    Attractor blocks
-
-*/
-
-const BLOCK_TYPENAME_ATTRACTOR = "attractor"
-class AttractorBlock extends DefaultBlock {
-    constructor() {
-        super();
-        this.targetBlock = {}
-
-        this.setTypeName(BLOCK_TYPENAME_ATTRACTOR)
-        this.setColor("blue")
-    }
-    setTargetBlock(targetBlock) {
-        this.targetBlock = targetBlock
-    }
-}
-// NOTE: AttractorBlock on its own is unusable.
-
-const BLOCK_ATTRACTOR_TYPEID_ALPHA = "attractor-alpha"
-class AttractorAlphaBlock extends AttractorBlock {
-    constructor() {
-        super();
-
-        this.setSymbol("α")
-        this.setTargetBlock({
-            typeName: "default"
-        })
-    }
-}
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_ATTRACTOR_TYPEID_ALPHA)
-
-const BLOCK_ATTRACTOR_TYPEID_BETA = "attractor-beta"
-class AttractorBetaBlock extends AttractorBlock {
-    constructor() {
-        super();
-
-        this.setSymbol("β")
-        this.setTargetBlock({
-            typeName: "default"
-        })
-    }
-}
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_ATTRACTOR_TYPEID_BETA)
-
-/*
-
     Motor
 
 */
@@ -146,8 +99,6 @@ export {
     BondingBlock,
     MotorBlock,
     HeartBlock,
-    AttractorAlphaBlock,
-    AttractorBetaBlock,
 
     // List of accessible block IDs
 
@@ -156,13 +107,7 @@ export {
     // Block type constants
 
     BLOCK_TYPENAME_DEFAULT,
-    BLOCK_TYPENAME_ATTRACTOR,
     BLOCK_TYPENAME_BONDING,
     BLOCK_TYPENAME_HEART,
     BLOCK_TYPENAME_MOTOR,
-
-    // Attractor type constants
-
-    BLOCK_ATTRACTOR_TYPEID_ALPHA,
-    BLOCK_ATTRACTOR_TYPEID_BETA
 }

@@ -80,12 +80,6 @@ function createNode(parentNode) {
                 case Blocks.BLOCK_TYPENAME_MOTOR:
                     createdNode.block = new Blocks.MotorBlock()
                     break
-                case Blocks.BLOCK_ATTRACTOR_TYPEID_ALPHA:
-                    createdNode.block = new Blocks.AttractorAlphaBlock()
-                    break
-                case Blocks.BLOCK_ATTRACTOR_TYPEID_BETA:
-                    createdNode.block = new Blocks.AttractorBetaBlock()
-                    break
             }
         }
 

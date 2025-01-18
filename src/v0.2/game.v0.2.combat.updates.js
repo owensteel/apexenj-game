@@ -9,14 +9,13 @@
 
 import * as ThreeElements from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Blocks from "./game.v0.2.blocks"
 
 // Cache for an update, so to prevent the same things (e.g the
 // world positions of nodes) being needlessly recalculated in
 // the same update. Is cleared after every combatUpdate
 const combatUpdateCache = {
     nodeWorldPositions: {},
-    attractorTargets: {}
+    orgAttractionTargets: {}
 }
 
 /*
@@ -26,7 +25,6 @@ const combatUpdateCache = {
 */
 
 // Block mechanics statics
-const enableBondingBlocks = false
 const maxAttractionVelocity = 0.05
 
 function updateOrganismInCombat(organism, opponent) {
@@ -50,153 +48,26 @@ function updateOrganismInCombat(organism, opponent) {
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpEdges(organism, opponent, overlappingNodes);
 
-        // Check block types for block interactions
-        for (const nodePair of overlappingNodes) {
-            const nodeOrg = nodePair.orgNodeWorldPos.node
-            const nodeOpp = nodePair.oppNodeWorldPos.node
-
-            // Bonding
-            if (
-                enableBondingBlocks &&
-                (
-                    (nodeOrg.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) ||
-                    (nodeOpp.block.typeName == Blocks.BLOCK_TYPENAME_BONDING)
-                )
-            ) {
-                if (!nodeOrg.block.isBonded && !nodeOpp.block.isBonded) {
-                    let toJoin, joinedTo;
-                    if (nodeOrg.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) {
-                        nodeOrg.block.isBonded = true
-
-                        toJoin = nodePair.oppNodeWorldPos
-                        toJoin.instance = opponent
-
-                        joinedTo = nodePair.orgNodeWorldPos
-                        joinedTo.instance = organism
-                    }
-                    if (nodeOpp.block.typeName == Blocks.BLOCK_TYPENAME_BONDING) {
-                        nodeOpp.block.isBonded = true
-
-                        toJoin = nodePair.orgNodeWorldPos
-                        toJoin.instance = organism
-
-                        joinedTo = nodePair.oppNodeWorldPos
-                        joinedTo.instance = opponent
-                    }
-                    // Find join position
-                    Organisms.bondOrganisms(
-                        toJoin,
-                        joinedTo
-                    )
-                }
-            }
-        }
+        // TODO: check block types for block interactions
     }
 
-    // Process nodes
+    /*
+    
+        Process nodes
+
+    */
+
     organismNodesWorld.forEach(orgNodeWorldPos => {
-        /*
+        // TODO: remove placeholder
+    });
+
+    /*
         
-            Attraction blocks
+        Attraction
 
-        */
-        if (orgNodeWorldPos.node.block.typeName == Blocks.BLOCK_TYPENAME_ATTRACTOR) {
-            // Find target
+    */
 
-            const thisAttractorBlock = orgNodeWorldPos.node.block
-
-            let targetNodeWorldPos = null
-
-            const getProximityToThisAttractor = (a) => {
-                // distance^2 for point
-                return (a.x - orgNodeWorldPos.x) ** 2 + (a.y - orgNodeWorldPos.y) ** 2;
-            }
-
-            const sortByProximityToThisAttractor = (a, b) => {
-                // distance^2 for point a
-                const distA = getProximityToThisAttractor(a);
-                // distance^2 for point b
-                const distB = getProximityToThisAttractor(b);
-
-                // sort ascending by distance^2
-                return distA - distB;
-            }
-
-            const findAttractorTargetNodeInThisOpp = () => {
-                const oppNodesWithMatchingBlocks = opponentNodesWorld.filter(
-                    (nP) => {
-                        // Find a node with a block that matches targetBlock requirements
-                        const nPBlock = nP.node.block
-                        for (const key of Object.keys(thisAttractorBlock.targetBlock)) {
-                            if (nPBlock[key] !== thisAttractorBlock.targetBlock[key]) {
-                                return false
-                            }
-                        }
-                        return true
-                    }
-                )
-                if (oppNodesWithMatchingBlocks.length < 1) {
-                    return false
-                } else if (oppNodesWithMatchingBlocks.length === 1) {
-                    return oppNodesWithMatchingBlocks[0]
-                } else {
-                    // Find closest target
-                    return oppNodesWithMatchingBlocks.sort(sortByProximityToThisAttractor)[0]
-                }
-            }
-
-            // Check if attractor has ID
-            if (!("attractorId" in thisAttractorBlock)) {
-                // Give attractor a complex ID
-                thisAttractorBlock.attractorId = String(Math.random()).split(".")[1]
-            }
-
-            // Check if attractor has target or not
-            if (!(thisAttractorBlock.attractorId in combatUpdateCache.attractorTargets)) {
-                // Give attractor an initial target in this opponent
-                targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
-            } else {
-                // Attractor already has a target — see if there's a closer one in this opponent
-                const existingTarget = combatUpdateCache.attractorTargets[thisAttractorBlock.attractorId]
-                const targetInThisOpponent = findAttractorTargetNodeInThisOpp()
-                if (
-                    targetInThisOpponent !== false &&
-                    getProximityToThisAttractor(targetInThisOpponent) < getProximityToThisAttractor(existingTarget)
-                ) {
-                    // New target is closer, change to this target instead
-                    targetNodeWorldPos = findAttractorTargetNodeInThisOpp()
-                } else {
-                    // Keep existing target
-                    targetNodeWorldPos = existingTarget
-                }
-            }
-
-            if (!targetNodeWorldPos) {
-                // Attractor has no target and thus is useless as a node, move onto next node
-                return;
-            }
-
-            // Update cache
-            combatUpdateCache.attractorTargets[thisAttractorBlock.attractorId] = targetNodeWorldPos
-
-            // Draw organism closer to target
-
-            const worldDist = {
-                x: targetNodeWorldPos.x - orgNodeWorldPos.x,
-                y: targetNodeWorldPos.y - orgNodeWorldPos.y
-            }
-            organism.velocity.x = Math.sign(worldDist.x) * maxAttractionVelocity
-            organism.velocity.y = Math.sign(worldDist.y) * maxAttractionVelocity
-
-            ThreeElements.rotateMeshToTarget(
-                organism.mesh,
-                orgNodeWorldPos.localNode.x,
-                orgNodeWorldPos.localNode.y,
-                targetNodeWorldPos.x,
-                targetNodeWorldPos.y
-            )
-        }
-    })
+    // TODO: attraction mechanic
 }
 
 /*
@@ -257,10 +128,7 @@ function bumpEdges(organism, opponent, overlappingNodes) {
             }
 
             // Each gets half the push, plus its own velocity
-            const half = (overlap * 0.5) + (
-                (organism.appliedVelocity.x) +
-                (opponent.appliedVelocity.x)
-            );
+            const half = (overlap * 0.5);
 
             // We push the organism by (nx*half, ny*half) in world space
             ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);
@@ -297,7 +165,7 @@ function combatUpdate() {
 
     // Clear cache for next update
     combatUpdateCache.nodeWorldPositions = {}
-    combatUpdateCache.attractorTargets = {}
+    combatUpdateCache.orgAttractionTargets = {}
 }
 
 export { combatUpdate }
