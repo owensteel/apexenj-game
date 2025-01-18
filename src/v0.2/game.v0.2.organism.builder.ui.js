@@ -314,7 +314,7 @@ function nodeClickHandler(e) {
     let connectingNode = null
     let connectingEdge = 0
 
-    for (let hexEdgeIndex = 0; hexEdgeIndex < 5; hexEdgeIndex++) {
+    for (let hexEdgeIndex = 0; hexEdgeIndex < 6; hexEdgeIndex++) {
         const neighbourHex = hexGrid.hexTable[clickedHex.neighbours[hexEdgeIndex]]
         const actualEdge = hexEdgeIndex + 1
 
@@ -333,10 +333,9 @@ function nodeClickHandler(e) {
     }
 
     if (!connectingNode) {
+        console.warn("no connecting edge found")
         return
     }
-
-    console.log("connecting node", { connectingNode, connectingEdge })
 
     const createdNode = createNode(connectingNode, connectingEdge)
     console.log("created node", createdNode)
