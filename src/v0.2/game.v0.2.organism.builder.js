@@ -9,117 +9,117 @@
 
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
-import { cloneObject } from "./game.v0.2.utils";
-import { enforceSymmetry } from './game.v0.2.dna';
 
-const nodeMeshSize = 1;
-const defaultSpread = 1.25;
+const nodeSize = 11;
 
-const shrinkingChildrenFlag = false;
-const maxLevel = 10
-const levelToSizePerc = (level) => {
-    if (!shrinkingChildrenFlag) {
-        return 1
+// Hexagon
+
+function generateHexagonGeometry() {
+    // Create a new shape for the hexagon
+    const hexShape = new THREE.Shape();
+
+    // Define a radius for the hexagon
+    const radius = nodeSize;
+
+    // Move to the starting point
+    hexShape.moveTo(
+        Math.cos(0) * radius,
+        Math.sin(0) * radius
+    );
+
+    // Create each side of the hexagon
+    for (let i = 1; i < 6; i++) {
+        hexShape.lineTo(
+            Math.cos(i * (Math.PI / 3)) * radius,
+            Math.sin(i * (Math.PI / 3)) * radius
+        );
     }
-    return Math.max(0.1, (1 - (level / maxLevel)))
+
+    // Close the path to form a proper hexagon
+    hexShape.closePath();
+
+    // Configure extrude settings (depth, no bevel, etc.)
+    const extrudeSettings = {
+        steps: 1,
+        depth: 0.5,
+        bevelEnabled: false
+    };
+
+    // Generate the extruded geometry
+    return new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
 }
 
-// Recursively collect positions of all appendage/root nodes
+// Generate positions of all appendage/root nodes in world space
+// So converting the node tree into a 2D array of positions
 
-function gatherNodePositions(
+function generateAbsoluteNodePositions(
     currentNode,
     allowDetachingParts = false,
     x = 0,
     y = 0,
     level = 0,
-    angleStart = Math.PI,
-    angleEnd = -Math.PI,
     positionsArray = [],
     parentNodePos = null,
     currentNodeAngle = 0
 ) {
     // Prevent null crash
     if (!currentNode) {
-        return
+        return;
     }
 
     // If node is "appendage" or "root", record its position
     if (currentNode.role !== "appendage" && currentNode.role !== "root") {
         // Cannot be added to union
-        return
+        return;
     }
 
-    // Create directional symmetry 
-    if (enforceSymmetry && currentNode.role == "root") {
-        // Clone root node before editing or it will affect
-        // original sequence
-        const newRootNode = {
-            role: "root",
-            block: currentNode.block,
-            offshoots: []
-        }
-        // Duplicate its single offshoot (there is only one
-        // allowed) 4 times for symmetry
-        for (let dirI = 0; dirI < 4; dirI++) {
-            // Individual clone for each offshoot
-            const rootNodeClone = cloneObject(currentNode)
-            newRootNode.offshoots.push(rootNodeClone.offshoots[0])
-        }
-        currentNode = newRootNode;
-    }
-
-    if (currentNode.detach == true && !allowDetachingParts) {
+    if (currentNode.detach === true && !allowDetachingParts) {
         // Do not add entirety of detaching node
-        return
+        return;
     }
 
-    const currentNodePosIndex = positionsArray.length
+    const currentNodePosIndex = positionsArray.length;
     const currentNodePosFinal = {
         x,
         y,
         z: 0,
-        detach: (currentNode.detach == true),
+        detach: currentNode.detach === true,
         node: currentNode,
         level,
         index: currentNodePosIndex,
         parentNodePos,
         mesh: null,
         angle: currentNodeAngle
-    }
+    };
     positionsArray.push(currentNodePosFinal);
 
-    // The distance from parent to child (radius).
-    const radius = defaultSpread * levelToSizePerc(level);
+    // The distance from parent to child (you can tweak for better spacing)
+    const radius = nodeSize * 1.75;
 
-    // If there are children, distribute them radially
-    if (currentNode.offshoots && currentNode.offshoots.length > 0) {
-        const childCount = currentNode.offshoots.length;
-        const angleSlice = (angleEnd - angleStart) / childCount;
+    // For a flat-topped hex, children are spaced at 0°, 60°, 120°, 180°, 240°, 300°
 
-        for (let i = 0; i < childCount; i++) {
-            const child = currentNode.offshoots[i];
-            const childAngle = angleStart + angleSlice * (i + 0.5);
+    for (const edgeIndex in Object.keys(currentNode.edges)) {
+        const child = currentNode.edges[edgeIndex]
+        if (!child) continue;
 
-            // Convert polar to cartesian
-            const childX = x + radius * Math.cos(childAngle);
-            const childY = y + radius * Math.sin(childAngle);
+        // Each of the 6 directions for a flat-top hex
+        const childAngle = (edgeIndex * (Math.PI / 3)) + 1.575;
 
-            const subAngleStart = angleStart + angleSlice * i;
-            const subAngleEnd = angleStart + angleSlice * (i + 1);
+        // Convert polar to cartesian
+        const childX = x + radius * Math.cos(childAngle);
+        const childY = y + radius * Math.sin(childAngle);
 
-            gatherNodePositions(
-                child,
-                allowDetachingParts,
-                childX,
-                childY,
-                level + 1,
-                subAngleStart,
-                subAngleEnd,
-                positionsArray,
-                currentNodePosFinal,
-                childAngle
-            );
-        }
+        // Recurse
+        generateAbsoluteNodePositions(
+            child,
+            allowDetachingParts,
+            childX,
+            childY,
+            level + 1,
+            positionsArray,
+            currentNodePosFinal,
+            childAngle
+        );
     }
 
     return positionsArray;
@@ -138,7 +138,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
     let meshUnion = null;
     const meshMaterials = [];
 
-    // For each position, build a sphere mesh
+    // For each position, build a node mesh
 
     positions.forEach((pos) => {
         // Don't add detaching parts to the union
@@ -146,56 +146,51 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             return
         }
 
-        const sphereGeom = new THREE.SphereGeometry(
-            nodeMeshSize,
-            4,
-            4
-        );
-        const sphereMaterial = new THREE.MeshBasicMaterial(
+        const nodeGeom = generateHexagonGeometry()
+        const nodeMaterial = new THREE.MeshBasicMaterial(
             {
                 color: pos.node.block.color
             }
         )
-        meshMaterials.push(sphereMaterial)
-        const sphereMesh = new THREE.Mesh(
-            sphereGeom,
-            sphereMaterial
+        meshMaterials.push(nodeMaterial)
+        const nodeMesh = new THREE.Mesh(
+            nodeGeom,
+            nodeMaterial
         );
-        sphereMesh.position.set(pos.x, pos.y, pos.z);
-
-        // Child nodes reduce in size
-        sphereMesh.scale.x = levelToSizePerc(pos.level)
-        sphereMesh.scale.y = levelToSizePerc(pos.level)
+        nodeMesh.position.set(pos.x, pos.y, pos.z);
 
         // Required for correct placing in a union
-        sphereMesh.updateMatrix();
+        nodeMesh.updateMatrix();
 
         // Reference to node's mesh
-        pos.mesh = sphereMesh
+        pos.mesh = nodeMesh
+
+        // Mesh's reference to node
+        nodeMesh.nodePos = pos
 
         if (!meshUnion) {
             // First shape
             if (formUnionMesh) {
-                meshUnion = CSG.fromMesh(sphereMesh)
+                meshUnion = CSG.fromMesh(nodeMesh)
             } else {
-                meshUnion = sphereMesh;
+                meshUnion = nodeMesh;
             }
         } else {
             // Union with the accumulated shape
             if (formUnionMesh) {
-                meshUnion = meshUnion.union(CSG.fromMesh(sphereMesh));
+                meshUnion = meshUnion.union(CSG.fromMesh(nodeMesh));
             } else {
                 if (pos.parentNodePos && pos.parentNodePos.mesh) {
                     const parentMesh = pos.parentNodePos.mesh
-                    sphereMesh.position.set(
+                    nodeMesh.position.set(
                         pos.x - pos.parentNodePos.x,
                         pos.y - pos.parentNodePos.y,
                         pos.z
                     );
-                    parentMesh.add(sphereMesh)
+                    parentMesh.add(nodeMesh)
                 } else {
                     console.warn("Could not add node mesh to a parent mesh, added to main mesh instead with global position")
-                    meshUnion.add(sphereMesh)
+                    meshUnion.add(nodeMesh)
                 }
             }
         }
@@ -213,26 +208,8 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
     return meshUnion;
 }
 
-function buildSeamlessBodyFromNodes(rootNodeUncloned, allowDetachingParts = false, formUnionMesh = false) {
-    console.log("building body...", { formUnionMesh })
-
-    // Clone to prevent detachment caching from entering original input
-    const rootNodeClone = cloneObject(rootNodeUncloned)
-
-    // Collect all node positions
-    const organismNodePositions = gatherNodePositions(rootNodeClone, allowDetachingParts)
-
-    // Build
-    return buildBodyFromNodePositions(
-        organismNodePositions,
-        allowDetachingParts,
-        formUnionMesh
-    )
-}
-
 export {
-    buildSeamlessBodyFromNodes,
-    gatherNodePositions,
+    generateAbsoluteNodePositions,
     buildBodyFromNodePositions,
-    nodeMeshSize
+    nodeSize
 }

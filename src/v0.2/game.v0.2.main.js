@@ -7,7 +7,7 @@
 */
 
 import * as DNA from "./game.v0.2.dna";
-import * as DNARenderer from "./game.v0.2.dna.renderer";
+import * as OrganismBuilderUI from "./game.v0.2.organism.builder.ui";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
 import { cloneObject } from "./game.v0.2.utils";
@@ -31,12 +31,6 @@ combatToggleButton.onclick = () => {
 // Init all
 
 function init() {
-    // Init canvas
-
-    const gameCanvas = document.getElementById('game-canvas');
-    gameCanvas.style.width = window.innerWidth
-    gameCanvas.style.height = 300
-
     // Init player
 
     const playerOrganism = Organisms.addOrganism(
@@ -45,12 +39,14 @@ function init() {
 
     // Init DNA renderer
 
-    DNARenderer.init(playerOrganism)
+    OrganismBuilderUI.init(playerOrganism)
+    OrganismBuilderUI.toggleVisibility()
 
     // Init combat button
 
     combatToggleButton.addEventListener("click", () => {
         Combat.toggleCombat(playerOrganism)
+        OrganismBuilderUI.toggleVisibility()
     })
     document.body.appendChild(combatToggleButton)
 }

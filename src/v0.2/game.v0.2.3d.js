@@ -12,20 +12,34 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 
-const gameStageWrapper = document.getElementById("game-stage-wrapper");
+const gameStageWrapper = document.createElement("game-stage-wrapper");
+document.getElementById('game-wrapper').appendChild(gameStageWrapper)
 
 // Initialize Three.js scene
 
+const canvasWidth = window.innerWidth;
+const canvasHeight = 300;
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / 300, 0.1, 1000);
-camera.position.set(0, 0, 30);
+const camera = new THREE.OrthographicCamera(
+    -canvasWidth / 2,   // left
+    canvasWidth / 2,   // right
+    canvasHeight / 2,  // top
+    -canvasHeight / 2,  // bottom
+    1,            // near clipping plane
+    1000          // far clipping plane
+);
+// With an orthographic camera, distance has no effect
+camera.position.set(0, 0, 10);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xffffff, 0);
-renderer.setSize(window.innerWidth, 300);
-renderer.domElement.setAttribute("id", "game-stage")
-gameStageWrapper.appendChild(renderer.domElement);
+renderer.setSize(canvasWidth, canvasHeight);
+
+const ThreeCanvas = renderer.domElement
+ThreeCanvas.setAttribute("id", "game-stage")
+gameStageWrapper.appendChild(ThreeCanvas);
 
 // Outline filter
 
@@ -81,7 +95,7 @@ async function loadModel(objUrl) {
 // For debugging purposes, to check camera can see far enough
 function addCubeAtPos(x, y, z) {
     const cube = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.BoxGeometry(10, 10, 10),
         new THREE.MeshBasicMaterial({ color: 'red' })
     )
     scene.add(cube)
@@ -165,11 +179,70 @@ function rotateMeshToTarget(mesh, nx, ny, targetX, targetY) {
     }
 }
 
+// From canvas click coords to 3D space coords
+function hit3DFromCanvasClickPos(clickPos) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const mouse = new THREE.Vector2(
+        ((clickPos.x - rect.left) / rect.width) * 2 - 1,
+        -((clickPos.y - rect.top) / rect.height) * 2 + 1
+    );
+
+    // Make a new Raycaster
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+
+    // Get all intersections with a group or array of meshes in your scene
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0) {
+        // intersects[0] is the closest object
+        return intersects[0];
+    }
+
+    return false
+}
+
+// Get 3D stage edges
+const stageBorder = 15;
+const stageEdges3D = {
+    top: {
+        left: hit3DFromCanvasClickPos(
+            {
+                x: stageBorder,
+                y: stageBorder
+            }
+        ),
+        right: hit3DFromCanvasClickPos(
+            {
+                x: canvasWidth - stageBorder,
+                y: stageBorder
+            }
+        )
+    },
+    bottom: {
+        left: hit3DFromCanvasClickPos(
+            {
+                x: stageBorder,
+                y: canvasHeight - stageBorder
+            }
+        ),
+        right: hit3DFromCanvasClickPos(
+            {
+                x: canvasWidth - stageBorder,
+                y: canvasHeight - stageBorder
+            }
+        )
+    }
+}
+
 export {
+    ThreeCanvas,
     scene,
+    stageEdges3D,
     renderScene,
     loadModel,
     translateMeshInWorld,
     convertNodePosIntoWorldPos,
-    rotateMeshToTarget
+    rotateMeshToTarget,
+    hit3DFromCanvasClickPos
 }
