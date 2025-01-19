@@ -17,16 +17,25 @@ import * as DNA from './game.v0.2.dna.js';
 
 const organisms = [];
 const defaultCombatStartPos = {
-    x: ThreeElements.stageEdges3D.top.left.x,
+    x: ThreeElements.stageEdges3D.top.left.x + 30,
     y: 0
 }
-const slowDownPerc = 0.01
 
 // Provide Brownian-esque motion
+
 const STEP_SIZE = 0.025;
 function randomOffset() {
     return (Math.random() * 2 - 1) * STEP_SIZE;
 }
+
+// Motion general
+
+const maxXDistInTick = Math.abs(
+    ThreeElements.stageEdges3D.top.left.x -
+    ThreeElements.stageEdges3D.top.right.x) * 0.025;
+const maxYDistInTick = Math.abs(
+    ThreeElements.stageEdges3D.top.left.y -
+    ThreeElements.stageEdges3D.bottom.left.y) * 0.025;
 
 /*
 
@@ -163,6 +172,7 @@ class Organism {
             }
             this.mesh = newMesh
 
+            // Center stage during design
             this.mesh.position.set(0, 0, 0)
             this.mesh.rotation.set(0, 0, 0)
         }
@@ -191,70 +201,59 @@ class Organism {
             return
         }
 
-        // Motor blocks
-
-        // A single motor increases velocity by a percent
-        // Should be just enough that the effect is visible
-        // to the player, but not too much so as to make it
-        // out of control
-        const motorIncreaseEffect = 0.5
-
-        // The total of all the effects ultimately applied
-        let totalMotorVelocityEffect = 1;
-
-        // Rotate meshes
-        if ("motor" in this.nodesByBlockTypeCache) {
-            for (const motorNodePos of this.nodesByBlockTypeCache["motor"]) {
-                if (!motorNodePos.rotZUpdated) {
-                    motorNodePos.mesh.rotation.z = Math.atan2(motorNodePos.y, motorNodePos.x)
-                    motorNodePos.rotZUpdated = true
-                }
-                motorNodePos.mesh.rotation.x += 0.1
-
-                // Add this motor's effect to velocity
-                totalMotorVelocityEffect += motorIncreaseEffect
-            }
-        }
-
-        // Idle animation
+        // Live animation
         if (movementToggle) {
-            // Apply movement
 
-            this.appliedVelocity.x = (this.velocity.x * totalMotorVelocityEffect)
-            this.appliedVelocity.y = (this.velocity.y * totalMotorVelocityEffect)
+            // Start with the organism's base velocity:
+            this.appliedVelocity.x = this.velocity.x;
+            this.appliedVelocity.y = this.velocity.y;
 
-            const maxXDistInTick = Math.abs(
-                ThreeElements.stageEdges3D.top.left.x -
-                ThreeElements.stageEdges3D.top.right.x) * 0.025;
-            const maxYDistInTick = Math.abs(
-                ThreeElements.stageEdges3D.top.left.y -
-                ThreeElements.stageEdges3D.bottom.left.y) * 0.025;
+            // Gather motor effects in some combined vector:
+            let totalMotorX = 0;
+            let totalMotorY = 0;
+            let totalPower = 0;  // track combined power
+
+            const motorPower = 0.05
+
+            if ("motor" in this.nodesByBlockTypeCache) {
+                // Each motor node modifies the velocity by pushing in a certain direction
+                for (const motorNodePos of this.nodesByBlockTypeCache["motor"]) {
+                    // The local angle from organism root => motor node
+                    const motorAngle = Math.atan2(motorNodePos.y, motorNodePos.x);
+
+                    // Convert that to a velocity vector:
+                    // e.g. each motor pushes outward along (cos(angle), sin(angle)) times power
+                    const vx = -(motorPower * Math.cos(motorAngle));
+                    const vy = -(motorPower * Math.sin(motorAngle));
+
+                    totalMotorX += vx;
+                    totalMotorY += vy;
+                    totalPower += motorPower;
+
+                    // Animate the "motor" mesh visually (e.g. spinning some axis)
+                    motorNodePos.mesh.rotation.x += 0.1 * Math.cos(motorAngle);
+                    motorNodePos.mesh.rotation.y += 0.1 * Math.sin(motorAngle);
+                }
+            }
+
+            // Add the total motor effect to the applied velocity
+            this.appliedVelocity.x += totalMotorX;
+            this.appliedVelocity.y += totalMotorY;
+
+            // Actually apply movement
 
             this.mesh.position.x += (maxXDistInTick * this.appliedVelocity.x) + randomOffset()
             this.mesh.position.y += (maxYDistInTick * this.appliedVelocity.y) + randomOffset()
 
-            // Naturally slow down any residue velocity
-            if (Math.abs(this.velocity.x) > 0) {
-                if (Math.abs(this.velocity.x) < slowDownPerc) {
-                    // If the velocity is smaller than the slow-down, clamp to 0
-                    this.velocity.x = 0;
-                } else {
-                    // Otherwise, subtract
-                    this.velocity.x -= slowDownPerc * Math.sign(this.velocity.x);
-                }
-            }
-            if (Math.abs(this.velocity.y) > 0) {
-                if (Math.abs(this.velocity.y) < slowDownPerc) {
-                    this.velocity.y = 0;
-                } else {
-                    this.velocity.y -= slowDownPerc * Math.sign(this.velocity.y);
-                }
-            }
+            // Rotate slightly for natural randomness
 
-            // Rotate idly
             this.mesh.rotation.z += Math.sin(
-                (this.random * Date.now()) * 0.001
-            ) * Math.random() * 0.025;
+                (this.random * Date.now()) * 0.01
+            ) * Math.random() * 0.0125;
+
+            // Reduce randomness if motors are supplying velocity
+
+            this.mesh.rotation.z *= 1 - (totalPower / 1)
         }
     }
 }

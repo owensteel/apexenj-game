@@ -11,7 +11,7 @@ import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
 import * as OrganismBuilder from "./game.v0.2.organism.builder"
 import * as Blocks from "./game.v0.2.blocks";
-import { cloneObject, getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
+import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 
 // Hexagons
 
@@ -36,6 +36,12 @@ function generateHexagonGrid() {
     canvas.height = gameWrapper.clientHeight
     const ctx = canvas.getContext("2d");
 
+    // Offset so hexagons "fit"
+    const hexGridOffset = {
+        x: 0,
+        y: 0
+    }
+
     // Side length of each hex
     const side = hexGrid.side;
 
@@ -55,8 +61,8 @@ function generateHexagonGrid() {
         for (let i = 0; i < 6; i++) {
             const angleDeg = 60 * i; // degrees
             const angleRad = (Math.PI / 180) * angleDeg;
-            const x = cx + side * Math.cos(angleRad);
-            const y = cy + side * Math.sin(angleRad);
+            const x = (cx + side * Math.cos(angleRad)) + hexGridOffset.x;
+            const y = (cy + side * Math.sin(angleRad)) + hexGridOffset.y;
             if (i === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -227,21 +233,14 @@ function deleteNodeFromSequence(node) {
 }
 
 function createNode(parentNode, edge) {
-    const createdNode = DNA.addNodeToParent(parentNode, edge)
-    if (createdNode) {
-        // Set node block
-        if (selectedBlockType !== Blocks.BLOCK_TYPENAME_DEFAULT) {
-            switch (selectedBlockType) {
-                case Blocks.BLOCK_TYPENAME_BONDING:
-                    createdNode.block = new Blocks.BondingBlock()
-                    break
-                case Blocks.BLOCK_TYPENAME_MOTOR:
-                    createdNode.block = new Blocks.MotorBlock()
-                    break
-            }
-        }
-        renderFocusedOrganism()
-    }
+    const createdNode = DNA.addNodeToParent(
+        parentNode,
+        edge,
+        selectedBlockType
+    )
+
+    renderFocusedOrganism()
+
     return createdNode
 }
 
