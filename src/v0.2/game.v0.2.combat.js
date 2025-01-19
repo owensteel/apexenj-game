@@ -110,7 +110,7 @@ function toggleCombat(playerOrganismImport) {
 */
 
 // Control TPS for debugging purposes
-const combatTicksPerSec = 12
+const combatTicksPerSec = 24
 
 // Updates per tick = speed of play, because a UPT value higher
 // than 1 allows updates/movements to "happen between frames"

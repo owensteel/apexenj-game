@@ -122,18 +122,20 @@ function bumpEdges(organism, opponent, overlappingNodes) {
                 ny = dy / dist;
             } else {
                 // exact same coords => arbitrary direction
-                nx = Math.random();
-                ny = Math.random();
+                nx = 1;
+                ny = 1;
             }
 
             // Each is pushed back
-            const half = overlap * 0.75;
+            const half = overlap * 0.5;
 
-            // We push the organism by (nx*half, ny*half) in world space
-            ThreeElements.translateMeshInWorld(organism.mesh, nx * half, ny * half);
+            // Move organism mesh outward
+            organism.mesh.position.x += nx * half;
+            organism.mesh.position.y += ny * half;
 
-            // We push the opponent by -(nx*half, ny*half)
-            ThreeElements.translateMeshInWorld(opponent.mesh, -nx * half, -ny * half);
+            // Move opponent mesh inward
+            opponent.mesh.position.x -= nx * half;
+            opponent.mesh.position.y -= ny * half;
         }
     }
 }
