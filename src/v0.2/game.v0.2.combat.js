@@ -34,6 +34,8 @@ const combatSessionCache = {
     originalEnemy: null
 }
 
+const maxAttractionVelocity = 0.05
+
 function startCombat() {
     console.log("starting combat...")
 
@@ -43,7 +45,7 @@ function startCombat() {
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         {
-            x: stageEdges3D.top.right.x,
+            x: stageEdges3D.top.right.x - 30,
             y: 0
         }
     )
@@ -56,6 +58,14 @@ function startCombat() {
     // Set session values
 
     combatRunning = true
+
+    // Start organisms' initial velocity
+
+    playerOrganism.velocity.x = maxAttractionVelocity
+    playerOrganism.velocity.y = 0
+
+    enemyOrganism.velocity.x = -maxAttractionVelocity
+    enemyOrganism.velocity.y = 0
 }
 
 function endCombat() {

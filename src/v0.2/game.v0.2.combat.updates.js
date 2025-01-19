@@ -23,9 +23,6 @@ const combatUpdateCache = {
 
 */
 
-// Block mechanics statics
-const maxAttractionVelocity = 0.05
-
 function updateOrganismInCombat(organism, opponent) {
     // Calc world positions of all nodes, if not yet done in this update
     [organism, opponent].forEach((org) => {
@@ -49,24 +46,6 @@ function updateOrganismInCombat(organism, opponent) {
 
         // TODO: check block types for block interactions
     }
-
-    /*
-        
-        Natural attraction to center for "bashing" mechanic
-
-    */
-
-    const orgWorldPos = organism.mesh.position
-    const targetWorldPos = { x: 0, y: 0 }
-
-    // Draw organism closer to center
-
-    const worldDist = {
-        x: targetWorldPos.x - orgWorldPos.x,
-        y: targetWorldPos.y - orgWorldPos.y
-    }
-    organism.velocity.x = Math.sign(worldDist.x) * maxAttractionVelocity
-    organism.velocity.y = Math.sign(worldDist.y) * maxAttractionVelocity
 }
 
 /*
