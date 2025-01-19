@@ -213,17 +213,6 @@ builderWrapper.appendChild(nodeBin)
 let selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT
 
 function deleteNodeFromSequence(node) {
-    // Confirm
-    if (
-        node.edges.filter((e) => {
-            return e && "role" in e
-        }).length > 0
-        &&
-        !confirm("Delete this node? This will also delete all of its branches.")
-    ) {
-        return
-    }
-
     // Parent null method
     node.parentNode.edges[node.edgeOfParent] = null
 
