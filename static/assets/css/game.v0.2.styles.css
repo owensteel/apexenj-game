@@ -12,6 +12,7 @@ li {
 }
 
 game-wrapper {
+    background-color: #fff;
     position: relative;
     display: block;
     overflow: hidden;
@@ -45,7 +46,7 @@ game-wrapper hex-grid {
     position: absolute;
     z-index: -1;
     display: block;
-    opacity: 0.25;
+    opacity: 0.125;
     top: 0px;
     bottom: 0px;
     left: 0px;
