@@ -65,6 +65,7 @@ function generateAbsoluteNodePositions(
 ) {
     // Prevent null crash
     if (!currentNode) {
+        console.warn("null node encountered")
         return;
     }
 
@@ -76,6 +77,11 @@ function generateAbsoluteNodePositions(
 
     if (currentNode.detach === true && !allowDetachingParts) {
         // Do not add entirety of detaching node
+        return;
+    }
+
+    if (currentNode.builderUIBeingDragged) {
+        // For UI effect where node appears "picked up"
         return;
     }
 
@@ -102,6 +108,11 @@ function generateAbsoluteNodePositions(
     for (const edgeIndex in Object.keys(currentNode.edges)) {
         const child = currentNode.edges[edgeIndex]
         if (!child) continue;
+
+        // Add parentNode and edgeOfParent to child as these
+        // are references that must be refreshed
+        child.parentNode = currentNode
+        child.edgeOfParent = edgeIndex
 
         // Each of the 6 directions for a flat-top hex
         const childAngle = (edgeIndex * (Math.PI / 3)) + 1.575;

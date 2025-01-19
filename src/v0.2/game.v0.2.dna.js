@@ -2,7 +2,7 @@
 
     DNA
 
-
+    Provides node and sequence structures.
 
 */
 
@@ -11,16 +11,23 @@ import * as Blocks from './game.v0.2.blocks'
 // Node class
 
 class dnaNode {
-    constructor(role, block, edges = [], detach = false) {
+    constructor(role, block, edges = [], detach = false, parentNode = null, edgeOfParent = null) {
         this.role = role
         this.block = block
 
-        this.edges = new Array(7)
-        for (let eI = 0; eI < 5; eI++) {
-            this.edges[eI] = edges[eI]
+        this.edges = new Array(6)
+        for (let eI = 0; eI < 6; eI++) {
+            if (edges[eI]) {
+                this.edges[eI] = edges[eI]
+            } else {
+                this.edges[eI] = null
+            }
         }
 
         this.detach = detach
+
+        this.parentNode = parentNode
+        this.edgeOfParent = edgeOfParent
     }
 }
 
@@ -34,17 +41,37 @@ const enforceSymmetry = false
 const demoDnaSequence = new dnaNode(
     "root",
     new Blocks.HeartBlock(),
-    // [
-    //     new dnaNode(
-    //         "appendage",
-    //         new Blocks.DefaultBlock()
-    //     ),
-    //     new dnaNode(
-    //         "appendage",
-    //         new Blocks.DefaultBlock(),
-    //         []
-    //     )
-    // ]
+    [
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock()
+        ),
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock(),
+            []
+        ),
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock(),
+            []
+        ),
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock(),
+            []
+        ),
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock(),
+            []
+        ),
+        new dnaNode(
+            "appendage",
+            new Blocks.DefaultBlock(),
+            []
+        )
+    ]
 )
 
 // Provided for cases where an organism is to be created and then imminently
@@ -69,6 +96,11 @@ function addNodeToParent(parentNode = null, edge = null) {
 
     if (parentNode && !isNaN(edge)) {
         parentNode.edges[edge] = node
+
+        // These values will be added in the building process
+        // anyway, but until then
+        node.parentNode = parentNode
+        node.edgeOfParent = edge
     } else {
         console.warn("Node created without a parent")
     }
@@ -76,4 +108,10 @@ function addNodeToParent(parentNode = null, edge = null) {
     return node
 }
 
-export { addNodeToParent, demoDnaSequence, placeholderDefaultRootNode, enforceSymmetry }
+export {
+    dnaNode,
+    addNodeToParent,
+    demoDnaSequence,
+    placeholderDefaultRootNode,
+    enforceSymmetry
+}

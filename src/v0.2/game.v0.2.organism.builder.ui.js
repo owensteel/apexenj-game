@@ -9,8 +9,9 @@
 import * as ThreeElements from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
+import * as OrganismBuilder from "./game.v0.2.organism.builder"
 import * as Blocks from "./game.v0.2.blocks";
-import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
+import { cloneObject, getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 
 // Hexagons
 
@@ -42,8 +43,8 @@ function generateHexagonGrid() {
     // - The 'width' of each hex is 2 * side
     // - The vertical distance between columns is sqrt(3) * side
     // - The horizontal distance between centres of adjacent columns is 1.5 * side
-    const columns = Math.ceil(gameWrapper.clientWidth / side);
-    const rows = Math.ceil(gameWrapper.clientHeight / side);
+    const columns = Math.ceil(gameWrapper.clientWidth / (side * 1.5));
+    const rows = Math.ceil(gameWrapper.clientHeight / (side * 1.8));
     const horizontalSpacing = 1.5 * side;       // gap between columns
     const verticalSpacing = Math.sqrt(3) * side; // gap between rows
 
@@ -208,15 +209,17 @@ let selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT
 function deleteNodeFromSequence(node) {
     // Confirm
     if (
-        node.offshoots.length > 0
+        node.edges.filter((e) => {
+            return e && "role" in e
+        }).length > 0
         &&
         !confirm("Delete this node? This will also delete all of its branches.")
     ) {
         return
     }
 
-    // Waste collection method
-    node.toBeRemoved = true;
+    // Parent null method
+    node.parentNode.edges[node.edgeOfParent] = null
 
     // Nodes to be removed will be removed from main DNA
     // sequence object when rendered
@@ -300,12 +303,13 @@ function nodeClickHandler(e) {
         return
     }
 
-    // First check if a node exists at this point
+    // Check if a node exists at this point
 
     const nodeAtClickPoint = get3DNodeAtScreenPos({
         x: clickedHex.x, y: clickedHex.y
     })
     if (nodeAtClickPoint) {
+        console.log(nodeAtClickPoint)
         return
     }
 
@@ -340,13 +344,13 @@ function nodeClickHandler(e) {
     const createdNode = createNode(connectingNode, connectingEdge)
     console.log("created node", createdNode)
 }
-
 builderWrapper.addEventListener("click", nodeClickHandler)
 
 // Node dragging
 
 const nodeDragging = {
-    currentNode: null
+    currentNode: null,
+    fakeTreeMesh: null
 }
 
 let binBoundingBox = null
@@ -356,8 +360,7 @@ const isInBin = (x, y) => {
     )
 }
 
-const nodeDraggingOverlay = document.createElement("game-node-dragging-overlay")
-nodeDraggingOverlay.onmousemove = (e) => {
+const nodeDraggingMouseMoveHandler = (e) => {
     if (nodeDragging.currentNode) {
         // Highlight bin on hover
         if (isInBin(e.pageX, e.pageY)) {
@@ -366,49 +369,108 @@ nodeDraggingOverlay.onmousemove = (e) => {
             nodeBin.style.transform = "scale(1)"
         }
 
+        // Get world pos of mouse pos
+        const pos3D = ThreeElements.mousePosTo3DPos({ x: e.pageX, y: e.pageY })
+
         // Render drag visuals
-        nodeDraggingOverlay.innerHTML = ""
-        renderTree(
-            nodeDragging.currentNode,
-            nodeDraggingOverlay,
-            e.pageX,
-            e.pageY
+        nodeDragging.fakeTreeMesh.position.set(
+            pos3D.x,
+            pos3D.y,
+            0
         )
     }
 }
-nodeDraggingOverlay.onmouseup = (e) => {
+builderWrapper.addEventListener("mousemove", nodeDraggingMouseMoveHandler)
+builderWrapper.addEventListener("touchmove", nodeDraggingMouseMoveHandler)
+
+const nodeDraggingMouseUpHandler = (e) => {
     if (nodeDragging.currentNode) {
         // Check if user has put node in the bin
         if (isInBin(e.pageX, e.pageY)) {
             deleteNodeFromSequence(nodeDragging.currentNode)
-
-            // If focused node was deleted, return to parent
-            if (nodeFocusHistory.focusedNode.beingDragged) {
-                goToPreviousNode()
-            }
         }
 
-        // Remove drag visuals
+        // Reset drag visuals
         nodeBin.style.transform = "scale(1)"
-        nodeDraggingOverlay.remove()
-        nodeDraggingOverlay.innerHTML = ""
+        builderWrapper.appendChild(builderHexGrid)
+        ThreeElements.scene.remove(nodeDragging.fakeTreeMesh)
 
-        // Reset node tree to original state
-        delete nodeDragging.currentNode["beingDragged"]
+        // Reset organism to original state
+        delete nodeDragging.currentNode["builderUIBeingDragged"]
         nodeDragging.currentNode = null
+        focusedOrganism.rebuildMesh()
     }
 }
+builderWrapper.addEventListener("mouseup", nodeDraggingMouseUpHandler)
+builderWrapper.addEventListener("touchend", nodeDraggingMouseUpHandler)
 
-function startDraggingNode(node, e) {
-    // Setup bin
+function startDraggingNode(node) {
+    // Setup elements
     binBoundingBox = getGlobalBoundingBoxOfHTMLElement(nodeBin)
+    builderHexGrid.remove()
 
-    node.beingDragged = true
+    // Set dragged node
     nodeDragging.currentNode = node
+
+    // Create shallow clone of node to create
+    // a fake version to be dragged around
+    const clonedNode = new DNA.dnaNode(
+        node.role,
+        node.block,
+        node.edges
+    )
 
     // Re-render main sequence so this node has
     // appears "removed"
+    node.builderUIBeingDragged = true
+    focusedOrganism.rebuildMesh()
+
+    // Build fake node that appears dragged
+    const fakeTreeNodePositions = OrganismBuilder.generateAbsoluteNodePositions(
+        clonedNode,
+        true
+    )
+    nodeDragging.fakeTreeMesh = OrganismBuilder.buildBodyFromNodePositions(
+        fakeTreeNodePositions
+    )
+    ThreeElements.scene.add(nodeDragging.fakeTreeMesh)
 }
+
+const nodeDraggingMouseDownHandler = (e) => {
+    const clickedNode = get3DNodeAtScreenPos(
+        {
+            x: e.pageX,
+            y: e.pageY
+        }
+    )
+
+    if (!clickedNode) {
+        return
+    }
+
+    let mouseDownOnNode = true
+    const mouseUpListener = () => {
+        mouseDownOnNode = false
+
+        builderWrapper.removeEventListener("mouseup", mouseUpListener)
+        builderWrapper.removeEventListener("touchend", mouseUpListener)
+    }
+
+    // Sub-tree dragging ability
+    if (clickedNode.role !== "root") {
+
+        setTimeout(() => {
+            if (mouseDownOnNode) {
+                startDraggingNode(clickedNode, e)
+            }
+        }, 250)
+
+        builderWrapper.addEventListener("mouseup", mouseUpListener)
+        builderWrapper.addEventListener("touchend", mouseUpListener)
+    }
+}
+builderWrapper.addEventListener("mousedown", nodeDraggingMouseDownHandler)
+builderWrapper.addEventListener("touchstart", nodeDraggingMouseDownHandler)
 
 // Organism rendering
 

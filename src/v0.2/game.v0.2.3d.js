@@ -228,6 +228,13 @@ const stageEdges3D = {
     }
 }
 
+function mousePosTo3DPos(mousePos) {
+    return {
+        x: (mousePos.x - (canvasWidth / 2)),
+        y: -(mousePos.y - (canvasHeight / 2))
+    }
+}
+
 export {
     ThreeCanvas,
     scene,
@@ -237,5 +244,6 @@ export {
     translateMeshInWorld,
     convertNodePosIntoWorldPos,
     rotateMeshToTarget,
-    hit3DFromCanvasClickPos
+    hit3DFromCanvasClickPos,
+    mousePosTo3DPos
 }
