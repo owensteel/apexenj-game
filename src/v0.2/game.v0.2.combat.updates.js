@@ -127,7 +127,7 @@ function bumpEdges(organism, opponent, overlappingNodes) {
             }
 
             // Each is pushed back
-            const half = overlap * 0.5;
+            const half = overlap * 0.25;
 
             // Move organism mesh outward
             organism.mesh.position.x += nx * half;
