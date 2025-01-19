@@ -84,15 +84,45 @@ const placeholderDefaultRootNode = new dnaNode(
 )
 
 // Adds a new node to a parent in a sequence
-function addNodeToParent(parentNode = null, edge = null) {
+function addNodeToParent(
+    parentNode = null,
+    edge = null,
+    blockType = Blocks.BLOCK_TYPENAME_DEFAULT
+) {
     console.log("creating...", { parentNode, edge })
+
+    // Motor blocks cannot have other motor blocks attached
+
+    if (
+        parentNode &&
+        parentNode.block.typeName == Blocks.BLOCK_TYPENAME_MOTOR &&
+        blockType == Blocks.BLOCK_TYPENAME_MOTOR
+    ) {
+        return false
+    }
 
     // Default state, will be changed dynamically when returned
     // if a different block type is intended
+
     const node = new dnaNode(
         "appendage",
         new Blocks.DefaultBlock()
     )
+
+    // Set node block
+
+    if (blockType !== Blocks.BLOCK_TYPENAME_DEFAULT) {
+        switch (blockType) {
+            case Blocks.BLOCK_TYPENAME_BONDING:
+                node.block = new Blocks.BondingBlock()
+                break
+            case Blocks.BLOCK_TYPENAME_MOTOR:
+                node.block = new Blocks.MotorBlock()
+                break
+        }
+    }
+
+    // Add to parent, if available
 
     if (parentNode && !isNaN(edge)) {
         parentNode.edges[edge] = node
