@@ -65,7 +65,7 @@ function generateAbsoluteNodePositions(
 ) {
     // Prevent null crash
     if (!currentNode) {
-        console.warn("null node encountered")
+        console.warn("Null node encountered while generating positions")
         return;
     }
 

@@ -297,8 +297,6 @@ function nodeClickHandler(e) {
         }
     }
 
-    console.log("clicked hex", clickedHex)
-
     if (!clickedHex) {
         return
     }
@@ -309,7 +307,7 @@ function nodeClickHandler(e) {
         x: clickedHex.x, y: clickedHex.y
     })
     if (nodeAtClickPoint) {
-        console.log(nodeAtClickPoint)
+        console.log("clicked node", nodeAtClickPoint)
         return
     }
 
@@ -328,8 +326,6 @@ function nodeClickHandler(e) {
         if (hit3DNode) {
             connectingNode = hit3DNode
 
-            console.log("found hex", { neighbourHex, actualEdge })
-
             connectingEdge = hexConnectingEdgeMap[actualEdge] - 1
 
             break;
@@ -337,7 +333,7 @@ function nodeClickHandler(e) {
     }
 
     if (!connectingNode) {
-        console.warn("no connecting edge found")
+        console.warn("No connecting edge found for new node")
         return
     }
 
