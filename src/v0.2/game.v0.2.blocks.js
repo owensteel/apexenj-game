@@ -102,7 +102,7 @@ class DetachingBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_DETACHING)
-        this.setColor("purple")
+        this.setColor("blue")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
