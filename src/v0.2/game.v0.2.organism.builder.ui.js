@@ -36,12 +36,6 @@ function generateHexagonGrid() {
     canvas.height = gameWrapper.clientHeight
     const ctx = canvas.getContext("2d");
 
-    // Offset so hexagons "fit"
-    const hexGridOffset = {
-        x: 0,
-        y: 0
-    }
-
     // Side length of each hex
     const side = hexGrid.side;
 
@@ -54,15 +48,37 @@ function generateHexagonGrid() {
     const horizontalSpacing = 1.5 * side;       // gap between columns
     const verticalSpacing = Math.sqrt(3) * side; // gap between rows
 
+    // A helper to compute the UNSHIFTED local x/y for a given col/row
+    function getLocalCoords(col, row) {
+        // Odd-q layout: offset half a row on odd columns
+        const verticalOffset = col % 2 ? verticalSpacing / 2 : 0;
+        // “Local” means no attempt yet to centre on screen
+        const localX = col * horizontalSpacing + side;
+        const localY = row * verticalSpacing + verticalOffset + side;
+        return [localX, localY];
+    }
+
+    // Decide which cell to treat as the "centre"
+    // e.g. the middle of all possible columns/rows
+    const centreCol = Math.floor(columns / 2);
+    const centreRow = Math.floor(rows / 2);
+
+    // Compute that cell’s local x,y
+    const [centreLocalX, centreLocalY] = getLocalCoords(centreCol, centreRow);
+
+    // Canvas centre
+    const halfWidth = canvas.width / 2;
+    const halfHeight = canvas.height / 2;
+
     // Draw a single flat-topped hex at (cx, cy)
-    function drawHexagon(cx, cy, side) {
+    function drawHexagon(cx, cy) {
         ctx.beginPath();
         // For flat-topped: angles 0°, 60°, 120°, 180°, 240°, 300°
         for (let i = 0; i < 6; i++) {
             const angleDeg = 60 * i; // degrees
             const angleRad = (Math.PI / 180) * angleDeg;
-            const x = (cx + side * Math.cos(angleRad)) + hexGridOffset.x;
-            const y = (cy + side * Math.sin(angleRad)) + hexGridOffset.y;
+            const x = (cx + side * Math.cos(angleRad));
+            const y = (cy + side * Math.sin(angleRad));
             if (i === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -91,16 +107,15 @@ function generateHexagonGrid() {
     // Loop through each column and row
     for (let col = 0; col < columns; col++) {
         for (let row = 0; row < rows; row++) {
-            // Offset every other column vertically for the honeycomb nest
-            // (an "odd-q" vertical layout)
-            const verticalOffset = (col % 2) ? verticalSpacing / 2 : 0;
+            // Get the unshifted local coords
+            const [localX, localY] = getLocalCoords(col, row);
 
-            // Centre coordinates for this hex
-            const cx = col * horizontalSpacing + side;
-            const cy = row * verticalSpacing + verticalOffset + side;
+            // Translate so that the chosen centre cell is on canvas centre
+            const finalX = localX - centreLocalX + halfWidth;
+            const finalY = localY - centreLocalY + halfHeight;
 
             // Draw the hex
-            const hexPos = drawHexagon(cx, cy - 3, side);
+            const hexPos = drawHexagon(finalX, finalY);
             hexPos.col = col
             hexPos.row = row
 
