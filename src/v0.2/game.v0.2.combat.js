@@ -6,11 +6,12 @@
 
 */
 
+import { stageEdges3D } from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
+import * as Food from "./game.v0.2.food"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
-import { stageEdges3D } from "./game.v0.2.3d";
 
 /*
 
@@ -31,10 +32,32 @@ const combatSessionTimeouts = []
 
 // Cache for the entire combat session
 const combatSessionCache = {
-    originalEnemy: null
+    originalEnemy: null,
+    foodEnabled: false,
+    food: [],
+    foodInterval: null
 }
 
+// Food
+
+function foodCheckSpawn() {
+    if ((combatSessionCache.food.filter((el) => {
+        // Food that hasn't been destroyed
+        return el.nodePositions.length > 0
+    })).length < 3) {
+        const foodInst = Food.createFood()
+        combatSessionCache.food.push(foodInst)
+    } else {
+        // Destroy oldest
+        Organisms.destroyOrganism(combatSessionCache.food[0])
+    }
+}
+const secondsUntilFoodStarts = 3
+const secondsBetweenFoodSpawn = 10
+
 // Healthbars
+
+
 const newHealthbar = () => {
     const hb = document.createElement("progress")
     hb.setAttribute("min", 0)
@@ -77,6 +100,21 @@ function startCombat() {
     )
     combatSessionCache.originalEnemy = enemyOrganism
 
+    // Food
+
+    combatSessionCache.foodEnabled = false
+    combatSessionCache.food = []
+
+    // Wait a few seconds before allowing food to
+    // spawn in
+    combatSessionTimeouts.push(setTimeout(() => {
+        foodCheckSpawn()
+        combatSessionCache.foodInterval = setInterval(
+            foodCheckSpawn,
+            1000 * secondsBetweenFoodSpawn
+        )
+    }, 1000 * secondsUntilFoodStarts))
+
     // Start tick updates
 
     combatTick()
@@ -105,10 +143,12 @@ function startCombat() {
 function endCombat() {
     console.log("ending combat...")
 
-    // Stop combat tick loop
+    // Stop combat loops
 
     cancelAnimationFrame(combatTickCycle)
     combatTickCycle = null
+
+    clearInterval(combatSessionCache.foodInterval)
 
     // Reset player values
 
@@ -124,10 +164,6 @@ function endCombat() {
     combatSessionTimeouts.forEach((timeout) => {
         clearTimeout(timeout)
     })
-
-    // Clear combat session cache
-
-    combatSessionCache.originalEnemy = {}
 
     // Stop movement
 

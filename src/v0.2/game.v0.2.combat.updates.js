@@ -8,8 +8,10 @@
 */
 
 import * as ThreeElements from "./game.v0.2.3d";
-import { BLOCK_TYPENAME_MOTOR } from "./game.v0.2.blocks";
+import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_MOTOR } from "./game.v0.2.blocks";
+import { nutritionPerFoodBlock } from "./game.v0.2.food";
 import * as Organisms from "./game.v0.2.organisms"
+import * as OrganismBuilder from "./game.v0.2.organism.builder"
 
 // Cache for an update, so to prevent the same things (e.g the
 // world positions of nodes) being needlessly recalculated in
@@ -28,6 +30,41 @@ const minNodesWithoutEnergyCon = 6
 const minMotorNodesWithoutEnergyCon = 0.5
 
 function updateOrganismInCombat(organism) {
+
+    // If food, just check if it should still be visible
+
+    if (organism.isFood) {
+
+        // Reduce blocks while being spent
+
+        const blocksLeft = Math.round(organism.energy / nutritionPerFoodBlock)
+        if (blocksLeft < organism.nodePositions.length) {
+            if (organism.nodePositions.length <= 1) {
+                // Destroy it
+
+                ThreeElements.scene.remove(organism.mesh)
+                Organisms.destroyOrganism(organism)
+            } else {
+                // Remove a node
+
+                organism.nodePositions.pop()
+
+                const meshPos = organism.mesh.position
+                ThreeElements.scene.remove(organism.mesh)
+
+                organism.mesh = OrganismBuilder.buildBodyFromNodePositions(
+                    organism.nodePositions,
+                    /* allowDetachingParts: */ false,
+                    /* formUnionMesh: */ false
+                )
+                ThreeElements.scene.add(organism.mesh)
+                organism.mesh.position.set(meshPos.x, meshPos.y, 0)
+            }
+        }
+
+        return
+    }
+
     const postUpdateOrganismStatus = {
         alive: true
     }
@@ -35,7 +72,7 @@ function updateOrganismInCombat(organism) {
     // Deplete energy
 
     // Natural amount
-    let energyDepletion = 0.001
+    let energyDepletion = 0.0005
 
     // More nodes = more energy consumed
     energyDepletion /= (minNodesWithoutEnergyCon / organism.nodePositions.length)
@@ -89,7 +126,30 @@ function syncOrganismsInCombat(organism, opponent) {
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpEdges(organism, opponent, overlappingNodes);
 
-        // TODO: check block types for block interactions
+        // Check block types for block interactions
+
+        // Food itself cannot have interactions
+        if (organism.isFood) {
+            return
+        }
+
+        // Absorb food
+        for (const pair of overlappingNodes) {
+            if (opponent.isFood) {
+                if (
+                    pair.orgNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
+                    pair.oppNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_FOOD
+                ) {
+                    if (organism.energy < 1) {
+                        // Eat an eighth of a food block for however many ticks the
+                        // food piece is stuck to the absorber node
+                        const energyAbsorbed = nutritionPerFoodBlock / 8
+                        organism.energy += energyAbsorbed
+                        opponent.energy -= energyAbsorbed
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -182,12 +242,14 @@ function combatUpdate() {
     // Each organism must be updated
     for (const organism of currentOrganisms) {
         const orgStatus = updateOrganismInCombat(organism)
-        if (!orgStatus.alive) {
+        // Food despawns naturally, we do not deplete
+        // its "energy" as it is not really alive
+        if (!organism.isFood && !orgStatus.alive) {
             postUpdateCombatStatus.ended = true
             postUpdateCombatStatus.loser = organism.id
             break
         }
-        // Sync with all opponents
+        // Sync with all other organisms
         for (const opponent of currentOrganisms) {
             if (organism.id !== opponent.id) {
                 syncOrganismsInCombat(organism, opponent);

@@ -107,6 +107,39 @@ class DetachingBlock extends DefaultBlock {
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
 
+/*
+
+    Food
+
+*/
+
+const BLOCK_TYPENAME_FOOD = "food"
+class FoodBlock extends DefaultBlock {
+    constructor() {
+        super();
+
+        this.setTypeName(BLOCK_TYPENAME_FOOD)
+        this.setColor("gold")
+    }
+}
+
+/*
+
+    Absorber
+
+*/
+
+const BLOCK_TYPENAME_ABSORBER = "absorber"
+class AbsorberBlock extends DefaultBlock {
+    constructor() {
+        super();
+
+        this.setTypeName(BLOCK_TYPENAME_ABSORBER)
+        this.setColor("lightgreen")
+    }
+}
+PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
+
 // Type name to instance
 function getBlockInstanceFromTypeName(typeName) {
     switch (typeName) {
@@ -116,6 +149,8 @@ function getBlockInstanceFromTypeName(typeName) {
             return new MotorBlock()
         case BLOCK_TYPENAME_DETACHING:
             return new DetachingBlock()
+        case BLOCK_TYPENAME_ABSORBER:
+            return new AbsorberBlock()
         default:
             return new DefaultBlock()
     }
@@ -130,6 +165,8 @@ export {
     MotorBlock,
     HeartBlock,
     DetachingBlock,
+    FoodBlock,
+    AbsorberBlock,
 
     // List of accessible block IDs
 
@@ -142,6 +179,8 @@ export {
     BLOCK_TYPENAME_HEART,
     BLOCK_TYPENAME_MOTOR,
     BLOCK_TYPENAME_DETACHING,
+    BLOCK_TYPENAME_FOOD,
+    BLOCK_TYPENAME_ABSORBER,
 
     // For converting block type names to instances
 
