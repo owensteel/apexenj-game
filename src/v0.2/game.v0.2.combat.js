@@ -214,14 +214,8 @@ function combatTick() {
     for (let i = 0; i < combatUpdatesPerTick; i++) {
         const postUpdateCombatStatus = CombatUpdates.combatUpdate()
         if (postUpdateCombatStatus.ended) {
-            console.log("organism was defeated", postUpdateCombatStatus.loser)
-
-            // Stop movement and combat running, but leave actually
-            // closing the session to the player
-
-            combatRunning = false
-
-            return
+            // Player's organism has been destroyed
+            // But let player end the combat mode when they want to
         }
     }
 
