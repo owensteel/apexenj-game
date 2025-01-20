@@ -221,7 +221,7 @@ class Organism {
             let totalMotorY = 0;
             let totalPower = 0;  // track combined power
 
-            const motorPower = 0.05
+            const motorPower = 0.1
 
             if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodesByBlockTypeCache) {
                 // Each motor node modifies the velocity by pushing in a certain direction
@@ -298,26 +298,20 @@ function animate() {
 
             // Bounce off edges regardless
             if (
-                (
-                    organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x &&
+                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x &&
                     Math.sign(organism.velocity.x) > 0)
                 ||
-                (
-                    organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x &&
+                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x &&
                     Math.sign(organism.velocity.x) < 0)
             ) {
                 organism.velocity.x = -organism.velocity.x;
             }
             if (
-                (
-                    organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y &&
-                    Math.sign(organism.velocity.y) > 0
-                )
+                (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y &&
+                    Math.sign(organism.velocity.y) > 0)
                 ||
-                (
-                    organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.right.y &&
-                    Math.sign(organism.velocity.y) < 0
-                )
+                (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.right.y &&
+                    Math.sign(organism.velocity.y) < 0)
             ) {
                 organism.velocity.y = -organism.velocity.y;
             }

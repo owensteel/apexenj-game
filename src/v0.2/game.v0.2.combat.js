@@ -77,7 +77,7 @@ const enemyHealthbar = newHealthbar()
 healthbarContainer.appendChild(enemyHealthbar)
 
 // Starting velocity, to be directed towards centre
-const maxAttractionVelocity = 0.05
+const maxAttractionVelocity = 0.005
 
 function startCombat() {
     console.log("starting combat...")
@@ -126,10 +126,10 @@ function startCombat() {
     // Start organisms' initial velocity
 
     playerOrganism.velocity.x = maxAttractionVelocity
-    playerOrganism.velocity.y = 0
+    playerOrganism.velocity.y = Math.random() * maxAttractionVelocity
 
     enemyOrganism.velocity.x = -maxAttractionVelocity
-    enemyOrganism.velocity.y = 0
+    enemyOrganism.velocity.y = -playerOrganism.velocity.y
 
     // Start movement
 
