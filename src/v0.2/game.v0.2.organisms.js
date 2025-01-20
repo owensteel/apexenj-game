@@ -12,6 +12,7 @@ import * as ThreeElements from './game.v0.2.3d.js'
 import * as OrganismBuilder from './game.v0.2.organism.builder.js'
 import { cloneObject } from './game.v0.2.utils.js';
 import * as DNA from './game.v0.2.dna.js';
+import * as Blocks from './game.v0.2.blocks.js';
 
 // Global variables for setup
 
@@ -55,6 +56,9 @@ class Organism {
 
         // DNA sequence input
         this.dnaSequence = dnaSequence;
+
+        // Energy / "healthbar"
+        this.energy = 1
 
         // Three.Js mesh
         this.mesh = null;
@@ -219,9 +223,9 @@ class Organism {
 
             const motorPower = 0.05
 
-            if ("motor" in this.nodesByBlockTypeCache) {
+            if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodesByBlockTypeCache) {
                 // Each motor node modifies the velocity by pushing in a certain direction
-                for (const motorNodePos of this.nodesByBlockTypeCache["motor"]) {
+                for (const motorNodePos of this.nodesByBlockTypeCache[Blocks.BLOCK_TYPENAME_MOTOR]) {
                     // The local angle from organism root => motor node
                     const motorAngle = Math.atan2(motorNodePos.y, motorNodePos.x);
 
@@ -337,6 +341,7 @@ animate()
 
 function addOrganism(dnaSequence, combatStartPos = defaultCombatStartPos) {
     const newOrganism = new Organism(dnaSequence, combatStartPos);
+    console.log("created organism", newOrganism)
     organisms.push(newOrganism);
     return newOrganism
 }
@@ -376,6 +381,9 @@ function setMovementToggle(state, playerOrganism) {
     }
 
     rebuildAllOrganisms()
+
+    // Reset energy
+    playerOrganism.energy = 1
 }
 
 // Gets all organisms currently cached

@@ -18,7 +18,7 @@ import { stageEdges3D } from "./game.v0.2.3d";
 
 */
 
-let liveModeToggle = false;
+let combatToggled = false;
 let combatRunning = false;
 let combatTickCycle;
 
@@ -34,6 +34,26 @@ const combatSessionCache = {
     originalEnemy: null
 }
 
+// Healthbars
+const newHealthbar = () => {
+    const hb = document.createElement("progress")
+    hb.setAttribute("min", 0)
+    hb.setAttribute("max", 100)
+    return hb
+}
+
+// Temp solution for debugging
+const healthbarContainer = document.createElement("fieldset")
+healthbarContainer.style.display = "none"
+document.body.appendChild(healthbarContainer)
+
+const playerHealthbar = newHealthbar()
+healthbarContainer.appendChild(playerHealthbar)
+
+const enemyHealthbar = newHealthbar()
+healthbarContainer.appendChild(enemyHealthbar)
+
+// Starting velocity, to be directed towards centre
 const maxAttractionVelocity = 0.05
 
 function startCombat() {
@@ -72,6 +92,14 @@ function startCombat() {
 
     enemyOrganism.velocity.x = -maxAttractionVelocity
     enemyOrganism.velocity.y = 0
+
+    // Start movement
+
+    Organisms.setMovementToggle(true, playerOrganism)
+
+    // Show UI
+
+    healthbarContainer.style.display = "block"
 }
 
 function endCombat() {
@@ -100,23 +128,28 @@ function endCombat() {
     // Clear combat session cache
 
     combatSessionCache.originalEnemy = {}
+
+    // Stop movement
+
+    Organisms.setMovementToggle(false, playerOrganism)
+
+    // Hide UI
+
+    healthbarContainer.style.display = "none"
 }
 
 function toggleCombat(playerOrganismImport) {
     playerOrganism = playerOrganismImport
-    liveModeToggle = !liveModeToggle
 
     // Begin/end combat session
 
-    if (liveModeToggle && !combatRunning) {
+    if (!combatToggled) {
+        combatToggled = true
         startCombat()
     } else {
+        combatToggled = false
         endCombat()
     }
-
-    // Start/end 'living' mode for individual organisms
-
-    Organisms.setMovementToggle(liveModeToggle, playerOrganism)
 }
 
 /*
@@ -140,10 +173,26 @@ function combatTick() {
         }
     }, (1000 / combatTicksPerSec)))
 
-    // Execute as many updates in this tick as UPT specifies
+    // Execute as many updates in this tick as UPT specifies, until
+    // end of combat is reached
     for (let i = 0; i < combatUpdatesPerTick; i++) {
-        CombatUpdates.combatUpdate()
+        const postUpdateCombatStatus = CombatUpdates.combatUpdate()
+        if (postUpdateCombatStatus.ended) {
+            console.log("organism was defeated", postUpdateCombatStatus.loser)
+
+            // Stop movement and combat running, but leave actually
+            // closing the session to the player
+
+            combatRunning = false
+
+            return
+        }
     }
+
+    // Set healthbars
+
+    playerHealthbar.value = playerOrganism.energy * 100
+    enemyHealthbar.value = enemyOrganism.energy * 100
 }
 
 export { toggleCombat }

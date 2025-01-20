@@ -8,6 +8,7 @@
 */
 
 import * as ThreeElements from "./game.v0.2.3d";
+import { BLOCK_TYPENAME_MOTOR } from "./game.v0.2.blocks";
 import * as Organisms from "./game.v0.2.organisms"
 
 // Cache for an update, so to prevent the same things (e.g the
@@ -23,7 +24,51 @@ const combatUpdateCache = {
 
 */
 
-function updateOrganismInCombat(organism, opponent) {
+const minNodesWithoutEnergyCon = 6
+const minMotorNodesWithoutEnergyCon = 0.5
+
+function updateOrganismInCombat(organism) {
+    const postUpdateOrganismStatus = {
+        alive: true
+    }
+
+    // Deplete energy
+
+    // Natural amount
+    let energyDepletion = 0.001
+
+    // More nodes = more energy consumed
+    energyDepletion /= (minNodesWithoutEnergyCon / organism.nodePositions.length)
+
+    // Motor nodes consume more energy
+    if (BLOCK_TYPENAME_MOTOR in organism.nodesByBlockTypeCache) {
+        energyDepletion /= (
+            minMotorNodesWithoutEnergyCon
+            / organism.nodesByBlockTypeCache[BLOCK_TYPENAME_MOTOR].length
+        )
+    }
+
+    // Deplete 'energy'
+    organism.energy -= energyDepletion
+
+    // Death check
+    postUpdateOrganismStatus.alive = (organism.energy > 0)
+
+    if (!postUpdateOrganismStatus.alive) {
+        // Remove from scene
+        ThreeElements.scene.remove(organism.mesh)
+    }
+
+    return postUpdateOrganismStatus
+}
+
+/*
+
+    "Syncing" two organisms, i.e checking interactions with each other
+
+*/
+
+function syncOrganismsInCombat(organism, opponent) {
     // Calc world positions of all nodes, if not yet done in this update
     [organism, opponent].forEach((org) => {
         if (!(org.id in combatUpdateCache.nodeWorldPositions)) {
@@ -127,24 +172,33 @@ function bumpEdges(organism, opponent, overlappingNodes) {
 
 // Updates each organism, syncs it with all its opponents
 function combatUpdate() {
+    const postUpdateCombatStatus = {
+        ended: false, loser: null
+    }
+
     // Organisms are changing constantly
     const currentOrganisms = Organisms.getAllOrganisms()
 
     // Each organism must be updated
     for (const organism of currentOrganisms) {
+        const orgStatus = updateOrganismInCombat(organism)
+        if (!orgStatus.alive) {
+            postUpdateCombatStatus.ended = true
+            postUpdateCombatStatus.loser = organism.id
+            break
+        }
         // Sync with all opponents
         for (const opponent of currentOrganisms) {
-            if (
-                // Prevent "fighting with self"
-                organism.id !== opponent.id
-            ) {
-                updateOrganismInCombat(organism, opponent);
+            if (organism.id !== opponent.id) {
+                syncOrganismsInCombat(organism, opponent);
             }
         }
     }
 
     // Clear cache for next update
     combatUpdateCache.nodeWorldPositions = {}
+
+    return postUpdateCombatStatus
 }
 
 export { combatUpdate }

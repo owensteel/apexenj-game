@@ -84,7 +84,6 @@ class HeartBlock extends DefaultBlock {
     constructor() {
         super();
         this.isHeart = true
-        this.healthbar = 100
 
         this.setTypeName(BLOCK_TYPENAME_HEART)
         this.setColor("pink")
