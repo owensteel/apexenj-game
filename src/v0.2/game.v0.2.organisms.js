@@ -358,7 +358,7 @@ function rebuildAllOrganisms() {
 // scene
 
 function clearScene() {
-    organisms.forEach((organism, index) => {
+    organisms.forEach((organism) => {
         ThreeElements.scene.remove(organism.mesh)
     })
 }
@@ -405,7 +405,7 @@ function getNodeRoot(node) {
 // Clear organism mesh (visible presence) and node positions ("invisible"
 // presence) to prevent it from continuing to exist in any form
 
-function clearUpOrganism(instance) {
+function destroyOrganism(instance) {
     instance.nodePositions = [];
     ThreeElements.scene.remove(instance.mesh);
 }
@@ -511,8 +511,8 @@ function bondOrganisms(joineeNode, joinerNode) {
 
     // Clear old organisms before creating new combined one
 
-    clearUpOrganism(joinerInstance)
-    clearUpOrganism(joineeInstance)
+    destroyOrganism(joinerInstance)
+    destroyOrganism(joineeInstance)
 
     // Create the new combined organism in the system
 
@@ -553,5 +553,6 @@ export {
     rebuildAllOrganisms,
     clearScene,
     getAllOrganisms,
-    bondOrganisms
+    bondOrganisms,
+    destroyOrganism
 };
