@@ -72,7 +72,7 @@ function updateOrganismInCombat(organism) {
     // Deplete energy
 
     // Natural amount
-    let energyDepletion = 0.0005
+    let energyDepletion = 0.01 / 100 // "energy" is 0 to 1
 
     // More nodes = more energy consumed
     energyDepletion /= (minNodesWithoutEnergyCon / organism.nodePositions.length)
@@ -140,9 +140,9 @@ function syncOrganismsInCombat(organism, opponent) {
                     pair.orgNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
                     pair.oppNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_FOOD
                 ) {
-                    if (organism.energy < 1) {
+                    if (opponent.energy > 0 && organism.energy < 1) {
                         // Eat an eighth of a food block for however many ticks the
-                        // food piece is stuck to the absorber node
+                        // food piece is touching the absorber node
                         const energyAbsorbed = nutritionPerFoodBlock / 8
                         organism.energy += energyAbsorbed
                         opponent.energy -= energyAbsorbed
@@ -242,12 +242,10 @@ function combatUpdate() {
     // Each organism must be updated
     for (const organism of currentOrganisms) {
         const orgStatus = updateOrganismInCombat(organism)
-        // Food despawns naturally, we do not deplete
-        // its "energy" as it is not really alive
         if (!organism.isFood && !orgStatus.alive) {
             postUpdateCombatStatus.ended = true
             postUpdateCombatStatus.loser = organism.id
-            break
+            continue
         }
         // Sync with all other organisms
         for (const opponent of currentOrganisms) {

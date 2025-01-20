@@ -74,6 +74,7 @@ const foodSequences = [
 ]
 
 const nutritionPerFoodBlock = 0.1
+const foodVelocity = 0.01
 
 // Create and deploy food
 function createFood() {
@@ -91,11 +92,14 @@ function createFood() {
             x: Math.random() > 0.5
                 ? ThreeElements.stageEdges3D.top.left.x :
                 ThreeElements.stageEdges3D.top.right.x,
-            y: 0
+            y: Math.random() > 0.5
+                ? ThreeElements.stageEdges3D.top.left.y :
+                ThreeElements.stageEdges3D.bottom.right.y,
         }
     )
     foodInstance.isFood = true
-    foodInstance.velocity.x = 0.01
+    foodInstance.velocity.x = Math.sign(0 - foodInstance.mesh.position.x) * foodVelocity
+    foodInstance.velocity.y = Math.sign(0 - foodInstance.mesh.position.y) * foodVelocity
 
     // Set food nutrition value depending on
     // amount of food blocks instance has
