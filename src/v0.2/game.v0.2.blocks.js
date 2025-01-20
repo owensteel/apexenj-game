@@ -91,6 +91,37 @@ class HeartBlock extends DefaultBlock {
     }
 }
 
+/*
+
+    Detaching
+
+*/
+
+const BLOCK_TYPENAME_DETACHING = "detaching"
+class DetachingBlock extends DefaultBlock {
+    constructor() {
+        super();
+
+        this.setTypeName(BLOCK_TYPENAME_DETACHING)
+        this.setColor("purple")
+    }
+}
+PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
+
+// Type name to instance
+function getBlockInstanceFromTypeName(typeName) {
+    switch (typeName) {
+        case BLOCK_TYPENAME_BONDING:
+            return new BondingBlock()
+        case BLOCK_TYPENAME_MOTOR:
+            return new MotorBlock()
+        case BLOCK_TYPENAME_DETACHING:
+            return new DetachingBlock()
+        default:
+            return new DefaultBlock()
+    }
+}
+
 export {
 
     // Block classes
@@ -99,6 +130,7 @@ export {
     BondingBlock,
     MotorBlock,
     HeartBlock,
+    DetachingBlock,
 
     // List of accessible block IDs
 
@@ -110,4 +142,9 @@ export {
     BLOCK_TYPENAME_BONDING,
     BLOCK_TYPENAME_HEART,
     BLOCK_TYPENAME_MOTOR,
+    BLOCK_TYPENAME_DETACHING,
+
+    // For converting block type names to instances
+
+    getBlockInstanceFromTypeName
 }

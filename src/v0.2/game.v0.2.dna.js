@@ -105,22 +105,11 @@ function addNodeToParent(
     // if a different block type is intended
 
     const node = new dnaNode(
-        "appendage",
-        new Blocks.DefaultBlock()
+        /* role: */ "appendage",
+        /* block: */ Blocks.getBlockInstanceFromTypeName(blockType),
+        /* edges: */[],
+        /* detach: */ blockType == Blocks.BLOCK_TYPENAME_DETACHING
     )
-
-    // Set node block
-
-    if (blockType !== Blocks.BLOCK_TYPENAME_DEFAULT) {
-        switch (blockType) {
-            case Blocks.BLOCK_TYPENAME_BONDING:
-                node.block = new Blocks.BondingBlock()
-                break
-            case Blocks.BLOCK_TYPENAME_MOTOR:
-                node.block = new Blocks.MotorBlock()
-                break
-        }
-    }
 
     // Add to parent, if available
 
