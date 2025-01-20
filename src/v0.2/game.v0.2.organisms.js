@@ -37,6 +37,8 @@ const maxYDistInTick = Math.abs(
     ThreeElements.stageEdges3D.top.left.y -
     ThreeElements.stageEdges3D.bottom.left.y) * 0.025;
 
+const minNumOfNodes = 6
+
 /*
 
     Organism class
@@ -205,10 +207,12 @@ class Organism {
         if (movementToggle) {
 
             // Start with the organism's base velocity:
+
             this.appliedVelocity.x = this.velocity.x;
             this.appliedVelocity.y = this.velocity.y;
 
             // Gather motor effects in some combined vector:
+
             let totalMotorX = 0;
             let totalMotorY = 0;
             let totalPower = 0;  // track combined power
@@ -237,8 +241,16 @@ class Organism {
             }
 
             // Add the total motor effect to the applied velocity
+
             this.appliedVelocity.x += totalMotorX;
             this.appliedVelocity.y += totalMotorY;
+
+            // Reduce effect of velocity depending on the size of the
+            // organism
+
+            const sizeSlowdown = (minNumOfNodes / this.nodePositions.length)
+            this.appliedVelocity.x *= sizeSlowdown
+            this.appliedVelocity.y *= sizeSlowdown
 
             // Actually apply movement
 
