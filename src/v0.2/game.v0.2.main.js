@@ -34,7 +34,13 @@ function init() {
     // Init player
 
     const playerOrganism = Organisms.addOrganism(
-        cloneObject(DNA.demoDnaSequence)
+        cloneObject(
+            DNA.demoDnaSequence,
+            /* shallow: */ false
+            // Must not be shallow or demoDNA
+            // will be a reference that may
+            // get corrupted
+        )
     )
 
     // Init DNA renderer

@@ -41,7 +41,13 @@ function startCombat() {
 
     // Set enemy
 
-    const enemyDNA = Utils.cloneObject(DNA.demoDnaSequence)
+    const enemyDNA = Utils.cloneObject(
+        DNA.demoDnaSequence,
+        /* shallow: */ false
+        // Must not be shallow or demoDNA
+        // will be a reference that may
+        // get corrupted
+    )
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         {
