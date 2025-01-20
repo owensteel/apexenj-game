@@ -6,8 +6,16 @@
 
 */
 
-function cloneObject(obj = {}) {
-    return JSON.parse(JSON.stringify(obj))
+function cloneObject(obj = {}, shallow = true) {
+    if (shallow) {
+        const clone = {}
+        for (const key of Object.keys(obj)) {
+            clone[key] = obj[key]
+        }
+        return clone
+    } else {
+        return JSON.parse(JSON.stringify(obj))
+    }
 }
 
 function getGlobalBoundingBoxOfHTMLElement(element) {
