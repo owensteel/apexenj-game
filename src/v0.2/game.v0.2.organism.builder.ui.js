@@ -343,7 +343,7 @@ function nodeClickHandler(e) {
     const createdNode = createNode(connectingNode, connectingEdge)
     console.log("created node", createdNode)
 }
-builderWrapper.addEventListener("click", nodeClickHandler)
+builderHexGrid.addEventListener("click", nodeClickHandler)
 
 // Node dragging
 
