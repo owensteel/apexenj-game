@@ -231,8 +231,8 @@ class Organism {
                     totalPower += motorPower;
 
                     // Animate the "motor" mesh visually (e.g. spinning some axis)
-                    motorNodePos.mesh.rotation.x += 0.1 * Math.cos(motorAngle);
-                    motorNodePos.mesh.rotation.y += 0.1 * Math.sin(motorAngle);
+                    motorNodePos.mesh.rotation.x += vx;
+                    motorNodePos.mesh.rotation.y += vy;
                 }
             }
 
