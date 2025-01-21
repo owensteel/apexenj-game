@@ -55,6 +55,19 @@ function init() {
         OrganismBuilderUI.toggleVisibility()
     })
     document.body.appendChild(combatToggleButton)
+
+    // Export DNA button (temp)
+
+    const dnaExportButton = document.createElement("button");
+    dnaExportButton.onclick = () => {
+        const dnaExported = playerOrganism.exportDNA()
+
+        const txtArea = document.createElement("textarea")
+        txtArea.innerHTML = dnaExported
+        document.body.appendChild(txtArea)
+    }
+    dnaExportButton.innerHTML = "Export player DNA"
+    document.body.appendChild(dnaExportButton)
 }
 
 export { init }

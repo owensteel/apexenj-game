@@ -109,6 +109,27 @@ class Organism {
         this.rebuildMesh();
     }
 
+    // Export DNA as a string
+    exportDNA() {
+        // Start with shallow clone
+        const dnaClone = cloneObject(this.dnaSequence, true)
+
+        // Remove circular references
+        const removeCircularReferences = (dnaNode) => {
+            delete dnaNode["parentNode"]
+
+            dnaNode.edges.forEach((edgeNode) => {
+                if (edgeNode) {
+                    removeCircularReferences(edgeNode)
+                }
+            })
+        }
+        removeCircularReferences(dnaClone)
+
+        // Export as string
+        return JSON.stringify(dnaClone)
+    }
+
     // Creates mesh for this organism out of its current
     // DNA sequence (converted into nodes)
     rebuildMesh() {
