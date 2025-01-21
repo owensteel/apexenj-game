@@ -335,8 +335,7 @@ function animate() {
 
             // Bounce off edges regardless
             if (
-                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x) &&
-                organism.mesh.rotation.z > Math.PI
+                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
             ) {
                 // Flip
                 organism.mesh.rotation.z -= Math.PI
@@ -344,8 +343,7 @@ function animate() {
                 organism.mesh.position.x -= maxXDistInTick
             }
             if (
-                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x) &&
-                organism.mesh.rotation.z < Math.PI
+                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
             ) {
                 // Flip
                 organism.mesh.rotation.z += Math.PI
