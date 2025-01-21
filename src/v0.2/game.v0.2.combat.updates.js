@@ -78,7 +78,7 @@ function updateOrganismInCombat(organism) {
     // Deplete energy
 
     // Natural amount
-    let energyDepletion = 0.01 / 100 // "energy" is 0 to 1
+    let energyDepletion = 0.025 / 100 // "energy" is 0 to 1
 
     // More nodes = more energy consumed
     energyDepletion /= (minNodesWithoutEnergyCon / organism.nodePositions.length)
