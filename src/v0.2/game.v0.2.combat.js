@@ -10,6 +10,7 @@ import { stageEdges3D } from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Food from "./game.v0.2.food"
+import * as Ecosystems from "./game.v0.2.ecosystems"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
 
@@ -35,7 +36,8 @@ const combatSessionCache = {
     originalEnemy: null,
     foodEnabled: false,
     food: [],
-    foodInterval: null
+    foodInterval: null,
+    ecosystem: {}
 }
 
 // Food
@@ -114,6 +116,10 @@ function startCombat() {
             1000 * secondsBetweenFoodSpawn
         )
     }, 1000 * secondsUntilFoodStarts))
+
+    // Ecosystem
+
+    combatSessionCache.ecosystem = new Ecosystems.Ecosystem()
 
     // Start tick updates
 

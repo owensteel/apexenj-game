@@ -134,6 +134,15 @@ class Organism {
                 0
             )
 
+            if (this.isPlant) {
+                // Direct plants towards the centre
+                const directionToFace = Math.atan2(
+                    0 - this.mesh.position.x,
+                    0 - this.mesh.position.y
+                )
+                this.mesh.rotation.z = directionToFace
+            }
+
             // Separate detachable parts into individual organisms
             const detachedParts = OrganismBuilder.generateAbsoluteNodePositions(
                 this.dnaSequence,
@@ -208,7 +217,7 @@ class Organism {
         }
 
         // Live animation
-        if (movementToggle) {
+        if (movementToggle && !this.isPlant) {
 
             // Start with the organism's base velocity:
 
