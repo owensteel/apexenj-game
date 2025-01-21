@@ -23,7 +23,7 @@ const foodSequences = [
         [
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.DefaultBlock(),
+                new Blocks.PlantBlock(),
             ),
             new DNA.dnaNode(
                 "appendage",
@@ -41,17 +41,17 @@ const foodSequences = [
                 [
                     new DNA.dnaNode(
                         "appendage",
-                        new Blocks.DefaultBlock(),
+                        new Blocks.PlantBlock(),
                     )
                 ]
             ),
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.DefaultBlock(),
+                new Blocks.PlantBlock(),
             ),
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.DefaultBlock(),
+                new Blocks.PlantBlock(),
             )
         ]
     )
@@ -76,7 +76,9 @@ function createFood() {
             x: Math.random() > 0.5
                 ? ThreeElements.stageEdges3D.top.left.x :
                 ThreeElements.stageEdges3D.top.right.x,
-            y: 0,
+            y: Math.random() > 0.5
+                ? ThreeElements.stageEdges3D.bottom.left.x :
+                ThreeElements.stageEdges3D.bottom.right.x,
         }
     )
     foodInstance.isFood = true

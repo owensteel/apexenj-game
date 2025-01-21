@@ -289,19 +289,31 @@ class Organism {
 
             // Rotate slightly for natural randomness
 
+            const randomInterval = 750 * (1 + this.random)
             this.mesh.rotation.z += Math.sin(
-                (this.random * Date.now()) * 0.01
-            ) * Math.random() * (0.0125);
+                (Math.round(Date.now() / randomInterval) * randomInterval) * 2
+            ) * 0.005;
+
+            // Prevent "twisting"
+            if (this.mesh.rotation.z > Math.PI * 2) {
+                this.mesh.rotation.z = 0
+            }
 
             // Actually apply movement
 
             this.mesh.position.x += (
                 maxXDistInTick *
-                (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z))
+                (
+                    (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z)) +
+                    (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
+                )
             ) + randomOffset()
             this.mesh.position.y += (
-                maxYDistInTick *
-                (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z))
+                maxXDistInTick *
+                (
+                    (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z)) +
+                    (this.appliedVelocity.y * Math.sin(this.mesh.rotation.z))
+                )
             ) + randomOffset()
         }
     }
@@ -336,11 +348,14 @@ function animate() {
             organism.updateMovement()
 
             // Bounce off edges regardless
+
+            const randomPiOffset = (1 + (Math.random() * 0.25))
+
             if (
                 (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z -= (Math.PI)
+                organism.mesh.rotation.z -= (Math.PI * randomPiOffset)
                 // Push in the right direction
                 organism.mesh.position.x -= maxXDistInTick
             }
@@ -348,7 +363,7 @@ function animate() {
                 (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z += (Math.PI)
+                organism.mesh.rotation.z += (Math.PI * randomPiOffset)
                 // Push in the right direction
                 organism.mesh.position.x += maxXDistInTick
             }
@@ -356,7 +371,7 @@ function animate() {
                 (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
             ) {
                 // Flip
-                organism.mesh.rotation.z += (Math.PI)
+                organism.mesh.rotation.z += (Math.PI * randomPiOffset)
                 // Push in the right direction
                 organism.mesh.position.y -= maxYDistInTick
             }
@@ -364,7 +379,7 @@ function animate() {
                 (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
             ) {
                 // Flip
-                organism.mesh.rotation.z -= (Math.PI)
+                organism.mesh.rotation.z -= (Math.PI * randomPiOffset)
                 // Push in the right direction
                 organism.mesh.position.y += maxYDistInTick
             }
