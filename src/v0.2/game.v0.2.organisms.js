@@ -19,7 +19,7 @@ import * as Blocks from './game.v0.2.blocks.js';
 const organisms = [];
 const defaultCombatStartPos = {
     x: ThreeElements.stageEdges3D.top.left.x + 30,
-    y: 0
+    y: ThreeElements.stageEdges3D.top.left.y * 0.5
 }
 
 // Provide Brownian-esque motion
@@ -135,6 +135,7 @@ class Organism {
     rebuildMesh() {
         // Create mesh for all nodes
 
+        // For combat mode, setup is more complex
         if (movementToggle) {
 
             // Save positions of (attached) nodes for overlapping
@@ -156,7 +157,7 @@ class Organism {
             )
 
             if (this.isPlant) {
-                // Direct plants towards the centre
+                // Direct towards the centre
                 const directionToFace = Math.atan2(
                     0 - this.mesh.position.x,
                     0 - this.mesh.position.y
@@ -286,21 +287,22 @@ class Organism {
             this.appliedVelocity.x *= sizeSlowdown
             this.appliedVelocity.y *= sizeSlowdown
 
-            // Adjust velocity for rotation
-
-            this.appliedVelocity.x *= Math.cos(this.mesh.rotation.z)
-            this.appliedVelocity.y *= Math.sin(this.mesh.rotation.z)
-
-            // Actually apply movement
-
-            this.mesh.position.x += (maxXDistInTick * this.appliedVelocity.x) + randomOffset()
-            this.mesh.position.y += (maxYDistInTick * this.appliedVelocity.y) + randomOffset()
-
             // Rotate slightly for natural randomness
 
             this.mesh.rotation.z += Math.sin(
                 (this.random * Date.now()) * 0.01
-            ) * Math.random() * (0.0125 * (1 - (totalPower / 1)));
+            ) * Math.random() * (0.0125);
+
+            // Actually apply movement
+
+            this.mesh.position.x += (
+                maxXDistInTick *
+                (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z))
+            ) + randomOffset()
+            this.mesh.position.y += (
+                maxYDistInTick *
+                (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z))
+            ) + randomOffset()
         }
     }
 }
@@ -338,7 +340,7 @@ function animate() {
                 (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z -= Math.PI
+                organism.mesh.rotation.z -= (Math.PI)
                 // Push in the right direction
                 organism.mesh.position.x -= maxXDistInTick
             }
@@ -346,9 +348,25 @@ function animate() {
                 (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z += Math.PI
+                organism.mesh.rotation.z += (Math.PI)
                 // Push in the right direction
                 organism.mesh.position.x += maxXDistInTick
+            }
+            if (
+                (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
+            ) {
+                // Flip
+                organism.mesh.rotation.z += (Math.PI)
+                // Push in the right direction
+                organism.mesh.position.y -= maxYDistInTick
+            }
+            if (
+                (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
+            ) {
+                // Flip
+                organism.mesh.rotation.z -= (Math.PI)
+                // Push in the right direction
+                organism.mesh.position.y += maxYDistInTick
             }
         });
         ThreeElements.renderScene();

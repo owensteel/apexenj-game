@@ -99,6 +99,7 @@ function updateOrganismInCombat(organism) {
 
     if (!postUpdateOrganismStatus.alive) {
         // Remove from scene
+        organism.nodePositions = [] // Prevents a "ghost"
         ThreeElements.scene.remove(organism.mesh)
     }
 

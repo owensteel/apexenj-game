@@ -46,16 +46,15 @@ function foodCheckSpawn() {
     if ((combatSessionCache.food.filter((el) => {
         // Food that hasn't been destroyed
         return el.nodePositions.length > 0
-    })).length < 3) {
-        const foodInst = Food.createFood()
-        combatSessionCache.food.push(foodInst)
-    } else {
+    })).length > 5) {
         // Destroy oldest
         Organisms.destroyOrganism(combatSessionCache.food[0])
     }
+    const foodInst = Food.createFood()
+    combatSessionCache.food.push(foodInst)
 }
-const secondsUntilFoodStarts = 3
-const secondsBetweenFoodSpawn = 10
+const secondsUntilFoodStarts = 2.5
+const secondsBetweenFoodSpawn = 5
 
 // Healthbars
 
@@ -97,7 +96,7 @@ function startCombat() {
         enemyDNA,
         {
             x: stageEdges3D.top.right.x - 30,
-            y: 0
+            y: stageEdges3D.bottom.right.y * 0.5
         }
     )
     combatSessionCache.originalEnemy = enemyOrganism
@@ -136,16 +135,23 @@ function startCombat() {
     // Start organisms' initial velocity
 
     playerOrganism.velocity.x = maxAttractionVelocity
-    playerOrganism.velocity.y = Math.random() * maxAttractionVelocity
+    playerOrganism.velocity.y = -maxAttractionVelocity
 
     enemyOrganism.velocity.x = -maxAttractionVelocity
-    enemyOrganism.velocity.y = -playerOrganism.velocity.y
+    enemyOrganism.velocity.y = maxAttractionVelocity
 
     // Start movement
 
     Organisms.setMovementToggle(true, playerOrganism)
 
-    enemyOrganism.mesh.rotation.z += Math.PI
+    playerOrganism.mesh.rotation.z = Math.atan2(
+        playerOrganism.combatStartPos.x,
+        playerOrganism.combatStartPos.y
+    )
+    enemyOrganism.mesh.rotation.z = Math.atan2(
+        enemyOrganism.combatStartPos.x,
+        enemyOrganism.combatStartPos.y
+    )
 
     // Show UI
 
