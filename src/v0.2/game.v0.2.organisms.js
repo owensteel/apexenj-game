@@ -325,26 +325,32 @@ function animate() {
             if (organism.mesh == null) {
                 return
             }
+
+            // Skip if a static thing, like a plant
+            if (organism.isPlant) {
+                return
+            }
+
             organism.updateMovement()
 
             // Bounce off edges regardless
             if (
-                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x &&
-                    Math.sign(organism.velocity.x) > 0)
-                ||
-                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x &&
-                    Math.sign(organism.velocity.x) < 0)
+                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x) &&
+                organism.mesh.rotation.z > Math.PI
             ) {
-                organism.velocity.x = -organism.velocity.x;
+                // Flip
+                organism.mesh.rotation.z -= Math.PI
+                // Push in the right direction
+                organism.mesh.position.x -= maxXDistInTick
             }
             if (
-                (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y &&
-                    Math.sign(organism.velocity.y) > 0)
-                ||
-                (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.right.y &&
-                    Math.sign(organism.velocity.y) < 0)
+                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x) &&
+                organism.mesh.rotation.z < Math.PI
             ) {
-                organism.velocity.y = -organism.velocity.y;
+                // Flip
+                organism.mesh.rotation.z += Math.PI
+                // Push in the right direction
+                organism.mesh.position.x += maxXDistInTick
             }
         });
         ThreeElements.renderScene();
