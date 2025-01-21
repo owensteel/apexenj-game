@@ -273,6 +273,8 @@ setNodeToolbar()
 
 // Node click
 
+let isMouseDrawingNodes = false
+
 const get3DNodeAtScreenPos = (pos) => {
     const hit3D = ThreeElements.hit3DFromCanvasClickPos(pos)
     if (hit3D) {
@@ -340,6 +342,7 @@ function nodeClickHandler(e) {
 
     if (!connectingNode) {
         console.warn("No connecting edge found for new node")
+        isMouseDrawingNodes = false
         return
     }
 
@@ -383,12 +386,18 @@ const nodeDraggingMouseMoveHandler = (e) => {
             pos3D.y,
             0
         )
+    } else {
+        if (isMouseDrawingNodes) {
+            nodeClickHandler(e)
+        }
     }
 }
 builderClickField.addEventListener("mousemove", nodeDraggingMouseMoveHandler)
 builderClickField.addEventListener("touchmove", nodeDraggingMouseMoveHandler)
 
 const nodeDraggingMouseUpHandler = (e) => {
+    isMouseDrawingNodes = true
+
     if (nodeDragging.currentNode) {
         // Check if user has put node in the bin
         if (isInBin(e.pageX, e.pageY)) {
@@ -408,6 +417,7 @@ const nodeDraggingMouseUpHandler = (e) => {
 }
 builderClickField.addEventListener("mouseup", nodeDraggingMouseUpHandler)
 builderClickField.addEventListener("touchend", nodeDraggingMouseUpHandler)
+builderClickField.addEventListener("mouseout", nodeDraggingMouseUpHandler)
 
 function startDraggingNode(node) {
     // Setup elements
@@ -443,6 +453,12 @@ function startDraggingNode(node) {
 
 const nodeDraggingMouseDownHandler = (e) => {
     e.preventDefault()
+
+    if (isMouseDrawingNodes) {
+        return
+    }
+
+    isMouseDrawingNodes = true
 
     const clickedNode = get3DNodeAtScreenPos(
         {
