@@ -25,12 +25,23 @@ game-wrapper canvas {
 }
 
 game-stage-wrapper {
+    user-select: none;
     position: relative;
 }
 
 game-wrapper game-builder-wrapper {
-    user-select: none;
+    position: absolute;
+    z-index: 1;
+    display: block;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 100%;
+}
 
+game-wrapper click-field {
     position: absolute;
     z-index: 1;
     display: block;
@@ -43,6 +54,7 @@ game-wrapper game-builder-wrapper {
 }
 
 game-wrapper hex-grid {
+    pointer-events: none;
     position: absolute;
     z-index: -1;
     display: block;
@@ -71,7 +83,7 @@ game-wrapper game-node-dragging-overlay {
 game-wrapper game-builder-wrapper node-toolbar {
     position: absolute;
     display: block;
-    z-index: 2;
+    z-index: 5;
     bottom: 0px;
     left: 0px;
     right: 0px;

@@ -43,8 +43,8 @@ function generateHexagonGrid() {
     // - The 'width' of each hex is 2 * side
     // - The vertical distance between columns is sqrt(3) * side
     // - The horizontal distance between centres of adjacent columns is 1.5 * side
-    const columns = Math.ceil(gameWrapper.clientWidth / (side * 1.5));
-    const rows = Math.ceil(gameWrapper.clientHeight / (side * 1.8));
+    const columns = Math.ceil(gameWrapper.clientWidth / (side)) + 5;
+    const rows = Math.ceil(gameWrapper.clientHeight / (side)) + 5;
     const horizontalSpacing = 1.5 * side;       // gap between columns
     const verticalSpacing = Math.sqrt(3) * side; // gap between rows
 
@@ -214,6 +214,9 @@ let focusedOrganism = null
 const builderWrapper = document.createElement("game-builder-wrapper")
 builderWrapper.isHidden = true
 
+const builderClickField = document.createElement("click-field")
+builderWrapper.appendChild(builderClickField)
+
 const builderHexGrid = document.createElement("hex-grid")
 builderWrapper.appendChild(builderHexGrid)
 
@@ -343,7 +346,8 @@ function nodeClickHandler(e) {
     const createdNode = createNode(connectingNode, connectingEdge)
     console.log("created node", createdNode)
 }
-builderHexGrid.addEventListener("click", nodeClickHandler)
+builderClickField.addEventListener("click", nodeClickHandler)
+builderClickField.addEventListener("touchstart", nodeClickHandler)
 
 // Node dragging
 
@@ -361,6 +365,8 @@ const isInBin = (x, y) => {
 
 const nodeDraggingMouseMoveHandler = (e) => {
     if (nodeDragging.currentNode) {
+        e.preventDefault()
+
         // Highlight bin on hover
         if (isInBin(e.pageX, e.pageY)) {
             nodeBin.style.transform = "scale(2)"
@@ -379,8 +385,8 @@ const nodeDraggingMouseMoveHandler = (e) => {
         )
     }
 }
-builderWrapper.addEventListener("mousemove", nodeDraggingMouseMoveHandler)
-builderWrapper.addEventListener("touchmove", nodeDraggingMouseMoveHandler)
+builderClickField.addEventListener("mousemove", nodeDraggingMouseMoveHandler)
+builderClickField.addEventListener("touchmove", nodeDraggingMouseMoveHandler)
 
 const nodeDraggingMouseUpHandler = (e) => {
     if (nodeDragging.currentNode) {
@@ -400,8 +406,8 @@ const nodeDraggingMouseUpHandler = (e) => {
         focusedOrganism.rebuildMesh()
     }
 }
-builderWrapper.addEventListener("mouseup", nodeDraggingMouseUpHandler)
-builderWrapper.addEventListener("touchend", nodeDraggingMouseUpHandler)
+builderClickField.addEventListener("mouseup", nodeDraggingMouseUpHandler)
+builderClickField.addEventListener("touchend", nodeDraggingMouseUpHandler)
 
 function startDraggingNode(node) {
     // Setup elements
@@ -436,6 +442,8 @@ function startDraggingNode(node) {
 }
 
 const nodeDraggingMouseDownHandler = (e) => {
+    e.preventDefault()
+
     const clickedNode = get3DNodeAtScreenPos(
         {
             x: e.pageX,
@@ -460,16 +468,16 @@ const nodeDraggingMouseDownHandler = (e) => {
 
         setTimeout(() => {
             if (mouseDownOnNode) {
-                startDraggingNode(clickedNode, e)
+                startDraggingNode(clickedNode)
             }
         }, 250)
 
-        builderWrapper.addEventListener("mouseup", mouseUpListener)
-        builderWrapper.addEventListener("touchend", mouseUpListener)
+        builderClickField.addEventListener("mouseup", mouseUpListener)
+        builderClickField.addEventListener("touchend", mouseUpListener)
     }
 }
-builderWrapper.addEventListener("mousedown", nodeDraggingMouseDownHandler)
-builderWrapper.addEventListener("touchstart", nodeDraggingMouseDownHandler)
+builderClickField.addEventListener("mousedown", nodeDraggingMouseDownHandler)
+builderClickField.addEventListener("touchstart", nodeDraggingMouseDownHandler)
 
 // Organism rendering
 
