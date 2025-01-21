@@ -37,6 +37,22 @@ PlayerAccessibleBlockTypeNamesList.push("default")
 
 /*
 
+    Default but for plants
+
+*/
+
+const BLOCK_TYPENAME_PLANT = "plant"
+class PlantBlock extends DefaultBlock {
+    constructor() {
+        super();
+
+        this.setTypeName(BLOCK_TYPENAME_PLANT)
+        this.setColor("hotpink")
+    }
+}
+
+/*
+
     Bonding
 
 */
@@ -161,6 +177,7 @@ export {
     // Block classes
 
     DefaultBlock,
+    PlantBlock,
     BondingBlock,
     MotorBlock,
     HeartBlock,
@@ -175,6 +192,7 @@ export {
     // Block type constants
 
     BLOCK_TYPENAME_DEFAULT,
+    BLOCK_TYPENAME_PLANT,
     BLOCK_TYPENAME_BONDING,
     BLOCK_TYPENAME_HEART,
     BLOCK_TYPENAME_MOTOR,

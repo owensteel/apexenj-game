@@ -33,17 +33,17 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(0, 0, 10);
 camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xffffff, 0);
-renderer.setSize(canvasWidth, canvasHeight);
+const ThreeRenderer = new THREE.WebGLRenderer();
+ThreeRenderer.setClearColor(0xffffff, 0);
+ThreeRenderer.setSize(canvasWidth, canvasHeight);
 
-const ThreeCanvas = renderer.domElement
+const ThreeCanvas = ThreeRenderer.domElement
 ThreeCanvas.setAttribute("id", "game-stage")
 gameStageWrapper.appendChild(ThreeCanvas);
 
 // Outline filter
 
-const composer = new EffectComposer(renderer);
+const composer = new EffectComposer(ThreeRenderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
@@ -64,7 +64,7 @@ outlinePass.hiddenEdgeColor.set('#ffffff');
 // loop
 
 function renderScene() {
-    renderer.render(scene, camera);
+    ThreeRenderer.render(scene, camera);
 
     outlinePass.selectedObjects = scene.children;
     composer.render();
@@ -181,7 +181,7 @@ function rotateMeshToTarget(mesh, nx, ny, targetX, targetY) {
 
 // From canvas click coords to 3D space coords
 function hit3DFromCanvasClickPos(clickPos) {
-    const rect = renderer.domElement.getBoundingClientRect();
+    const rect = ThreeRenderer.domElement.getBoundingClientRect();
     const mouse = new THREE.Vector2(
         ((clickPos.x - rect.left) / rect.width) * 2 - 1,
         -((clickPos.y - rect.top) / rect.height) * 2 + 1
@@ -236,6 +236,7 @@ function mousePosTo3DPos(mousePos) {
 }
 
 export {
+    ThreeRenderer,
     ThreeCanvas,
     scene,
     stageEdges3D,

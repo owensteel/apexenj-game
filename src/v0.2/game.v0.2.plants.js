@@ -18,14 +18,48 @@ const plantSequences = [
         [
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.DefaultBlock(),
+                new Blocks.PlantBlock(),
+                [
+                    new DNA.dnaNode(
+                        "appendage",
+                        new Blocks.AbsorberBlock(),
+                        []
+                    )
+                ]
             ),
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.DefaultBlock(),
-            )
+                new Blocks.PlantBlock(),
+                []
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.FoodBlock(),
+                []
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.PlantBlock(),
+                [
+                    new DNA.dnaNode(
+                        "appendage",
+                        new Blocks.AbsorberBlock(),
+                        []
+                    )
+                ]
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.FoodBlock(),
+                []
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.PlantBlock(),
+                []
+            ),
         ]
-    ),
+    )
 ]
 
 // Create and deploy plants

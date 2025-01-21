@@ -23,11 +23,6 @@ const plantPositions = [
         x: ThreeElements.stageEdges3D.top.right.x,
         y: ThreeElements.stageEdges3D.top.right.y
     },
-    // Middle right
-    {
-        x: ThreeElements.stageEdges3D.top.right.x,
-        y: 0
-    },
     // Bottom left
     {
         x: ThreeElements.stageEdges3D.bottom.left.x,
@@ -49,6 +44,7 @@ class Ecosystem {
     constructor(presetSeed = null) {
         this.plants = []
         this.temperature = 0
+        this.backgroundColor = "Cornsilk"
 
         if (presetSeed == null) {
 

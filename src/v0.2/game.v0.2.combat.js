@@ -6,7 +6,7 @@
 
 */
 
-import { stageEdges3D } from "./game.v0.2.3d";
+import { stageEdges3D, ThreeCanvas, ThreeRenderer } from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Food from "./game.v0.2.food"
@@ -121,6 +121,10 @@ function startCombat() {
 
     combatSessionCache.ecosystem = new Ecosystems.Ecosystem()
 
+    // Changing bg color of actual renderer causes
+    // outlines to fail
+    ThreeCanvas.style.backgroundColor = combatSessionCache.ecosystem.backgroundColor
+
     // Start tick updates
 
     combatTick()
@@ -140,6 +144,8 @@ function startCombat() {
     // Start movement
 
     Organisms.setMovementToggle(true, playerOrganism)
+
+    enemyOrganism.mesh.rotation.z += Math.PI
 
     // Show UI
 
@@ -164,6 +170,10 @@ function endCombat() {
     // Reset session values
 
     combatRunning = false
+
+    // Reset canvas
+
+    ThreeCanvas.style.backgroundColor = ""
 
     // Cancel any timeouts
 

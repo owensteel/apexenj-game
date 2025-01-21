@@ -286,6 +286,11 @@ class Organism {
             this.appliedVelocity.x *= sizeSlowdown
             this.appliedVelocity.y *= sizeSlowdown
 
+            // Adjust velocity for rotation
+
+            this.appliedVelocity.x *= Math.cos(this.mesh.rotation.z)
+            this.appliedVelocity.y *= Math.sin(this.mesh.rotation.z)
+
             // Actually apply movement
 
             this.mesh.position.x += (maxXDistInTick * this.appliedVelocity.x) + randomOffset()
@@ -295,11 +300,7 @@ class Organism {
 
             this.mesh.rotation.z += Math.sin(
                 (this.random * Date.now()) * 0.01
-            ) * Math.random() * 0.0125;
-
-            // Reduce randomness if motors are supplying velocity
-
-            this.mesh.rotation.z *= 1 - (totalPower / 1)
+            ) * Math.random() * (0.0125 * (1 - (totalPower / 1)));
         }
     }
 }

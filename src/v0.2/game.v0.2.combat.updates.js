@@ -38,16 +38,22 @@ function updateOrganismInCombat(organism) {
         // Reduce blocks while being spent
 
         const blocksLeft = Math.round(organism.energy / nutritionPerFoodBlock)
-        if (blocksLeft < organism.nodePositions.length) {
-            if (organism.nodePositions.length <= 1) {
+        const foodBlockNodes = organism.nodePositions.filter((nodePos) => {
+            return nodePos.node.block.typeName == BLOCK_TYPENAME_FOOD
+        })
+        if (blocksLeft < foodBlockNodes.length) {
+            if (foodBlockNodes.length <= 1) {
                 // Destroy it
 
                 ThreeElements.scene.remove(organism.mesh)
                 Organisms.destroyOrganism(organism)
             } else {
-                // Remove a node
+                // Remove a food node
 
-                organism.nodePositions.pop()
+                const foodNodeToRemoveIndex = organism.nodePositions.findIndex((nodePos) => {
+                    return nodePos.node.block.typeName == BLOCK_TYPENAME_FOOD
+                })
+                organism.nodePositions.splice(foodNodeToRemoveIndex, 1);
 
                 const meshPos = organism.mesh.position
                 ThreeElements.scene.remove(organism.mesh)
