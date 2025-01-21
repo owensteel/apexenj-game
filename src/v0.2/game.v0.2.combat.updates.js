@@ -33,7 +33,7 @@ function updateOrganismInCombat(organism) {
 
     // If food, just check if it should still be visible
 
-    if (organism.isFood) {
+    if (organism.isFood || organism.isPlant) {
 
         // Reduce blocks while being spent
 
@@ -135,13 +135,13 @@ function syncOrganismsInCombat(organism, opponent) {
         // Check block types for block interactions
 
         // Food itself cannot have interactions
-        if (organism.isFood) {
+        if (organism.isFood || organism.isPlant) {
             return
         }
 
         // Absorb food
         for (const pair of overlappingNodes) {
-            if (opponent.isFood) {
+            if (opponent.isFood || opponent.isPlant) {
                 if (
                     pair.orgNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
                     pair.oppNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_FOOD
@@ -248,7 +248,7 @@ function combatUpdate() {
     // Each organism must be updated
     for (const organism of currentOrganisms) {
         const orgStatus = updateOrganismInCombat(organism)
-        if (!organism.isFood && !orgStatus.alive) {
+        if ((!organism.isFood && !organism.isPlant) && !orgStatus.alive) {
             postUpdateCombatStatus.ended = true
             postUpdateCombatStatus.loser = organism.id
             continue

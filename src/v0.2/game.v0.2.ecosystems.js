@@ -44,7 +44,7 @@ class Ecosystem {
     constructor(presetSeed = null) {
         this.plants = []
         this.temperature = 0
-        this.backgroundColor = "Cornsilk"
+        this.backgroundColor = "PaleGreen"
 
         if (presetSeed == null) {
 

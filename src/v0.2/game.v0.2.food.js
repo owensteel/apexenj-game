@@ -85,7 +85,10 @@ function createFood() {
 
     // Set food nutrition value depending on
     // amount of food blocks instance has
-    foodInstance.energy = nutritionPerFoodBlock * foodInstance.nodePositions.length
+    const foodBlockNodes = foodInstance.nodePositions.filter((nodePos) => {
+        return nodePos.node.block.typeName == Blocks.BLOCK_TYPENAME_FOOD
+    })
+    foodInstance.energy = nutritionPerFoodBlock * foodBlockNodes.length
 
     console.log("created food", foodInstance)
 
