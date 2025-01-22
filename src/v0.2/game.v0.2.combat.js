@@ -83,7 +83,7 @@ const maxAttractionVelocity = 0.005
 function startCombat() {
     console.log("starting combat...")
 
-    // Set enemy
+    // Set players
 
     const enemyDNA = Utils.cloneObject(
         DNA.demoDnaSequence,
