@@ -336,6 +336,22 @@ class Organism {
         }
     }
 
+    // Update node pos world positions
+    updateNodePosWorldPositions() {
+        if (!this.mesh || this.nodePositions.length < 1) {
+            return false
+        }
+
+        this.mesh.updateMatrixWorld(true);
+        for (const nodePos of this.nodePositions) {
+            nodePos.worldPos = ThreeElements.convertNodePosIntoWorldPos(
+                nodePos, this.mesh
+            )
+        }
+
+        return this.nodePositions
+    }
+
     // An effect that visually shows the damage done to an organism
     breakOffNode() {
         if (!this.mesh || this.nodePositions.length < 1) {
@@ -378,14 +394,19 @@ class Organism {
         // to "resurrect"
         removedNode.edges = Array(6)
         // Add to scene, like it's "crumbled" off
-        // const removedNodePosWorld = ThreeElements.convertNodePosIntoWorldPos(
-        //     removedNodePos, this.mesh
-        // )
+        const removedNodePosWorld = {
+            x: removedNodePos.x + meshPos.x,
+            y: removedNodePos.y + meshPos.y
+        }
+        if ("worldPos" in removedNodePos) {
+            removedNodePosWorld.x = removedNodePos.worldPos.x
+            removedNodePosWorld.y = removedNodePos.worldPos.y
+        }
         const removedNodeAsOrg = addOrganism(
             removedNode,
             {
-                x: meshPos.x + removedNodePos.x,
-                y: meshPos.y + removedNodePos.y
+                x: removedNodePosWorld.x,
+                y: removedNodePosWorld.y
             }
         )
         // Motor blocks tend to go crazy alone, so make static
@@ -423,6 +444,7 @@ class Organism {
 
         this.hasExploded = true
 
+        this.updateNodePosWorldPositions()
         while (this.nodePositions.length > 1) {
             this.breakOffNode()
         }
@@ -464,13 +486,11 @@ function animate() {
 
             // Bounce off edges regardless
 
-            const randomPiOffset = (1 + (Math.random() * 0.25))
-
             if (
                 (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z -= (Math.PI * randomPiOffset)
+                organism.mesh.rotation.z -= Math.PI
                 // Push in the right direction
                 organism.mesh.position.x -= maxXDistInTick
             }
@@ -478,7 +498,7 @@ function animate() {
                 (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
             ) {
                 // Flip
-                organism.mesh.rotation.z += (Math.PI * randomPiOffset)
+                organism.mesh.rotation.z += Math.PI
                 // Push in the right direction
                 organism.mesh.position.x += maxXDistInTick
             }
@@ -486,7 +506,7 @@ function animate() {
                 (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
             ) {
                 // Flip
-                organism.mesh.rotation.z += (Math.PI * randomPiOffset)
+                organism.mesh.rotation.z += Math.PI
                 // Push in the right direction
                 organism.mesh.position.y -= maxYDistInTick
             }
@@ -494,7 +514,7 @@ function animate() {
                 (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
             ) {
                 // Flip
-                organism.mesh.rotation.z -= (Math.PI * randomPiOffset)
+                organism.mesh.rotation.z -= Math.PI
                 // Push in the right direction
                 organism.mesh.position.y += maxYDistInTick
             }
