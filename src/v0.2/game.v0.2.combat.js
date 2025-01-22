@@ -45,7 +45,6 @@ const combatSessionCache = {
 
 const secondsUntilFoodStarts = 2.5
 const secondsBetweenFoodSpawn = 5
-const foodLifetimeSecs = secondsBetweenFoodSpawn * 5
 
 // Healthbars
 
