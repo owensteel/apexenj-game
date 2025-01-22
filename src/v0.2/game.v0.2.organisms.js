@@ -291,14 +291,15 @@ class Organism {
                         totalPower += motorPowerByEnergy;
 
                         // Animate the "motor" mesh visually (e.g. spinning some axis)
-                        motorNodePos.mesh.rotation.x += (
-                            (vx * Math.cos(motorAngle)) -
-                            (vy * Math.sin(motorAngle))
-                        );
+                        motorNodePos.mesh.rotation.x += (vx * Math.cos(motorAngle));
+                        motorNodePos.mesh.rotation.y += (vy * Math.sin(motorAngle));
 
                         // Prevent "twisting"
                         if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
                             motorNodePos.mesh.rotation.x = 0
+                        }
+                        if (Math.abs(motorNodePos.mesh.rotation.y) > (Math.PI * 2)) {
+                            motorNodePos.mesh.rotation.y = 0
                         }
                     }
                 }
