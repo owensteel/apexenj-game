@@ -260,50 +260,62 @@ class Organism {
             this.appliedVelocity.x = this.velocity.x;
             this.appliedVelocity.y = this.velocity.y;
 
-            // Gather motor effects in some combined vector:
+            // Don't apply organism physics to food for
+            // convenience reasons
 
-            let totalMotorX = 0;
-            let totalMotorY = 0;
-            let totalPower = 0;  // track combined power
+            if (!this.isFood) {
 
-            if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodePosByBlockTypeCache) {
-                // Each motor node modifies the velocity by pushing in a certain direction
-                for (const motorNodePos of this.nodePosByBlockTypeCache[Blocks.BLOCK_TYPENAME_MOTOR]) {
-                    // The local angle from organism root => motor node
-                    const motorAngle = Math.atan2(motorNodePos.y, motorNodePos.x);
+                // Gather motor effects in some combined vector:
 
-                    // Energy affects motor power
-                    const motorPowerByEnergy = motorMaxPower * this.energy
-                    motorNodePos.node.block.appliedPowerPerc = motorPowerByEnergy / motorMaxPower
+                let totalMotorX = 0;
+                let totalMotorY = 0;
+                let totalPower = 0;  // track combined power
 
-                    // Convert that to a velocity vector:
-                    // e.g. each motor pushes outward along (cos(angle), sin(angle)) times power
-                    const vx = -(motorPowerByEnergy * Math.cos(motorAngle));
-                    const vy = -(motorPowerByEnergy * Math.sin(motorAngle));
+                if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodePosByBlockTypeCache) {
+                    // Each motor node modifies the velocity by pushing in a certain direction
+                    for (const motorNodePos of this.nodePosByBlockTypeCache[Blocks.BLOCK_TYPENAME_MOTOR]) {
+                        // The local angle from organism root => motor node
+                        const motorAngle = Math.atan2(motorNodePos.y, motorNodePos.x);
 
-                    totalMotorX += vx;
-                    totalMotorY += vy;
-                    totalPower += motorPowerByEnergy;
+                        // Energy affects motor power
+                        const motorPowerByEnergy = motorMaxPower * this.energy
+                        motorNodePos.node.block.appliedPowerPerc = motorPowerByEnergy / motorMaxPower
 
-                    // Animate the "motor" mesh visually (e.g. spinning some axis)
-                    motorNodePos.mesh.rotation.x += vx;
-                    if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
-                        motorNodePos.mesh.rotation.x = 0
+                        // Convert that to a velocity vector:
+                        // e.g. each motor pushes outward along (cos(angle), sin(angle)) times power
+                        const vx = -(motorPowerByEnergy * Math.cos(motorAngle));
+                        const vy = -(motorPowerByEnergy * Math.sin(motorAngle));
+
+                        totalMotorX += vx;
+                        totalMotorY += vy;
+                        totalPower += motorPowerByEnergy;
+
+                        // Animate the "motor" mesh visually (e.g. spinning some axis)
+                        motorNodePos.mesh.rotation.x += (
+                            (vx * Math.cos(motorAngle)) -
+                            (vy * Math.sin(motorAngle))
+                        );
+
+                        // Prevent "twisting"
+                        if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
+                            motorNodePos.mesh.rotation.x = 0
+                        }
                     }
                 }
+
+                // Add the total motor effect to the applied velocity
+
+                this.appliedVelocity.x += totalMotorX;
+                this.appliedVelocity.y += totalMotorY;
+
+                // Reduce effect of velocity depending on the size of the
+                // organism
+
+                const sizeSlowdown = (minNumOfNodes / this.nodePositions.length)
+                this.appliedVelocity.x *= sizeSlowdown
+                this.appliedVelocity.y *= sizeSlowdown
+
             }
-
-            // Add the total motor effect to the applied velocity
-
-            this.appliedVelocity.x += totalMotorX;
-            this.appliedVelocity.y += totalMotorY;
-
-            // Reduce effect of velocity depending on the size of the
-            // organism
-
-            const sizeSlowdown = (minNumOfNodes / this.nodePositions.length)
-            this.appliedVelocity.x *= sizeSlowdown
-            this.appliedVelocity.y *= sizeSlowdown
 
             // Rotate slightly for natural randomness
 
@@ -322,15 +334,15 @@ class Organism {
             this.mesh.position.x += (
                 maxXDistInTick *
                 (
-                    (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z)) +
-                    (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
+                    (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z)) -
+                    (this.appliedVelocity.y * Math.sin(this.mesh.rotation.z))
                 )
             ) + randomOffset()
             this.mesh.position.y += (
                 maxXDistInTick *
                 (
                     (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z)) +
-                    (this.appliedVelocity.y * Math.sin(this.mesh.rotation.z))
+                    (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
                 )
             ) + randomOffset()
         }
