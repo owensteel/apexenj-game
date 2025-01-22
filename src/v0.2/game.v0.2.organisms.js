@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import * as ThreeElements from './game.v0.2.3d.js'
 import * as OrganismBuilder from './game.v0.2.organism.builder.js'
-import { cloneObject } from './game.v0.2.utils.js';
+import { cloneArray, cloneObject } from './game.v0.2.utils.js';
 import * as DNA from './game.v0.2.dna.js';
 import * as Blocks from './game.v0.2.blocks.js';
 
@@ -39,6 +39,11 @@ const maxYDistInTick = Math.abs(
     ThreeElements.stageEdges3D.bottom.left.y) * 0.025;
 
 const minNumOfNodes = 6
+
+// Energy general
+
+const minNodesWithoutEnergyCon = 6
+const minMotorNodesWithoutEnergyCon = 0.5
 
 /*
 
@@ -72,9 +77,9 @@ class Organism {
         // Set the organism's starting place in the scene
         this.combatStartPos = combatStartPos
 
-        // Prevents animations overriding each other
-        // NOTE: Animations are currently not in use
+        // Animation utilities
         this.currentAnimations = {}
+        this.hasExploded = false
 
         // Default velocity
         this.velocity = {
@@ -215,8 +220,13 @@ class Organism {
         }
         this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
-        ThreeElements.scene.add(this.mesh);
+        this.updateNodesByBlockTypeCache()
+        this.hasExploded = false
 
+        ThreeElements.scene.add(this.mesh);
+    }
+
+    updateNodesByBlockTypeCache() {
         // Update cache of blocks by type, e.g motor blocks
 
         // Clear old cache
@@ -230,6 +240,8 @@ class Organism {
             }
             this.nodesByBlockTypeCache[typeName].push(nodePos)
         }
+
+        return this.nodesByBlockTypeCache
     }
 
     // Provides "visible life" to organism mesh
@@ -316,6 +328,104 @@ class Organism {
                 )
             ) + randomOffset()
         }
+    }
+
+    // An effect that visually shows the damage done to an organism
+    breakOffNode() {
+        if (!this.mesh || this.nodePositions.length < 1) {
+            return false
+        }
+
+        // Cache original mesh position and rotation
+        const meshPos = this.mesh.position
+        const meshRot = this.mesh.rotation
+
+        // Remove the most childless node possible
+
+        const getNullEdgesInNode = (a) => {
+            return a.edges.filter((nodeEdge) => {
+                return nodeEdge == null
+            })
+        }
+
+        const clonedNPForSorting = cloneArray(this.nodePositions)
+
+        const removedNodePos = clonedNPForSorting.sort((a, b) => {
+            return getNullEdgesInNode(b.node).length - getNullEdgesInNode(a.node).length
+        })[0]
+
+        if (!removedNodePos) {
+            return false
+        }
+
+        console.log("removing nodepos...", removedNodePos, removedNodePos.index)
+
+        // Remove the node from the positions by index
+        if (this.nodePositions.splice(removedNodePos.index, 1).length < 1) {
+            console.warn("failed to delete node pos")
+            return false
+        }
+
+        const removedNode = cloneObject(removedNodePos.node)
+
+        // Motor blocks tend to go crazy, so forget them
+        if (removedNode.block.typeName !== Blocks.BLOCK_TYPENAME_MOTOR) {
+            // Isolate, to get rid of any children the builder may try
+            // to "resurrect"
+            removedNode.edges = Array(6)
+            // Add to scene, like it's "crumbled" off
+            // const removedNodePosWorld = ThreeElements.convertNodePosIntoWorldPos(
+            //     removedNodePos, this.mesh
+            // )
+            addOrganism(
+                removedNode,
+                {
+                    x: meshPos.x + removedNodePos.x,
+                    y: meshPos.y + removedNodePos.y
+                }
+            )
+        }
+
+        // Rebuild this organism without the removed node
+        ThreeElements.scene.remove(this.mesh)
+
+        // Only rebuild if there are any nodes left, otherwise
+        // let it remain removed forever
+        if (this.nodePositions.length > 0) {
+            this.mesh = OrganismBuilder.buildBodyFromNodePositions(
+                this.nodePositions,
+                /* allowDetachingParts: */ false,
+                /* formUnionMesh: */ false
+            )
+
+            this.updateNodesByBlockTypeCache()
+            ThreeElements.scene.add(this.mesh)
+
+            this.mesh.position.set(meshPos.x, meshPos.y, 0)
+            this.mesh.rotation.set(meshRot.x, meshRot.y, meshRot.z)
+        }
+
+        return true
+    }
+
+    // Exploding animation, break into pieces and die
+    explode() {
+        if (this.hasExploded) {
+            return
+        }
+
+        this.hasExploded = true
+
+        while (this.nodePositions.length > 1) {
+            this.breakOffNode()
+        }
+
+        setTimeout(() => {
+            // Remove the organism (or what remains of
+            // it) from scene
+            this.nodePositions = [] // Prevents a "ghost"
+            ThreeElements.scene.remove(this.mesh)
+        }, 3000)
     }
 }
 
@@ -616,5 +726,8 @@ export {
     clearScene,
     getAllOrganisms,
     bondOrganisms,
-    destroyOrganism
+    destroyOrganism,
+
+    minNodesWithoutEnergyCon,
+    minMotorNodesWithoutEnergyCon
 };

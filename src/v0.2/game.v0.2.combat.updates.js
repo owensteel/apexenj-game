@@ -26,9 +26,6 @@ const combatUpdateCache = {
 
 */
 
-const minNodesWithoutEnergyCon = 6
-const minMotorNodesWithoutEnergyCon = 0.5
-
 function updateOrganismInCombat(organism) {
 
     // If food, just check if it should still be visible
@@ -78,15 +75,15 @@ function updateOrganismInCombat(organism) {
     // Deplete energy
 
     // Natural amount
-    let energyDepletion = 0.025 / 100 // "energy" is 0 to 1
+    let energyDepletion = 0.0125 / 100 // "energy" ranges from 0 to 1
 
     // More nodes = more energy consumed
-    energyDepletion /= (minNodesWithoutEnergyCon / organism.nodePositions.length)
+    energyDepletion /= (Organisms.minNodesWithoutEnergyCon / organism.nodePositions.length)
 
     // Motor nodes consume more energy
     if (BLOCK_TYPENAME_MOTOR in organism.nodesByBlockTypeCache) {
         energyDepletion /= (
-            minMotorNodesWithoutEnergyCon
+            Organisms.minMotorNodesWithoutEnergyCon
             / organism.nodesByBlockTypeCache[BLOCK_TYPENAME_MOTOR].length
         )
     }
@@ -98,9 +95,10 @@ function updateOrganismInCombat(organism) {
     postUpdateOrganismStatus.alive = (organism.energy > 0)
 
     if (!postUpdateOrganismStatus.alive) {
-        // Remove from scene
-        organism.nodePositions = [] // Prevents a "ghost"
-        ThreeElements.scene.remove(organism.mesh)
+        // Explode!
+        if (!organism.hasExploded) {
+            organism.explode()
+        }
     }
 
     return postUpdateOrganismStatus
