@@ -82,8 +82,14 @@ function createFood() {
         }
     )
     foodInstance.isFood = true
-    foodInstance.velocity.x = Math.sign(0 - foodInstance.mesh.position.x) * foodVelocity
-    foodInstance.velocity.y = Math.sign(0 - foodInstance.mesh.position.y) * foodVelocity
+    foodInstance.isEaten = false
+
+    foodInstance.velocity.x = foodVelocity
+    foodInstance.velocity.y = -foodVelocity
+    foodInstance.mesh.rotation.z = Math.atan2(
+        0 - foodInstance.mesh.position.x,
+        0 - foodInstance.mesh.position.y
+    )
 
     // Set food nutrition value depending on
     // amount of food blocks instance has
@@ -92,7 +98,7 @@ function createFood() {
     })
     foodInstance.energy = nutritionPerFoodBlock * foodBlockNodes.length
 
-    console.log("created food", foodInstance)
+    console.log("created food")
 
     return foodInstance
 }

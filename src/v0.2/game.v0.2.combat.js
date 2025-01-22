@@ -37,24 +37,15 @@ const combatSessionCache = {
     foodEnabled: false,
     food: [],
     foodInterval: null,
-    ecosystem: {}
+    ecosystem: {},
+    result: null
 }
 
 // Food
 
-function foodCheckSpawn() {
-    if ((combatSessionCache.food.filter((el) => {
-        // Food that hasn't been destroyed
-        return el.nodePositions.length > 0
-    })).length > 5) {
-        // Destroy oldest
-        Organisms.destroyOrganism(combatSessionCache.food[0])
-    }
-    const foodInst = Food.createFood()
-    combatSessionCache.food.push(foodInst)
-}
 const secondsUntilFoodStarts = 2.5
 const secondsBetweenFoodSpawn = 5
+const foodLifetimeSecs = secondsBetweenFoodSpawn * 5
 
 // Healthbars
 
@@ -106,12 +97,20 @@ function startCombat() {
     combatSessionCache.foodEnabled = false
     combatSessionCache.food = []
 
+    const spawnFood = () => {
+        // Don't spawn any more food until the organisms
+        // have eaten what exists
+        if (combatSessionCache.food.filter((e) => e.isEaten == false).length < 5) {
+            combatSessionCache.food.push(Food.createFood())
+        }
+    }
+
     // Wait a few seconds before allowing food to
     // spawn in
     combatSessionTimeouts.push(setTimeout(() => {
-        foodCheckSpawn()
+        spawnFood()
         combatSessionCache.foodInterval = setInterval(
-            foodCheckSpawn,
+            spawnFood,
             1000 * secondsBetweenFoodSpawn
         )
     }, 1000 * secondsUntilFoodStarts))
@@ -235,9 +234,11 @@ function combatTick() {
     // end of combat is reached
     for (let i = 0; i < combatUpdatesPerTick; i++) {
         const postUpdateCombatStatus = CombatUpdates.combatUpdate()
-        if (postUpdateCombatStatus.ended) {
+        if (postUpdateCombatStatus.ended && !combatSessionCache.result) {
             // Player's organism has been destroyed
             // But let player end the combat mode when they want to
+            combatSessionCache.result = postUpdateCombatStatus.loser
+            console.log("combat ended; result:", combatSessionCache.result)
         }
     }
 
