@@ -42,6 +42,7 @@ const minNumOfNodes = 6
 
 // Energy general
 
+const motorMaxPower = 0.1
 const minNodesWithoutEnergyCon = 6
 const minMotorNodesWithoutEnergyCon = 0.5
 
@@ -72,7 +73,7 @@ class Organism {
         this.nodePositions = []
 
         // Organise nodes by block type for quick access
-        this.nodesByBlockTypeCache = {}
+        this.nodePosByBlockTypeCache = {}
 
         // Set the organism's starting place in the scene
         this.combatStartPos = combatStartPos
@@ -80,6 +81,7 @@ class Organism {
         // Animation utilities
         this.currentAnimations = {}
         this.hasExploded = false
+        this.noMovement = false
 
         // Default velocity
         this.velocity = {
@@ -220,38 +222,38 @@ class Organism {
         }
         this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
-        this.updateNodesByBlockTypeCache()
+        this.updateNodePosByBlockTypeCache()
         this.hasExploded = false
 
         ThreeElements.scene.add(this.mesh);
     }
 
-    updateNodesByBlockTypeCache() {
+    updateNodePosByBlockTypeCache() {
         // Update cache of blocks by type, e.g motor blocks
 
         // Clear old cache
-        this.nodesByBlockTypeCache = {}
+        this.nodePosByBlockTypeCache = {}
 
         // Populate new cache
         for (const nodePos of this.nodePositions) {
             const typeName = nodePos.node.block.typeName
-            if (!(typeName in this.nodesByBlockTypeCache)) {
-                this.nodesByBlockTypeCache[typeName] = []
+            if (!(typeName in this.nodePosByBlockTypeCache)) {
+                this.nodePosByBlockTypeCache[typeName] = []
             }
-            this.nodesByBlockTypeCache[typeName].push(nodePos)
+            this.nodePosByBlockTypeCache[typeName].push(nodePos)
         }
 
-        return this.nodesByBlockTypeCache
+        return this.nodePosByBlockTypeCache
     }
 
     // Provides "visible life" to organism mesh
     updateMovement() {
-        if (this.mesh == null) {
+        if (this.mesh == null || this.isPlant || this.noMovement) {
             return
         }
 
         // Live animation
-        if (movementToggle && !this.isPlant) {
+        if (movementToggle) {
 
             // Start with the organism's base velocity:
 
@@ -264,22 +266,24 @@ class Organism {
             let totalMotorY = 0;
             let totalPower = 0;  // track combined power
 
-            const motorPower = 0.1
-
-            if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodesByBlockTypeCache) {
+            if (Blocks.BLOCK_TYPENAME_MOTOR in this.nodePosByBlockTypeCache) {
                 // Each motor node modifies the velocity by pushing in a certain direction
-                for (const motorNodePos of this.nodesByBlockTypeCache[Blocks.BLOCK_TYPENAME_MOTOR]) {
+                for (const motorNodePos of this.nodePosByBlockTypeCache[Blocks.BLOCK_TYPENAME_MOTOR]) {
                     // The local angle from organism root => motor node
                     const motorAngle = Math.atan2(motorNodePos.y, motorNodePos.x);
 
+                    // Energy affects motor power
+                    const motorPowerByEnergy = motorMaxPower * this.energy
+                    motorNodePos.node.block.appliedPowerPerc = motorPowerByEnergy / motorMaxPower
+
                     // Convert that to a velocity vector:
                     // e.g. each motor pushes outward along (cos(angle), sin(angle)) times power
-                    const vx = -(motorPower * Math.cos(motorAngle));
-                    const vy = -(motorPower * Math.sin(motorAngle));
+                    const vx = -(motorPowerByEnergy * Math.cos(motorAngle));
+                    const vy = -(motorPowerByEnergy * Math.sin(motorAngle));
 
                     totalMotorX += vx;
                     totalMotorY += vy;
-                    totalPower += motorPower;
+                    totalPower += motorPowerByEnergy;
 
                     // Animate the "motor" mesh visually (e.g. spinning some axis)
                     motorNodePos.mesh.rotation.x += vx;
@@ -368,22 +372,23 @@ class Organism {
 
         const removedNode = cloneObject(removedNodePos.node)
 
-        // Motor blocks tend to go crazy, so forget them
-        if (removedNode.block.typeName !== Blocks.BLOCK_TYPENAME_MOTOR) {
-            // Isolate, to get rid of any children the builder may try
-            // to "resurrect"
-            removedNode.edges = Array(6)
-            // Add to scene, like it's "crumbled" off
-            // const removedNodePosWorld = ThreeElements.convertNodePosIntoWorldPos(
-            //     removedNodePos, this.mesh
-            // )
-            addOrganism(
-                removedNode,
-                {
-                    x: meshPos.x + removedNodePos.x,
-                    y: meshPos.y + removedNodePos.y
-                }
-            )
+        // Isolate, to get rid of any children the builder may try
+        // to "resurrect"
+        removedNode.edges = Array(6)
+        // Add to scene, like it's "crumbled" off
+        // const removedNodePosWorld = ThreeElements.convertNodePosIntoWorldPos(
+        //     removedNodePos, this.mesh
+        // )
+        const removedNodeAsOrg = addOrganism(
+            removedNode,
+            {
+                x: meshPos.x + removedNodePos.x,
+                y: meshPos.y + removedNodePos.y
+            }
+        )
+        // Motor blocks tend to go crazy alone, so make static
+        if (removedNode.block.typeName == Blocks.BLOCK_TYPENAME_MOTOR) {
+            removedNodeAsOrg.noMovement = true
         }
 
         // Rebuild this organism without the removed node
@@ -398,7 +403,7 @@ class Organism {
                 /* formUnionMesh: */ false
             )
 
-            this.updateNodesByBlockTypeCache()
+            this.updateNodePosByBlockTypeCache()
             ThreeElements.scene.add(this.mesh)
 
             this.mesh.position.set(meshPos.x, meshPos.y, 0)
@@ -420,12 +425,10 @@ class Organism {
             this.breakOffNode()
         }
 
-        setTimeout(() => {
-            // Remove the organism (or what remains of
-            // it) from scene
-            this.nodePositions = [] // Prevents a "ghost"
-            ThreeElements.scene.remove(this.mesh)
-        }, 3000)
+        // Remove what remains of the organism
+        // from scene
+        this.nodePositions = [] // Prevents a "ghost"
+        ThreeElements.scene.remove(this.mesh)
     }
 }
 

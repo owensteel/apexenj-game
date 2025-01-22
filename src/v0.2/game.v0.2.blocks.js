@@ -81,7 +81,7 @@ class MotorBlock extends DefaultBlock {
     constructor() {
         super();
         this.isMotor = true
-        this.speed = 0 /* (angle / sec) */
+        this.appliedPowerPerc = 1 /* Perc of max power, 0 - 1 */
 
         this.setTypeName(BLOCK_TYPENAME_MOTOR)
         this.setColor("yellow")

@@ -81,10 +81,19 @@ function updateOrganismInCombat(organism) {
     energyDepletion /= (Organisms.minNodesWithoutEnergyCon / organism.nodePositions.length)
 
     // Motor nodes consume more energy
-    if (BLOCK_TYPENAME_MOTOR in organism.nodesByBlockTypeCache) {
+    if (BLOCK_TYPENAME_MOTOR in organism.nodePosByBlockTypeCache) {
+        // Num of motor blocks = sum of all the *applied power* from
+        // motor blocks. I.e, a motor block only applying half the
+        // power technically only counts as half a motor block. This
+        // means less energy is consumed if motor blocks are going
+        // slower, e.g due to low energy.
+        const motorBlocksActualNum = organism.nodePosByBlockTypeCache[BLOCK_TYPENAME_MOTOR].reduce(
+            (accumulator, nodePos) => accumulator + nodePos.node.block.appliedPowerPerc,
+            0
+        );
         energyDepletion /= (
             Organisms.minMotorNodesWithoutEnergyCon
-            / organism.nodesByBlockTypeCache[BLOCK_TYPENAME_MOTOR].length
+            / motorBlocksActualNum
         )
     }
 
@@ -92,7 +101,7 @@ function updateOrganismInCombat(organism) {
     organism.energy -= energyDepletion
 
     // Death check
-    postUpdateOrganismStatus.alive = (organism.energy > 0)
+    postUpdateOrganismStatus.alive = (Math.round(organism.energy * 25) / 25) > 0
 
     if (!postUpdateOrganismStatus.alive) {
         // Explode!
