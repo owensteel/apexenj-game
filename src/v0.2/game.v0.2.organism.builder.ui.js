@@ -396,7 +396,7 @@ builderClickField.addEventListener("mousemove", nodeDraggingMouseMoveHandler)
 builderClickField.addEventListener("touchmove", nodeDraggingMouseMoveHandler)
 
 const nodeDraggingMouseUpHandler = (e) => {
-    isMouseDrawingNodes = true
+    isMouseDrawingNodes = false
 
     if (nodeDragging.currentNode) {
         // Check if user has put node in the bin
@@ -420,6 +420,8 @@ builderClickField.addEventListener("touchend", nodeDraggingMouseUpHandler)
 builderClickField.addEventListener("mouseout", nodeDraggingMouseUpHandler)
 
 function startDraggingNode(node) {
+    isMouseDrawingNodes = false
+
     // Setup elements
     binBoundingBox = getGlobalBoundingBoxOfHTMLElement(nodeBin)
     builderHexGrid.remove()
