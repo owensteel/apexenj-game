@@ -43,6 +43,9 @@ function init() {
         )
     )
 
+    // TODO: remove, debugging only
+    window.pO = playerOrganism
+
     // Init DNA renderer
 
     OrganismBuilderUI.init(playerOrganism)
