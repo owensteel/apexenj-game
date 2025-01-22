@@ -152,7 +152,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
 
     // For each position, build a node mesh
 
-    positions.forEach((pos) => {
+    positions.forEach((pos, posIndex) => {
         // Don't add detaching parts to the union
         if (pos.detach && !allowDetachingParts) {
             return
@@ -173,6 +173,10 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
 
         // Required for correct placing in a union
         nodeMesh.updateMatrix();
+
+        // Update index in case node positions array has been
+        // changed between builds
+        pos.index = posIndex
 
         // Reference to node's mesh
         pos.mesh = nodeMesh
