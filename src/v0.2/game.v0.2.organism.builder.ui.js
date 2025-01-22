@@ -16,7 +16,7 @@ import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 // Hexagons
 
 const hexGrid = {
-    side: 11,
+    side: 11.25,
     hexPositions: [],
     hexTable: {},
     image: null
