@@ -287,7 +287,9 @@ class Organism {
 
                     // Animate the "motor" mesh visually (e.g. spinning some axis)
                     motorNodePos.mesh.rotation.x += vx;
-                    motorNodePos.mesh.rotation.y += vy;
+                    if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
+                        motorNodePos.mesh.rotation.x = 0
+                    }
                 }
             }
 
@@ -308,7 +310,7 @@ class Organism {
             const randomInterval = 750 * (1 + this.random)
             this.mesh.rotation.z += Math.sin(
                 (Math.round(Date.now() / randomInterval) * randomInterval) * 2
-            ) * 0.005;
+            ) * 0.0025;
 
             // Prevent "twisting"
             if (this.mesh.rotation.z > Math.PI * 2) {
