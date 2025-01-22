@@ -117,3 +117,15 @@ game-wrapper game-builder-wrapper node-bin:after {
     font-size: 25px;
     line-height: 25px;
 }
+
+game-wrapper healthbar-container {
+    text-align: center;
+    display: block;
+    width: calc(100% - 32px);
+    padding: 15px;
+    border: solid 1px #000;
+}
+
+game-wrapper healthbar-container progress.alert {
+    filter: hue-rotate(90deg)
+}

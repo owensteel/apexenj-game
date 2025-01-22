@@ -134,7 +134,7 @@ function updateOrganismInCombat(organism) {
     organism.energy -= energyDepletion
 
     // Death check
-    postUpdateOrganismStatus.alive = (Math.round(organism.energy * 25) / 25) > 0
+    postUpdateOrganismStatus.alive = (Math.round((organism.energy * 100) / 10) * 10) > 0
 
     if (!postUpdateOrganismStatus.alive) {
         // Explode!

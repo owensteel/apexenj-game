@@ -53,13 +53,23 @@ const newHealthbar = () => {
     const hb = document.createElement("progress")
     hb.setAttribute("min", 0)
     hb.setAttribute("max", 100)
+
+    hb.updateWithEnergyValue = (energy) => {
+        hb.value = Math.round((energy * 100) / 5) * 5
+        if (hb.value <= 25) {
+            hb.className = "alert"
+        } else {
+            hb.className = ""
+        }
+    }
+
     return hb
 }
 
 // Temp solution for debugging
-const healthbarContainer = document.createElement("fieldset")
+const healthbarContainer = document.createElement("healthbar-container")
 healthbarContainer.style.display = "none"
-document.body.appendChild(healthbarContainer)
+document.getElementById("game-wrapper").appendChild(healthbarContainer)
 
 const playerHealthbar = newHealthbar()
 healthbarContainer.appendChild(playerHealthbar)
@@ -243,8 +253,16 @@ function combatTick() {
 
     // Set healthbars
 
-    playerHealthbar.value = playerOrganism.energy * 100
-    enemyHealthbar.value = enemyOrganism.energy * 100
+    if (combatSessionCache.result == playerOrganism.id) {
+        playerHealthbar.updateWithEnergyValue(0)
+    } else {
+        playerHealthbar.updateWithEnergyValue(playerOrganism.energy)
+    }
+    if (combatSessionCache.result == enemyOrganism.id) {
+        enemyHealthbar.updateWithEnergyValue(0)
+    } else {
+        enemyHealthbar.updateWithEnergyValue(enemyOrganism.energy)
+    }
 }
 
 export { toggleCombat }
