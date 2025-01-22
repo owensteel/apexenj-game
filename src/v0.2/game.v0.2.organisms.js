@@ -310,7 +310,7 @@ class Organism {
             const randomInterval = 750 * (1 + this.random)
             this.mesh.rotation.z += Math.sin(
                 (Math.round(Date.now() / randomInterval) * randomInterval) * 2
-            ) * 0.0025;
+            ) * 0.00125;
 
             // Prevent "twisting"
             if (this.mesh.rotation.z > Math.PI * 2) {
@@ -486,38 +486,38 @@ function animate() {
 
             // Bounce off edges regardless
 
-            if (
-                (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
-            ) {
-                // Flip
-                organism.mesh.rotation.z -= Math.PI
-                // Push in the right direction
-                organism.mesh.position.x -= maxXDistInTick
-            }
-            if (
-                (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
-            ) {
-                // Flip
-                organism.mesh.rotation.z += Math.PI
-                // Push in the right direction
-                organism.mesh.position.x += maxXDistInTick
-            }
-            if (
-                (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
-            ) {
-                // Flip
-                organism.mesh.rotation.z += Math.PI
-                // Push in the right direction
-                organism.mesh.position.y -= maxYDistInTick
-            }
-            if (
-                (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
-            ) {
-                // Flip
-                organism.mesh.rotation.z -= Math.PI
-                // Push in the right direction
-                organism.mesh.position.y += maxYDistInTick
-            }
+            // if (
+            //     (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
+            // ) {
+            //     // Flip
+            //     organism.mesh.rotation.z -= Math.PI
+            //     // Push in the right direction
+            //     organism.mesh.position.x -= maxXDistInTick
+            // }
+            // if (
+            //     (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
+            // ) {
+            //     // Flip
+            //     organism.mesh.rotation.z += Math.PI
+            //     // Push in the right direction
+            //     organism.mesh.position.x += maxXDistInTick
+            // }
+            // if (
+            //     (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
+            // ) {
+            //     // Flip
+            //     organism.mesh.rotation.z += Math.PI
+            //     // Push in the right direction
+            //     organism.mesh.position.y -= maxYDistInTick
+            // }
+            // if (
+            //     (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
+            // ) {
+            //     // Flip
+            //     organism.mesh.rotation.z -= Math.PI
+            //     // Push in the right direction
+            //     organism.mesh.position.y += maxYDistInTick
+            // }
         });
         ThreeElements.renderScene();
         activeAnimation = requestAnimationFrame(renderFrame);

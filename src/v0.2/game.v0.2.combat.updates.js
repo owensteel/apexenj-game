@@ -20,6 +20,13 @@ const combatUpdateCache = {
     nodeWorldPositions: {}
 }
 
+function updateCachedNodeWorldPositionsOfOrganism(organism) {
+    organism.mesh.updateMatrixWorld(true);
+    combatUpdateCache.nodeWorldPositions[organism.id] = organism.nodePositions.map(nodePos => {
+        return ThreeElements.convertNodePosIntoWorldPos(nodePos, organism.mesh)
+    })
+}
+
 /*
 
     Updating an organism with mechanics
@@ -27,6 +34,18 @@ const combatUpdateCache = {
 */
 
 function updateOrganismInCombat(organism) {
+
+    // Calc world positions of nodes, to use in this update
+
+    if (!(organism.id in combatUpdateCache.nodeWorldPositions)) {
+        updateCachedNodeWorldPositionsOfOrganism(organism)
+    }
+
+    // Bump against canvas edges
+
+    if (!organism.isPlant) {
+        bumpCanvasEdges(organism, combatUpdateCache.nodeWorldPositions[organism.id])
+    }
 
     // If food, just check if it should still be visible
 
@@ -67,6 +86,8 @@ function updateOrganismInCombat(organism) {
 
         return
     }
+
+    // Check living state
 
     const postUpdateOrganismStatus = {
         alive: true
@@ -120,25 +141,18 @@ function updateOrganismInCombat(organism) {
 */
 
 function syncOrganismsInCombat(organism, opponent) {
-    // Calc world positions of all nodes, if not yet done in this update
-    [organism, opponent].forEach((org) => {
-        if (!(org.id in combatUpdateCache.nodeWorldPositions)) {
-            org.mesh.updateMatrixWorld(true);
-            combatUpdateCache.nodeWorldPositions[org.id] = org.nodePositions.map(nodePos => {
-                return ThreeElements.convertNodePosIntoWorldPos(nodePos, org.mesh)
-            })
-        }
-    })
-
     // Get world positions of nodes in the current update
     const organismNodesWorld = combatUpdateCache.nodeWorldPositions[organism.id]
+    if (!(opponent.id in combatUpdateCache.nodeWorldPositions)) {
+        updateCachedNodeWorldPositionsOfOrganism(opponent)
+    }
     const opponentNodesWorld = combatUpdateCache.nodeWorldPositions[opponent.id]
 
     // Check overlapping nodes for bumping and any block functions
     const overlappingNodes = getOverlappingNodes(organismNodesWorld, opponentNodesWorld);
     if (overlappingNodes.length > 0) {
         // Bump them so that none of these overlapping node pairs remain overlapped
-        bumpEdges(organism, opponent, overlappingNodes);
+        bumpNodes(organism, opponent, overlappingNodes);
 
         // Check block types for block interactions
 
@@ -197,7 +211,7 @@ function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     return result;
 }
 
-function bumpEdges(organism, opponent, overlappingNodes) {
+function bumpNodes(organism, opponent, overlappingNodes) {
     for (const pair of overlappingNodes) {
         const orgNode = pair.orgNodeWorldPos;
         const oppNode = pair.oppNodeWorldPos;
@@ -235,6 +249,60 @@ function bumpEdges(organism, opponent, overlappingNodes) {
             opponent.mesh.position.x -= nx * half;
             opponent.mesh.position.y -= ny * half;
         }
+    }
+}
+
+function bumpCanvasEdges(organism, organismNodesWorld) {
+    // If there are no nodes, skip
+    if (!organismNodesWorld.length) return;
+
+    // Grab stage edges (assuming these corners exist in ThreeElements.stageEdges3D)
+    const canvasRightX = ThreeElements.stageEdges3D.top.right.x;
+    const canvasLeftX = ThreeElements.stageEdges3D.bottom.left.x;
+    const canvasTopY = ThreeElements.stageEdges3D.top.right.y;
+    const canvasBottomY = ThreeElements.stageEdges3D.bottom.right.y;
+
+    // Find the bounding box of the organism
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+
+    for (const pos of organismNodesWorld) {
+        if (pos.x < minX) minX = pos.x;
+        if (pos.x > maxX) maxX = pos.x;
+        if (pos.y < minY) minY = pos.y;
+        if (pos.y > maxY) maxY = pos.y;
+    }
+
+    // Determine how much we need to shift to keep the bounding box in-bounds
+    let shiftX = 0;
+    let shiftY = 0;
+
+    // If the right edge is out of bounds, shift left
+    if (maxX > canvasRightX) {
+        shiftX = canvasRightX - maxX;
+    }
+    // If the left edge is out of bounds, shift right
+    if (minX < canvasLeftX) {
+        // Note: if minX is out of bounds in the other direction,
+        // you might need to compare which shift is larger, or just apply them in separate steps
+        shiftX = canvasLeftX - minX;
+    }
+
+    // If the top edge is out of bounds, shift down
+    if (maxY > canvasTopY) {
+        shiftY = canvasTopY - maxY;
+    }
+    // If the bottom edge is out of bounds, shift up
+    if (minY < canvasBottomY) {
+        shiftY = canvasBottomY - minY;
+    }
+
+    // Apply one shift to bring the bounding box inside the stage
+    organism.mesh.position.x += shiftX;
+    organism.mesh.position.y += shiftY;
+
+    if (Math.abs(shiftX) > 0 || Math.abs(shiftY) > 0) {
+        organism.mesh.rotation.z += (Math.PI * 2) * 0.0125
     }
 }
 
