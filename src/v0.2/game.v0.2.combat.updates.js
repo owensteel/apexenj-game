@@ -74,6 +74,10 @@ function updateOrganismInCombat(organism) {
                 })
                 organism.nodePositions.splice(foodNodeToRemoveIndex, 1);
 
+                if (organism.nodePositions.length < 1) {
+                    return
+                }
+
                 const meshPos = organism.mesh.position
                 ThreeElements.scene.remove(organism.mesh)
 
@@ -82,6 +86,11 @@ function updateOrganismInCombat(organism) {
                     /* allowDetachingParts: */ false,
                     /* formUnionMesh: */ false
                 )
+
+                if (!organism.mesh) {
+                    return
+                }
+
                 ThreeElements.scene.add(organism.mesh)
                 organism.mesh.position.set(meshPos.x, meshPos.y, 0)
             }
