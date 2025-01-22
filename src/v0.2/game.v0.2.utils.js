@@ -18,6 +18,16 @@ function cloneObject(obj = {}, shallow = true) {
     }
 }
 
+function cloneArray(array = []) {
+    const clone = []
+
+    for (const element of array) {
+        clone.push(cloneObject(element))
+    }
+
+    return clone
+}
+
 function getGlobalBoundingBoxOfHTMLElement(element) {
     const rect = element.getBoundingClientRect();
     const scrollX = window.scrollX || window.pageXOffset;
@@ -36,4 +46,4 @@ function getGlobalBoundingBoxOfHTMLElement(element) {
     return globalRect;
 }
 
-export { cloneObject, getGlobalBoundingBoxOfHTMLElement }
+export { cloneObject, cloneArray, getGlobalBoundingBoxOfHTMLElement }
