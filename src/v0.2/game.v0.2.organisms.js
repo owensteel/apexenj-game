@@ -291,15 +291,11 @@ class Organism {
                         totalPower += motorPowerByEnergy;
 
                         // Animate the "motor" mesh visually (e.g. spinning some axis)
-                        motorNodePos.mesh.rotation.x += (vx * Math.cos(motorAngle));
-                        motorNodePos.mesh.rotation.y += (vy * Math.sin(motorAngle));
+                        motorNodePos.mesh.rotation.x += vx;
 
                         // Prevent "twisting"
                         if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
                             motorNodePos.mesh.rotation.x = 0
-                        }
-                        if (Math.abs(motorNodePos.mesh.rotation.y) > (Math.PI * 2)) {
-                            motorNodePos.mesh.rotation.y = 0
                         }
                     }
                 }
@@ -340,7 +336,7 @@ class Organism {
                 )
             ) + randomOffset()
             this.mesh.position.y += (
-                maxXDistInTick *
+                maxYDistInTick *
                 (
                     (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z)) +
                     (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
@@ -496,41 +492,6 @@ function animate() {
             }
 
             organism.updateMovement()
-
-            // Bounce off edges regardless
-
-            // if (
-            //     (organism.mesh.position.x >= ThreeElements.stageEdges3D.top.right.x)
-            // ) {
-            //     // Flip
-            //     organism.mesh.rotation.z -= Math.PI
-            //     // Push in the right direction
-            //     organism.mesh.position.x -= maxXDistInTick
-            // }
-            // if (
-            //     (organism.mesh.position.x <= ThreeElements.stageEdges3D.top.left.x)
-            // ) {
-            //     // Flip
-            //     organism.mesh.rotation.z += Math.PI
-            //     // Push in the right direction
-            //     organism.mesh.position.x += maxXDistInTick
-            // }
-            // if (
-            //     (organism.mesh.position.y >= ThreeElements.stageEdges3D.top.right.y)
-            // ) {
-            //     // Flip
-            //     organism.mesh.rotation.z += Math.PI
-            //     // Push in the right direction
-            //     organism.mesh.position.y -= maxYDistInTick
-            // }
-            // if (
-            //     (organism.mesh.position.y <= ThreeElements.stageEdges3D.bottom.left.y)
-            // ) {
-            //     // Flip
-            //     organism.mesh.rotation.z -= Math.PI
-            //     // Push in the right direction
-            //     organism.mesh.position.y += maxYDistInTick
-            // }
         });
         ThreeElements.renderScene();
         activeAnimation = requestAnimationFrame(renderFrame);
