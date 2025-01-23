@@ -75,12 +75,14 @@ function createPlant() {
     const plantInstance = Organism.addOrganism(
         plantDNA,
         {
-            x: Math.random() > 0.5
-                ? ThreeElements.stageEdges3D.top.left.x :
-                ThreeElements.stageEdges3D.top.right.x,
-            y: Math.random() > 0.5
-                ? ThreeElements.stageEdges3D.top.left.y :
-                ThreeElements.stageEdges3D.bottom.right.y,
+            x: Math.random() * (
+                ThreeElements.stageEdges3D.top.left.x +
+                ThreeElements.stageEdges3D.top.right.x
+            ),
+            y: Math.random() * (
+                ThreeElements.stageEdges3D.top.right.y +
+                ThreeElements.stageEdges3D.bottom.right.y
+            )
         }
     )
     plantInstance.isPlant = true
@@ -94,7 +96,7 @@ function createPlant() {
     })
     plantInstance.energy = nutritionPerFoodBlock * foodBlockNodes.length
 
-    console.log("created plant", plantInstance)
+    console.log("created plant")
 
     return plantInstance
 }

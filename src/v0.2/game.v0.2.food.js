@@ -61,7 +61,18 @@ const nutritionPerFoodBlock = 0.1
 const foodVelocity = 0.01
 
 // Create and deploy food
-function createFood() {
+function createFood(foodStartPos = null) {
+
+    if (!foodStartPos) {
+        foodStartPos = {
+            x: Math.random() > 0.5
+                ? ThreeElements.stageEdges3D.top.left.x :
+                ThreeElements.stageEdges3D.top.right.x,
+            y: Math.random() > 0.5
+                ? ThreeElements.stageEdges3D.bottom.left.x :
+                ThreeElements.stageEdges3D.bottom.right.x,
+        }
+    }
 
     const foodInstance = Organism.addOrganism(
         cloneObject(
@@ -72,14 +83,7 @@ function createFood() {
             ],
             false
         ),
-        {
-            x: Math.random() > 0.5
-                ? ThreeElements.stageEdges3D.top.left.x :
-                ThreeElements.stageEdges3D.top.right.x,
-            y: Math.random() > 0.5
-                ? ThreeElements.stageEdges3D.bottom.left.x :
-                ThreeElements.stageEdges3D.bottom.right.x,
-        }
+        foodStartPos
     )
     foodInstance.isFood = true
     foodInstance.isEaten = false

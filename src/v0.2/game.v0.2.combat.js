@@ -9,7 +9,6 @@
 import { stageEdges3D, ThreeCanvas, ThreeRenderer } from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Food from "./game.v0.2.food"
 import * as Ecosystems from "./game.v0.2.ecosystems"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
@@ -35,16 +34,10 @@ const combatSessionTimeouts = []
 const combatSessionCache = {
     originalEnemy: null,
     foodEnabled: false,
-    food: [],
     foodInterval: null,
     ecosystem: {},
     result: null
 }
-
-// Food
-
-const secondsUntilFoodStarts = 2.5
-const secondsBetweenFoodSpawn = 5
 
 // Healthbars
 
@@ -100,29 +93,6 @@ function startCombat() {
         }
     )
     combatSessionCache.originalEnemy = enemyOrganism
-
-    // Food
-
-    combatSessionCache.foodEnabled = false
-    combatSessionCache.food = []
-
-    const spawnFood = () => {
-        // Don't spawn any more food until the organisms
-        // have eaten what exists
-        if (combatSessionCache.food.filter((e) => e.isEaten == false).length < 5) {
-            combatSessionCache.food.push(Food.createFood())
-        }
-    }
-
-    // Wait a few seconds before allowing food to
-    // spawn in
-    combatSessionTimeouts.push(setTimeout(() => {
-        spawnFood()
-        combatSessionCache.foodInterval = setInterval(
-            spawnFood,
-            1000 * secondsBetweenFoodSpawn
-        )
-    }, 1000 * secondsUntilFoodStarts))
 
     // Ecosystem
 
