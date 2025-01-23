@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 
-const nodeSize = 11;
+const nodeSize = 12;
 const nodeDepth = 5;
 
 // Hexagon
@@ -101,7 +101,7 @@ function generateAbsoluteNodePositions(
     positionsArray.push(currentNodePosFinal);
 
     // The distance from parent to child (you can tweak for better spacing)
-    const radius = nodeSize * 1.75;
+    const radius = nodeSize * 1.7;
 
     // For a flat-topped hex, children are spaced at 0°, 60°, 120°, 180°, 240°, 300°
 

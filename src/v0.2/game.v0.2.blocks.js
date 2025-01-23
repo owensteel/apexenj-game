@@ -20,7 +20,7 @@ const BLOCK_TYPENAME_DEFAULT = "default"
 class DefaultBlock {
     constructor() {
         this.typeName = BLOCK_TYPENAME_DEFAULT
-        this.color = "red"
+        this.color = "#003f7d"
         this.symbol = ""
     }
     setTypeName(typeName) {
@@ -47,26 +47,7 @@ class PlantBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_PLANT)
-        this.setColor("hotpink")
-    }
-}
-
-/*
-
-    Bonding
-
-*/
-
-// NOTE: Bonding is currently disabled.
-const BLOCK_TYPENAME_BONDING = "bonding"
-class BondingBlock extends DefaultBlock {
-    constructor() {
-        super();
-        this.to = 0
-        this.strength = 0
-
-        this.setTypeName(BLOCK_TYPENAME_BONDING)
-        this.setColor("lightgreen")
+        this.setColor("DarkViolet")
     }
 }
 
@@ -84,7 +65,7 @@ class MotorBlock extends DefaultBlock {
         this.appliedPowerPerc = 1 /* Perc of max power, 0 - 1 */
 
         this.setTypeName(BLOCK_TYPENAME_MOTOR)
-        this.setColor("yellow")
+        this.setColor("Gold")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_MOTOR)
@@ -102,7 +83,7 @@ class HeartBlock extends DefaultBlock {
         this.isHeart = true
 
         this.setTypeName(BLOCK_TYPENAME_HEART)
-        this.setColor("pink")
+        this.setColor("LightSkyBlue")
     }
 }
 
@@ -135,7 +116,7 @@ class FoodBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_FOOD)
-        this.setColor("gold")
+        this.setColor("Lavender")
     }
 }
 
@@ -151,7 +132,7 @@ class AbsorberBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_ABSORBER)
-        this.setColor("lightgreen")
+        this.setColor("DarkOrange")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
@@ -159,8 +140,6 @@ PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
 // Type name to instance
 function getBlockInstanceFromTypeName(typeName) {
     switch (typeName) {
-        case BLOCK_TYPENAME_BONDING:
-            return new BondingBlock()
         case BLOCK_TYPENAME_MOTOR:
             return new MotorBlock()
         case BLOCK_TYPENAME_DETACHING:
@@ -178,7 +157,6 @@ export {
 
     DefaultBlock,
     PlantBlock,
-    BondingBlock,
     MotorBlock,
     HeartBlock,
     DetachingBlock,
@@ -193,7 +171,6 @@ export {
 
     BLOCK_TYPENAME_DEFAULT,
     BLOCK_TYPENAME_PLANT,
-    BLOCK_TYPENAME_BONDING,
     BLOCK_TYPENAME_HEART,
     BLOCK_TYPENAME_MOTOR,
     BLOCK_TYPENAME_DETACHING,

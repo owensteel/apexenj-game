@@ -128,10 +128,6 @@ function startCombat() {
 
     combatSessionCache.ecosystem = new Ecosystems.Ecosystem()
 
-    // Changing bg color of actual renderer causes
-    // outlines to fail
-    ThreeCanvas.style.backgroundColor = combatSessionCache.ecosystem.backgroundColor
-
     // Start tick updates
 
     combatTick()

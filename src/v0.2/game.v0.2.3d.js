@@ -12,12 +12,13 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 
+const gameWrapper = document.getElementById('game-wrapper')
 const gameStageWrapper = document.createElement("game-stage-wrapper");
-document.getElementById('game-wrapper').appendChild(gameStageWrapper)
+gameWrapper.appendChild(gameStageWrapper)
 
 // Initialize Three.js scene
 
-const canvasWidth = window.innerWidth;
+const canvasWidth = gameWrapper.clientWidth;
 const canvasHeight = canvasWidth * 1.5;
 
 const scene = new THREE.Scene();
@@ -33,8 +34,10 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(0, 0, 10);
 camera.lookAt(0, 0, 0);
 
-const ThreeRenderer = new THREE.WebGLRenderer();
-ThreeRenderer.setClearColor(0xffffff, 0);
+const ThreeRenderer = new THREE.WebGLRenderer({
+    antialias: true
+});
+ThreeRenderer.setClearColor(0x05001f, 0);
 ThreeRenderer.setSize(canvasWidth, canvasHeight);
 
 const ThreeCanvas = ThreeRenderer.domElement
@@ -48,17 +51,17 @@ const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
 const outlinePass = new OutlinePass(
-    new THREE.Vector2(window.innerWidth, 300),
+    new THREE.Vector2(canvasWidth, canvasHeight),
     scene,
     camera
 );
 composer.addPass(outlinePass);
 
-outlinePass.edgeStrength = 10;
-outlinePass.edgeGlow = 0.0;
-outlinePass.edgeThickness = 0.5;
-outlinePass.visibleEdgeColor.set('#000000');
-outlinePass.hiddenEdgeColor.set('#ffffff');
+outlinePass.edgeStrength = 100;
+outlinePass.edgeGlow = 0.05;
+outlinePass.edgeThickness = 0.1;
+outlinePass.visibleEdgeColor.set('hotpink');
+outlinePass.hiddenEdgeColor.set('#000000');
 
 // Main renderer, called in the organism animation rendering
 // loop
