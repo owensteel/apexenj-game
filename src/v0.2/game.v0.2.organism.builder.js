@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 
-const nodeSize = 12;
+const nodeSize = 9;
 const nodeDepth = 5;
 
 // Hexagon
