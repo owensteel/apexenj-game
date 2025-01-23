@@ -57,10 +57,10 @@ const outlinePass = new OutlinePass(
 );
 composer.addPass(outlinePass);
 
-outlinePass.edgeStrength = 100;
+outlinePass.edgeStrength = 50;
 outlinePass.edgeGlow = 0.05;
 outlinePass.edgeThickness = 0.1;
-outlinePass.visibleEdgeColor.set('hotpink');
+outlinePass.visibleEdgeColor.set('#000000');
 outlinePass.hiddenEdgeColor.set('#000000');
 
 // Main renderer, called in the organism animation rendering

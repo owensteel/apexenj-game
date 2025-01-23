@@ -30,7 +30,7 @@ game-wrapper {
 
     color: #003f7d;
 
-    background-image: linear-gradient(#002142, #05001f)
+    background-image: linear-gradient(#fff, #fff)
 }
 
 game-wrapper canvas {
@@ -73,7 +73,7 @@ game-wrapper hex-grid {
     position: absolute;
     z-index: -1;
     display: block;
-    opacity: 0.25;
+    opacity: 0.125;
     top: 0px;
     bottom: 0px;
     left: 0px;
@@ -81,7 +81,6 @@ game-wrapper hex-grid {
     width: 100%;
     height: 100%;
     background-repeat: no-repeat;
-    filter: invert();
 }
 
 game-wrapper game-node-dragging-overlay {
