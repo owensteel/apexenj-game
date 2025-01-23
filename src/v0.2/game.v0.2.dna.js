@@ -66,7 +66,30 @@ const demoDnaSequence = new dnaNode(
                 new dnaNode(
                     "appendage",
                     new Blocks.MotorBlock(),
-                    []
+                    [
+                        null,
+                        null,
+                        new dnaNode(
+                            "appendage",
+                            new Blocks.DefaultBlock(),
+                            [
+                                null,
+                                new dnaNode(
+                                    "appendage",
+                                    new Blocks.MotorBlock(),
+                                    [
+                                        null,
+                                        null,
+                                        new dnaNode(
+                                            "appendage",
+                                            new Blocks.DefaultBlock(),
+                                            []
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
                 )
             ]
         ),
