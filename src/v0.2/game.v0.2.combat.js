@@ -96,7 +96,7 @@ function startCombat() {
         enemyDNA,
         {
             x: stageEdges3D.top.right.x - 30,
-            y: stageEdges3D.bottom.right.y * 0.5
+            y: stageEdges3D.top.right.y * 0.5
         }
     )
     combatSessionCache.originalEnemy = enemyOrganism
@@ -138,11 +138,11 @@ function startCombat() {
 
     // Start organisms' initial velocity
 
-    playerOrganism.velocity.x = maxAttractionVelocity
-    playerOrganism.velocity.y = -maxAttractionVelocity
+    playerOrganism.velocity.x = -maxAttractionVelocity
+    playerOrganism.velocity.y = maxAttractionVelocity
 
-    enemyOrganism.velocity.x = -maxAttractionVelocity
-    enemyOrganism.velocity.y = maxAttractionVelocity
+    enemyOrganism.velocity.x = maxAttractionVelocity
+    enemyOrganism.velocity.y = -maxAttractionVelocity
 
     // Start movement
 
