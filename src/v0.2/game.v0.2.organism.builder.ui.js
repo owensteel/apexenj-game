@@ -346,7 +346,6 @@ function nodeClickHandler(e) {
 
     if (!connectingNode) {
         console.warn("No connecting edge found for new node")
-        isMouseDrawingNodes = false
         return
     }
 
