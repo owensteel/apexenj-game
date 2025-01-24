@@ -31,6 +31,10 @@ combatToggleButton.onclick = () => {
 // Init all
 
 function init() {
+    // Means builder UI is unhidden as default
+
+    OrganismBuilderUI.toggleVisibility()
+
     // Init player
 
     const playerOrganism = Organisms.addOrganism(

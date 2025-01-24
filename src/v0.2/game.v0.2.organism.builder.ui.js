@@ -15,7 +15,7 @@ import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 
 // For informing other modules about the UI state
 
-let builderUiToggled = true
+let builderUiToggled = false
 
 // Hexagons
 
@@ -216,8 +216,7 @@ let focusedOrganism = null
 // Setup for globally-used DOM elements
 
 const builderWrapper = document.createElement("game-builder-wrapper")
-document.getElementById('game-wrapper').appendChild(builderWrapper)
-builderWrapper.isHidden = false
+builderWrapper.isHidden = true
 
 const builderClickField = document.createElement("click-field")
 builderWrapper.appendChild(builderClickField)
