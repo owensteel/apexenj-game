@@ -33,8 +33,6 @@ const combatSessionTimeouts = []
 // Cache for the entire combat session
 const combatSessionCache = {
     originalEnemy: null,
-    foodEnabled: false,
-    foodInterval: null,
     ecosystem: {},
     result: null
 }
@@ -98,12 +96,9 @@ function startCombat() {
 
     combatSessionCache.ecosystem = new Ecosystems.Ecosystem()
 
-    // Start tick updates
-
-    combatTick()
-
     // Set session values
 
+    combatSessionCache.result = null
     combatRunning = true
 
     // Start organisms' initial velocity
@@ -130,6 +125,10 @@ function startCombat() {
     // Show UI
 
     healthbarContainer.style.display = "block"
+
+    // Start tick updates
+
+    combatTick()
 }
 
 function endCombat() {
@@ -139,8 +138,6 @@ function endCombat() {
 
     cancelAnimationFrame(combatTickCycle)
     combatTickCycle = null
-
-    clearInterval(combatSessionCache.foodInterval)
 
     // Reset player values
 
