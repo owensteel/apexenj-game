@@ -13,10 +13,14 @@ import * as OrganismBuilder from "./game.v0.2.organism.builder"
 import * as Blocks from "./game.v0.2.blocks";
 import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 
+// For informing other modules about the UI state
+
+let builderUiToggled = true
+
 // Hexagons
 
 const hexGrid = {
-    side: OrganismBuilder.nodeSize * 0.9863636363636363,
+    side: OrganismBuilder.NODESIZE_BUILDER * 0.9863636363636363,
     hexPositions: [],
     hexTable: {},
     image: null
@@ -212,7 +216,8 @@ let focusedOrganism = null
 // Setup for globally-used DOM elements
 
 const builderWrapper = document.createElement("game-builder-wrapper")
-builderWrapper.isHidden = true
+document.getElementById('game-wrapper').appendChild(builderWrapper)
+builderWrapper.isHidden = false
 
 const builderClickField = document.createElement("click-field")
 builderWrapper.appendChild(builderClickField)
@@ -532,6 +537,7 @@ function toggleVisibility() {
         builderWrapper.isHidden = true
         builderWrapper.remove()
     }
+    builderUiToggled = !builderWrapper.isHidden
 }
 
-export { init, toggleVisibility }
+export { init, toggleVisibility, builderUiToggled }

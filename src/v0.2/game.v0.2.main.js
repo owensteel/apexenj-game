@@ -49,13 +49,12 @@ function init() {
     // Init DNA renderer
 
     OrganismBuilderUI.init(playerOrganism)
-    OrganismBuilderUI.toggleVisibility()
 
     // Init combat button
 
     combatToggleButton.addEventListener("click", () => {
-        Combat.toggleCombat(playerOrganism)
         OrganismBuilderUI.toggleVisibility()
+        Combat.toggleCombat(playerOrganism)
     })
     document.body.appendChild(combatToggleButton)
 

@@ -9,8 +9,12 @@
 
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
+import { builderUiToggled } from './game.v0.2.organism.builder.ui';
 
-const nodeSize = 9;
+const NODESIZE_DEFAULT = 9
+const NODESIZE_BUILDER = 14
+
+let nodeSize = NODESIZE_DEFAULT;
 const nodeDepth = 5;
 
 // Hexagon
@@ -63,6 +67,10 @@ function generateAbsoluteNodePositions(
     parentNodePos = null,
     currentNodeAngle = 0
 ) {
+    // Set node size
+
+    nodeSize = builderUiToggled ? NODESIZE_BUILDER : NODESIZE_DEFAULT
+
     // Prevent null crash
     if (!currentNode) {
         console.warn("Null node encountered while generating positions")
@@ -227,5 +235,6 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
 export {
     generateAbsoluteNodePositions,
     buildBodyFromNodePositions,
-    nodeSize
+    nodeSize,
+    NODESIZE_BUILDER
 }
