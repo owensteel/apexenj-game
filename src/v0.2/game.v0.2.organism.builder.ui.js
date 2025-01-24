@@ -423,7 +423,7 @@ builderClickField.addEventListener("mouseup", nodeDraggingMouseUpHandler)
 builderClickField.addEventListener("touchend", nodeDraggingMouseUpHandler)
 builderClickField.addEventListener("mouseout", nodeDraggingMouseUpHandler)
 
-function startDraggingNode(node) {
+function startDraggingNode(node, e) {
     isMouseDrawingNodes = false
 
     // Setup elements
@@ -455,6 +455,9 @@ function startDraggingNode(node) {
         fakeTreeNodePositions
     )
     ThreeElements.scene.add(nodeDragging.fakeTreeMesh)
+
+    // Initial render for drag visuals
+    nodeDraggingMouseMoveHandler(e)
 }
 
 const nodeDraggingMouseDownHandler = (e) => {
@@ -490,7 +493,7 @@ const nodeDraggingMouseDownHandler = (e) => {
 
         setTimeout(() => {
             if (mouseDownOnNode) {
-                startDraggingNode(clickedNode)
+                startDraggingNode(clickedNode, e)
             }
         }, 250)
 
