@@ -37,7 +37,7 @@ camera.lookAt(0, 0, 0);
 const ThreeRenderer = new THREE.WebGLRenderer({
     antialias: true
 });
-ThreeRenderer.setClearColor(0x05001f, 0);
+ThreeRenderer.setClearColor(0x05001f, 1);
 ThreeRenderer.setSize(canvasWidth, canvasHeight);
 
 const ThreeCanvas = ThreeRenderer.domElement
@@ -57,11 +57,11 @@ const outlinePass = new OutlinePass(
 );
 composer.addPass(outlinePass);
 
-outlinePass.edgeStrength = 50;
-outlinePass.edgeGlow = 0.05;
-outlinePass.edgeThickness = 0.1;
-outlinePass.visibleEdgeColor.set('#000000');
-outlinePass.hiddenEdgeColor.set('#000000');
+outlinePass.edgeStrength = 100;
+outlinePass.edgeGlow = 0;
+outlinePass.edgeThickness = 1;
+outlinePass.visibleEdgeColor.set('#fff');
+outlinePass.hiddenEdgeColor.set('#fff');
 
 // Main renderer, called in the organism animation rendering
 // loop

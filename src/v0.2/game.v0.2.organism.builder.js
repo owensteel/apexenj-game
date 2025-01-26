@@ -17,7 +17,7 @@ const NODESIZE_BUILDER = 14
 let nodeSize = NODESIZE_DEFAULT;
 const nodeDepth = 5;
 
-// Hexagon
+// Hexagon (for builder)
 
 function generateHexagonGeometry() {
     // Create a new shape for the hexagon

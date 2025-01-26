@@ -20,7 +20,7 @@ const BLOCK_TYPENAME_DEFAULT = "default"
 class DefaultBlock {
     constructor() {
         this.typeName = BLOCK_TYPENAME_DEFAULT
-        this.color = "#003f7d"
+        this.color = "#05001f"
         this.symbol = ""
     }
     setTypeName(typeName) {
@@ -65,7 +65,7 @@ class MotorBlock extends DefaultBlock {
         this.appliedPowerPerc = 1 /* Perc of max power, 0 - 1 */
 
         this.setTypeName(BLOCK_TYPENAME_MOTOR)
-        this.setColor("Gold")
+        this.setColor("hotpink")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_MOTOR)
@@ -83,7 +83,7 @@ class HeartBlock extends DefaultBlock {
         this.isHeart = true
 
         this.setTypeName(BLOCK_TYPENAME_HEART)
-        this.setColor("LightSkyBlue")
+        this.setColor("white")
     }
 }
 
@@ -132,7 +132,7 @@ class AbsorberBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_ABSORBER)
-        this.setColor("DarkOrange")
+        this.setColor("gold")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
