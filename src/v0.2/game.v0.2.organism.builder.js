@@ -16,7 +16,6 @@ const NODESIZE_DEFAULT = 9
 const NODESIZE_BUILDER = 14
 
 let nodeSize = NODESIZE_DEFAULT;
-const nodeDepth = 5;
 
 // Hexagon (for builder)
 
@@ -46,8 +45,8 @@ function generateHexagonGeometry() {
 
     // Configure extrude settings (depth, no bevel, etc.)
     const extrudeSettings = {
-        steps: 1,
-        depth: nodeDepth,
+        steps: 2,
+        depth: nodeSize,
         bevelEnabled: false
     };
 
@@ -177,7 +176,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             return
         }
 
-        const nodeGeom = builderUiToggled ? generateHexagonGeometry() : generateSphereGeometry()
+        const nodeGeom = generateHexagonGeometry()
         const nodeMaterial = builderUiToggled ?
             // No shading
             new THREE.MeshBasicMaterial(
@@ -185,7 +184,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
                     color: pos.node.block.color,
                     dithering: true,
                     // Set default blocks to invisible
-                    opacity: 0,
+                    opacity: 0.5,
                     transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
                 }
             ) :
@@ -195,7 +194,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
                     color: pos.node.block.color,
                     dithering: true,
                     // Set default blocks to invisible
-                    opacity: 0,
+                    opacity: 0.5,
                     transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
                 }
             )
