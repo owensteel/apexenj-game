@@ -220,7 +220,6 @@ class Organism {
             this.mesh.position.set(0, 0, 0)
             this.mesh.rotation.set(0, 0, 0)
         }
-        this.mesh.material = new THREE.MeshBasicMaterial({ color: this.dnaSequence.block.color });
 
         this.updateNodePosByBlockTypeCache()
         this.hasExploded = false

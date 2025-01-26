@@ -20,7 +20,7 @@ const BLOCK_TYPENAME_DEFAULT = "default"
 class DefaultBlock {
     constructor() {
         this.typeName = BLOCK_TYPENAME_DEFAULT
-        this.color = "#05001f"
+        this.color = "#000"
         this.symbol = ""
     }
     setTypeName(typeName) {
@@ -132,7 +132,7 @@ class AbsorberBlock extends DefaultBlock {
         super();
 
         this.setTypeName(BLOCK_TYPENAME_ABSORBER)
-        this.setColor("gold")
+        this.setColor("lightgreen")
     }
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)

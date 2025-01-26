@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 import { builderUiToggled } from './game.v0.2.organism.builder.ui';
+import { BLOCK_TYPENAME_DEFAULT } from './game.v0.2.blocks';
 
 const NODESIZE_DEFAULT = 9
 const NODESIZE_BUILDER = 14
@@ -52,6 +53,16 @@ function generateHexagonGeometry() {
 
     // Generate the extruded geometry
     return new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
+}
+
+// Sphere
+
+function generateSphereGeometry() {
+    return new THREE.SphereGeometry(
+        nodeSize * 1.1,
+        6,
+        6
+    )
 }
 
 // Generate positions of all appendage/root nodes in world space
@@ -166,13 +177,30 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             return
         }
 
-        const nodeGeom = generateHexagonGeometry()
-        const nodeMaterial = new THREE.MeshBasicMaterial(
-            {
-                color: pos.node.block.color
-            }
-        )
+        const nodeGeom = builderUiToggled ? generateHexagonGeometry() : generateSphereGeometry()
+        const nodeMaterial = builderUiToggled ?
+            // No shading
+            new THREE.MeshBasicMaterial(
+                {
+                    color: pos.node.block.color,
+                    dithering: true,
+                    // Set default blocks to invisible
+                    opacity: 0,
+                    transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
+                }
+            ) :
+            // Shading
+            new THREE.MeshToonMaterial(
+                {
+                    color: pos.node.block.color,
+                    dithering: true,
+                    // Set default blocks to invisible
+                    opacity: 0,
+                    transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
+                }
+            )
         meshMaterials.push(nodeMaterial)
+
         const nodeMesh = new THREE.Mesh(
             nodeGeom,
             nodeMaterial

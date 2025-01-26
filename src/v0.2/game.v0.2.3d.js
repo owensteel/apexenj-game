@@ -31,13 +31,19 @@ const camera = new THREE.OrthographicCamera(
     1000          // far clipping plane
 );
 // With an orthographic camera, distance has no effect
-camera.position.set(0, 0, 10);
+camera.position.set(0, 0, 50);
 camera.lookAt(0, 0, 0);
+
+const ambLighting = new THREE.AmbientLight("#fff", 0);
+scene.add(ambLighting)
+
+const defLighting = new THREE.PointLight("#fff", 4, 0, 0);
+scene.add(defLighting)
 
 const ThreeRenderer = new THREE.WebGLRenderer({
     antialias: true
 });
-ThreeRenderer.setClearColor(0x05001f, 1);
+ThreeRenderer.setClearColor("#0E003F", 1);
 ThreeRenderer.setSize(canvasWidth, canvasHeight);
 
 const ThreeCanvas = ThreeRenderer.domElement
@@ -59,7 +65,7 @@ composer.addPass(outlinePass);
 
 outlinePass.edgeStrength = 100;
 outlinePass.edgeGlow = 0;
-outlinePass.edgeThickness = 1;
+outlinePass.edgeThickness = 0.1;
 outlinePass.visibleEdgeColor.set('#fff');
 outlinePass.hiddenEdgeColor.set('#fff');
 
