@@ -9,7 +9,7 @@
 import { stageEdges3D, ThreeCanvas, ThreeRenderer } from "./game.v0.2.3d";
 import * as DNA from "./game.v0.2.dna";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Ecosystems from "./game.v0.2.ecosystems"
+import * as Levels from "./game.v0.2.levels"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
 
@@ -94,7 +94,7 @@ function startCombat() {
 
     // Ecosystem
 
-    combatSessionCache.ecosystem = new Ecosystems.Ecosystem()
+    combatSessionCache.ecosystem = new Levels.Level()
 
     // Set session values
 
