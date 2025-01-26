@@ -46,7 +46,7 @@ function generateHexagonGeometry() {
     // Configure extrude settings (depth, no bevel, etc.)
     const extrudeSettings = {
         steps: 2,
-        depth: nodeSize,
+        depth: radius,
         bevelEnabled: false
     };
 
