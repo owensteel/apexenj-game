@@ -183,8 +183,8 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
                 {
                     color: pos.node.block.color,
                     dithering: true,
-                    // Set default blocks to invisible
-                    opacity: 0.5,
+                    // Opacity = transparency
+                    opacity: 1,
                     transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
                 }
             ) :
@@ -193,8 +193,8 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
                 {
                     color: pos.node.block.color,
                     dithering: true,
-                    // Set default blocks to invisible
-                    opacity: 0.5,
+                    // Opacity = transparency
+                    opacity: 1,
                     transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
                 }
             )

@@ -34,7 +34,7 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(0, 0, 50);
 camera.lookAt(0, 0, 0);
 
-const ambLighting = new THREE.AmbientLight("#fff", 0);
+const ambLighting = new THREE.AmbientLight("#fff", 0.25);
 scene.add(ambLighting)
 
 const defLighting = new THREE.PointLight("#fff", 4, 0, 0);
@@ -43,7 +43,7 @@ scene.add(defLighting)
 const ThreeRenderer = new THREE.WebGLRenderer({
     antialias: true
 });
-ThreeRenderer.setClearColor("#0E003F", 1);
+ThreeRenderer.setClearColor("#ffffff", 0);
 ThreeRenderer.setSize(canvasWidth, canvasHeight);
 
 const ThreeCanvas = ThreeRenderer.domElement
@@ -66,7 +66,7 @@ composer.addPass(outlinePass);
 outlinePass.edgeStrength = 100;
 outlinePass.edgeGlow = 0;
 outlinePass.edgeThickness = 0.1;
-outlinePass.visibleEdgeColor.set('#fff');
+outlinePass.visibleEdgeColor.set('#000');
 outlinePass.hiddenEdgeColor.set('#fff');
 
 // Main renderer, called in the organism animation rendering

@@ -20,7 +20,7 @@ const BLOCK_TYPENAME_DEFAULT = "default"
 class DefaultBlock {
     constructor() {
         this.typeName = BLOCK_TYPENAME_DEFAULT
-        this.color = "#000"
+        this.color = "#fff"
         this.symbol = ""
     }
     setTypeName(typeName) {
@@ -83,7 +83,7 @@ class HeartBlock extends DefaultBlock {
         this.isHeart = true
 
         this.setTypeName(BLOCK_TYPENAME_HEART)
-        this.setColor("white")
+        this.setColor("black")
     }
 }
 
