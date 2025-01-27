@@ -23,11 +23,42 @@ const foodSequences = [
         [
             new DNA.dnaNode(
                 "appendage",
+                new Blocks.FoodBlock(),
+            )
+        ]
+    ),
+    new DNA.dnaNode(
+        "root",
+        new Blocks.FoodBlock(),
+        [
+            new DNA.dnaNode(
+                "appendage",
                 new Blocks.PlantBlock(),
             ),
             new DNA.dnaNode(
                 "appendage",
                 new Blocks.FoodBlock(),
+            )
+        ]
+    ),
+    new DNA.dnaNode(
+        "root",
+        new Blocks.FoodBlock(),
+        [
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.PlantBlock(),
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.FoodBlock(),
+                [
+                    null,
+                    new DNA.dnaNode(
+                        "appendage",
+                        new Blocks.FoodBlock(),
+                    )
+                ]
             )
         ]
     ),

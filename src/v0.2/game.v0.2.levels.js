@@ -6,6 +6,9 @@
 
 import * as Food from "./game.v0.2.food"
 
+const foodRingRadius = 100
+const foodRingNumOfItems = 6
+
 class Level {
     constructor(presetSeed = null) {
         this.plants = []
@@ -13,15 +16,18 @@ class Level {
         this.temperature = 0
 
         // Rings of food around organisms
-        for (const foodRadius of [150, 300]) {
-            for (let i = 0; i < 6; i++) {
+        for (const ringRadius of [foodRingRadius, foodRingRadius * 2]) {
+            for (let i = 0; i < foodRingNumOfItems; i++) {
                 const foodStartPos = {
-                    x: Math.cos(i * (Math.PI / 3)) * foodRadius,
-                    y: Math.sin(i * (Math.PI / 3)) * foodRadius
+                    x: Math.cos(
+                        i * (Math.PI / (foodRingNumOfItems / 2))
+                    ) * ringRadius,
+                    y: Math.sin(
+                        i * (Math.PI / (foodRingNumOfItems / 2))
+                    ) * ringRadius
                 }
                 const foodItem = Food.createFood(
                     foodStartPos
-                    // Type left null for now, for random food
                 )
                 foodItem.velocity.x = Food.foodVelocity * (Math.random() > 0.5 ? -1 : 1)
                 foodItem.velocity.y = Food.foodVelocity * (Math.random() > 0.5 ? -1 : 1)
