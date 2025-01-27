@@ -182,20 +182,14 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             new THREE.MeshBasicMaterial(
                 {
                     color: pos.node.block.color,
-                    dithering: true,
-                    // Opacity = transparency
-                    opacity: 1,
-                    transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
+                    dithering: true
                 }
             ) :
             // Shading
             new THREE.MeshToonMaterial(
                 {
                     color: pos.node.block.color,
-                    dithering: true,
-                    // Opacity = transparency
-                    opacity: 1,
-                    transparent: pos.node.block.typeName == BLOCK_TYPENAME_DEFAULT
+                    dithering: true
                 }
             )
         meshMaterials.push(nodeMaterial)
