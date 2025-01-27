@@ -73,7 +73,7 @@ game-wrapper hex-grid {
     position: absolute;
     z-index: -1;
     display: block;
-    opacity: 0.175;
+    opacity: 0.125;
     top: 0px;
     bottom: 0px;
     left: 0px;
@@ -81,7 +81,6 @@ game-wrapper hex-grid {
     width: 100%;
     height: 100%;
     background-repeat: no-repeat;
-    filter: invert();
 }
 
 game-wrapper game-node-dragging-overlay {
