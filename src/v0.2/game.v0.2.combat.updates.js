@@ -320,7 +320,7 @@ function bumpCanvasEdges(organism, organismNodesWorld) {
     organism.mesh.position.y += shiftY;
 
     if (Math.abs(shiftX) > 0 || Math.abs(shiftY) > 0) {
-        organism.mesh.rotation.z += (Math.PI * 2) * 0.0125
+        organism.mesh.rotation.z += (Math.PI * 2) * (0.0125 * organism.energy)
     }
 }
 
