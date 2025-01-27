@@ -174,19 +174,25 @@ function syncOrganismsInCombat(organism, opponent) {
         }
 
         // Absorb food
-        for (const pair of overlappingNodes) {
-            if (opponent.isFood || opponent.isPlant) {
-                if (
-                    pair.orgNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
-                    pair.oppNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_FOOD
-                ) {
-                    if (opponent.energy > 0 && organism.energy < 1) {
-                        // Eat an eighth of a food block for however many ticks the
-                        // food piece is touching the absorber node
-                        const energyAbsorbed = nutritionPerFoodBlock / 8
-                        organism.energy += energyAbsorbed
-                        opponent.energy -= energyAbsorbed
-                    }
+        if (opponent.isFood || opponent.isPlant) {
+            // Absorbers have to be touching every food block
+            const touchingPairs = overlappingNodes.filter((pair) => (
+                pair.orgNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
+                pair.oppNodeWorldPos.node.block.typeName == BLOCK_TYPENAME_FOOD
+            ))
+            // Use threshold method
+            // Energy = nutritionPerFoodBlock * numOfFoodBlockNodes
+            // So numOfFoodBlockNodes = energy / nutritionPerFoodBlock
+            const foodBlocksThreshold = Math.floor(opponent.energy / nutritionPerFoodBlock)
+            if (touchingPairs.length >= foodBlocksThreshold) {
+                if (opponent.energy > 0 && organism.energy < 1) {
+                    // Eat an eighth of a food block for however many ticks the
+                    // food piece is touching the absorber node
+                    const energyAbsorbed = nutritionPerFoodBlock / 8
+                    organism.energy += energyAbsorbed
+                    opponent.energy -= energyAbsorbed
+                    // Scoring
+                    organism.totalEnergyAbsorbed += energyAbsorbed
                 }
             }
         }
@@ -199,7 +205,7 @@ function syncOrganismsInCombat(organism, opponent) {
 
 */
 
-const overlapRadius = 25
+const overlapRadius = 12.5
 function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     const result = [];
 

@@ -144,3 +144,13 @@ game-wrapper healthbar-container {
 game-wrapper healthbar-container progress.alert {
     filter: hue-rotate(90deg)
 }
+
+game-wrapper healthbar-container healthbar-wrapper {
+    display: inline-block;
+    width: 50%;
+}
+
+game-wrapper healthbar-container healthbar-wrapper progress,
+game-wrapper healthbar-container healthbar-wrapper span {
+    display: inline-block;
+}

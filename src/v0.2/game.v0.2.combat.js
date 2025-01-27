@@ -12,6 +12,7 @@ import * as Organisms from "./game.v0.2.organisms"
 import * as Levels from "./game.v0.2.levels"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as Utils from "./game.v0.2.utils"
+import { nutritionPerFoodBlock } from "./game.v0.2.food";
 
 /*
 
@@ -33,7 +34,7 @@ const combatSessionTimeouts = []
 // Cache for the entire combat session
 const combatSessionCache = {
     originalEnemy: null,
-    ecosystem: {},
+    level: null,
     result: null
 }
 
@@ -41,20 +42,35 @@ const combatSessionCache = {
 
 
 const newHealthbar = () => {
+    const hbWrapper = document.createElement("healthbar-wrapper")
+
     const hb = document.createElement("progress")
     hb.setAttribute("min", 0)
     hb.setAttribute("max", 100)
+    hbWrapper.appendChild(hb)
 
-    hb.updateWithEnergyValue = (energy) => {
+    hbWrapper.updateWithEnergyValue = (energy) => {
         hb.value = Math.round((energy * 100) / 5) * 5
         if (hb.value <= 25) {
             hb.className = "alert"
         } else {
             hb.className = ""
         }
+        hbWrapper.currentEnergyValue = energy
     }
+    hbWrapper.updateWithEnergyValue(0)
 
-    return hb
+    const fS = document.createElement("p")
+    fS.style.color = "purple"
+    hbWrapper.appendChild(fS)
+
+    hbWrapper.updateWithFoodScore = (score) => {
+        fS.innerHTML = score
+        hbWrapper.currentFoodScore = score
+    }
+    hbWrapper.updateWithFoodScore(0)
+
+    return hbWrapper
 }
 
 // Temp solution for debugging
@@ -86,15 +102,18 @@ function startCombat() {
     enemyOrganism = Organisms.addOrganism(
         enemyDNA,
         {
-            x: stageEdges3D.top.right.x - 30,
+            x: 0,
             y: stageEdges3D.top.right.y * 0.5
         }
     )
     combatSessionCache.originalEnemy = enemyOrganism
 
-    // Ecosystem
+    playerOrganism.totalEnergyAbsorbed = 0
+    enemyOrganism.totalEnergyAbsorbed = 0
 
-    combatSessionCache.ecosystem = new Levels.Level()
+    // Level
+
+    combatSessionCache.level = new Levels.Level()
 
     // Set session values
 
@@ -115,11 +134,11 @@ function startCombat() {
 
     playerOrganism.mesh.rotation.z = Math.atan2(
         playerOrganism.combatStartPos.x,
-        playerOrganism.combatStartPos.y
+        -playerOrganism.combatStartPos.y
     )
     enemyOrganism.mesh.rotation.z = Math.atan2(
         enemyOrganism.combatStartPos.x,
-        enemyOrganism.combatStartPos.y
+        -enemyOrganism.combatStartPos.y
     )
 
     // Show UI
@@ -216,6 +235,7 @@ function combatTick() {
 
     // Set healthbars
 
+    // Energy
     if (combatSessionCache.result == playerOrganism.id) {
         playerHealthbar.updateWithEnergyValue(0)
     } else {
@@ -226,6 +246,14 @@ function combatTick() {
     } else {
         enemyHealthbar.updateWithEnergyValue(enemyOrganism.energy)
     }
+
+    // Food score
+    playerHealthbar.updateWithFoodScore(
+        Math.round(playerOrganism.totalEnergyAbsorbed / nutritionPerFoodBlock)
+    )
+    enemyHealthbar.updateWithFoodScore(
+        Math.round(enemyOrganism.totalEnergyAbsorbed / nutritionPerFoodBlock)
+    )
 }
 
 export { toggleCombat }

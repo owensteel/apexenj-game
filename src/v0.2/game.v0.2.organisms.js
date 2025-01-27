@@ -18,8 +18,8 @@ import * as Blocks from './game.v0.2.blocks.js';
 
 const organisms = [];
 const defaultCombatStartPos = {
-    x: ThreeElements.stageEdges3D.top.left.x + 30,
-    y: ThreeElements.stageEdges3D.top.left.y * 0.5
+    x: 0,
+    y: -ThreeElements.stageEdges3D.top.left.y * 0.5
 }
 
 // Provide Brownian-esque motion

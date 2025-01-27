@@ -37,6 +37,32 @@ const foodSequences = [
         [
             new DNA.dnaNode(
                 "appendage",
+                new Blocks.PlantBlock(),
+                [
+                    new DNA.dnaNode(
+                        "appendage",
+                        new Blocks.FoodBlock(),
+                        [
+                            new DNA.dnaNode(
+                                "appendage",
+                                new Blocks.FoodBlock(),
+                            )
+                        ]
+                    )
+                ]
+            ),
+            new DNA.dnaNode(
+                "appendage",
+                new Blocks.FoodBlock(),
+            )
+        ]
+    ),
+    new DNA.dnaNode(
+        "root",
+        new Blocks.FoodBlock(),
+        [
+            new DNA.dnaNode(
+                "appendage",
                 new Blocks.FoodBlock(),
                 [
                     new DNA.dnaNode(
@@ -47,21 +73,29 @@ const foodSequences = [
             ),
             new DNA.dnaNode(
                 "appendage",
-                new Blocks.PlantBlock(),
-            ),
-            new DNA.dnaNode(
-                "appendage",
-                new Blocks.PlantBlock(),
+                new Blocks.FoodBlock(),
+                [
+                    new DNA.dnaNode(
+                        "appendage",
+                        new Blocks.FoodBlock(),
+                        [
+                            new DNA.dnaNode(
+                                "appendage",
+                                new Blocks.FoodBlock(),
+                            )
+                        ]
+                    )
+                ]
             )
         ]
     )
 ]
 
 const nutritionPerFoodBlock = 0.1
-const foodVelocity = 0.01
+const foodVelocity = 0.005
 
 // Create and deploy food
-function createFood(foodStartPos = null) {
+function createFood(foodStartPos = null, typeId = null) {
 
     if (!foodStartPos) {
         foodStartPos = {
@@ -73,14 +107,13 @@ function createFood(foodStartPos = null) {
                 ThreeElements.stageEdges3D.bottom.right.x,
         }
     }
+    if (!typeId) {
+        typeId = Math.floor(Math.random() * (foodSequences.length - 1))
+    }
 
     const foodInstance = Organism.addOrganism(
         cloneObject(
-            foodSequences[
-            Math.round(
-                Math.random() *
-                (foodSequences.length - 1))
-            ],
+            foodSequences[typeId],
             false
         ),
         foodStartPos
@@ -88,6 +121,7 @@ function createFood(foodStartPos = null) {
     foodInstance.isFood = true
     foodInstance.isEaten = false
 
+    // Default velocity
     foodInstance.velocity.x = foodVelocity
     foodInstance.velocity.y = -foodVelocity
     foodInstance.mesh.rotation.z = Math.atan2(
@@ -107,4 +141,4 @@ function createFood(foodStartPos = null) {
     return foodInstance
 }
 
-export { createFood, nutritionPerFoodBlock }
+export { createFood, nutritionPerFoodBlock, foodVelocity }
