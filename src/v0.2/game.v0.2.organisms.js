@@ -413,8 +413,16 @@ class Organism {
         const removedNodeAsOrg = addOrganism(
             removedNode,
             {
-                x: removedNodePosWorld.x,
-                y: removedNodePosWorld.y
+                x: removedNodePosWorld.x + (
+                    Math.sign(
+                        removedNodePosWorld.x - meshPos.x
+                    ) * OrganismBuilder.nodeSize
+                ),
+                y: removedNodePosWorld.y + (
+                    Math.sign(
+                        removedNodePosWorld.y - meshPos.y
+                    ) * OrganismBuilder.nodeSize
+                )
             }
         )
         // Motor blocks tend to go crazy alone, so make static
