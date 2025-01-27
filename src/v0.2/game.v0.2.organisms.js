@@ -444,6 +444,12 @@ class Organism {
         return true
     }
 
+    // Remove organism from scene
+    die() {
+        this.nodePositions = [] // Prevents a "ghost"
+        ThreeElements.scene.remove(this.mesh)
+    }
+
     // Exploding animation, break into pieces and die
     explode() {
         if (this.hasExploded) {
@@ -458,9 +464,7 @@ class Organism {
         }
 
         // Remove what remains of the organism
-        // from scene
-        this.nodePositions = [] // Prevents a "ghost"
-        ThreeElements.scene.remove(this.mesh)
+        this.die()
     }
 }
 
