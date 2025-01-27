@@ -21,7 +21,6 @@ class DefaultBlock {
     constructor() {
         this.typeName = BLOCK_TYPENAME_DEFAULT
         this.color = "#fff"
-        this.symbol = ""
     }
     setTypeName(typeName) {
         this.typeName = typeName
