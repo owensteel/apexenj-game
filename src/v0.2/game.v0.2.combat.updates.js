@@ -58,13 +58,10 @@ function updateOrganismInCombat(organism) {
             return nodePos.node.block.typeName == BLOCK_TYPENAME_FOOD
         })
         if (foodBlockNodes.length < 1) {
-            // Destroy the whole thing
+            // Destroy the whole thing if it hasn't been already
 
             organism.isEaten = true
-
-            organism.nodePositions = []
-            ThreeElements.scene.remove(organism.mesh)
-            Organisms.destroyOrganism(organism)
+            organism.die()
         } else {
             if (blocksLeft < foodBlockNodes.length) {
                 // Remove a food node
@@ -74,9 +71,23 @@ function updateOrganismInCombat(organism) {
                 })
                 organism.nodePositions.splice(foodNodeToRemoveIndex, 1);
 
-                if (organism.nodePositions.length < 1) {
+                const remainingFoodBlockNodes = organism.nodePositions.filter((nodePos) => {
+                    return nodePos.node.block.typeName == BLOCK_TYPENAME_FOOD
+                })
+
+                // Destroy if no food blocks remain
+
+                if (
+                    remainingFoodBlockNodes.length < 1 ||
+                    organism.nodePositions.length < 1
+                ) {
+                    organism.isEaten = true
+                    organism.die()
+
                     return
                 }
+
+                // Build new mesh
 
                 const meshPos = organism.mesh.position
                 ThreeElements.scene.remove(organism.mesh)
@@ -205,7 +216,7 @@ function syncOrganismsInCombat(organism, opponent) {
 
 */
 
-const overlapRadius = 12.5
+const overlapRadius = 15
 function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     const result = [];
 
