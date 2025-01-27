@@ -96,23 +96,25 @@ const foodSequences = [
                 "appendage",
                 new Blocks.FoodBlock(),
                 [
+                    null,
                     new DNA.dnaNode(
                         "appendage",
                         new Blocks.PlantBlock(),
-                    )
-                ]
-            ),
-            new DNA.dnaNode(
-                "appendage",
-                new Blocks.FoodBlock(),
-                [
-                    new DNA.dnaNode(
-                        "appendage",
-                        new Blocks.FoodBlock(),
                         [
+                            null,
+                            null,
                             new DNA.dnaNode(
                                 "appendage",
                                 new Blocks.FoodBlock(),
+                                [
+                                    null,
+                                    null,
+                                    new DNA.dnaNode(
+                                        "appendage",
+                                        new Blocks.FoodBlock(),
+                                        []
+                                    )
+                                ]
                             )
                         ]
                     )
@@ -139,7 +141,7 @@ function createFood(foodStartPos = null, typeId = null) {
         }
     }
     if (!typeId) {
-        typeId = Math.floor(Math.random() * (foodSequences.length - 1))
+        typeId = Math.floor(Math.random() * (foodSequences.length))
     }
 
     const foodInstance = Organism.addOrganism(
