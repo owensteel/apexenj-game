@@ -19,7 +19,10 @@ let nodeSize = NODESIZE_DEFAULT;
 
 // Hexagon (for builder)
 
-function generateHexagonGeometry(blockCut = Blocks.BLOCK_CUT_DEFAULT) {
+function generateHexagonGeometry(
+    blockCut = Blocks.BLOCK_CUT_DEFAULT,
+    zAngle = 0
+) {
     // Create a new shape for the hexagon
     const hexShape = new THREE.Shape();
 
@@ -158,7 +161,13 @@ function generateHexagonGeometry(blockCut = Blocks.BLOCK_CUT_DEFAULT) {
     };
 
     // Generate the extruded geometry
-    return new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
+    const geom = new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
+
+    if (blockCut !== Blocks.BLOCK_CUT_DEFAULT) {
+        geom.rotateZ(zAngle - (Math.PI / 2))
+    }
+
+    return geom
 }
 
 // Sphere (DO NOT REMOVE, FOR DEBUGGING PURPOSES)
@@ -283,7 +292,10 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             return
         }
 
-        const nodeGeom = generateHexagonGeometry(pos.node.block.cut)
+        const nodeGeom = generateHexagonGeometry(
+            pos.node.block.cut,
+            pos.angle
+        )
         const nodeMaterial = builderUiToggled ?
             // No shading
             new THREE.MeshBasicMaterial(
