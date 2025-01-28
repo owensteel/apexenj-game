@@ -7,7 +7,7 @@
 */
 
 import * as DNA from "./game.v0.2.dna";
-import * as OrganismBuilderUI from "./game.v0.2.organism.builder.ui";
+import * as OrganismBuilderUI from "./game.v0.2.builder.ui";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
 import { cloneObject } from "./game.v0.2.utils";

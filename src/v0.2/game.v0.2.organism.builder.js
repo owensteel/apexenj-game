@@ -9,8 +9,8 @@
 
 import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
-import { builderUiToggled } from './game.v0.2.organism.builder.ui';
-import { BLOCK_TYPENAME_DEFAULT } from './game.v0.2.blocks';
+import { builderUiToggled } from './game.v0.2.builder.ui';
+import * as Blocks from './game.v0.2.blocks'
 
 const NODESIZE_DEFAULT = 9
 const NODESIZE_BUILDER = 14
@@ -19,7 +19,7 @@ let nodeSize = NODESIZE_DEFAULT;
 
 // Hexagon (for builder)
 
-function generateHexagonGeometry() {
+function generateHexagonGeometry(blockCut = Blocks.BLOCK_CUT_DEFAULT) {
     // Create a new shape for the hexagon
     const hexShape = new THREE.Shape();
 
@@ -33,11 +33,118 @@ function generateHexagonGeometry() {
     );
 
     // Create each side of the hexagon
+    // For basic/placeholder geometry
+    let hexShapeLinePos = []
     for (let i = 1; i < 6; i++) {
+        hexShapeLinePos.push({
+            x: Math.cos(i * (Math.PI / 3)) * radius,
+            y: Math.sin(i * (Math.PI / 3)) * radius
+        });
+    }
+
+    // Alter geometry for non-default cuts
+    const shapeTopPoint = hexShapeLinePos[0]
+    switch (blockCut) {
+        case Blocks.BLOCK_CUT_A:
+
+            hexShapeLinePos[2].x = 0
+            hexShapeLinePos[2].y = 0
+
+            hexShapeLinePos.push(
+                { x: 0, y: 0 }
+            )
+            hexShapeLinePos.push(
+                {
+                    x: shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                }
+            )
+
+            break
+        case Blocks.BLOCK_CUT_B:
+
+            hexShapeLinePos = [
+                {
+                    x: shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                },
+                {
+                    x: -shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                },
+                {
+                    x: -(shapeTopPoint.x * 2),
+                    y: 0
+                },
+                {
+                    x: 0,
+                    y: 0
+                },
+                {
+                    x: -shapeTopPoint.x,
+                    y: -shapeTopPoint.y
+                },
+                {
+                    x: shapeTopPoint.x,
+                    y: -shapeTopPoint.y
+                },
+                {
+                    x: 0,
+                    y: 0
+                }
+            ]
+
+            break
+        case Blocks.BLOCK_CUT_C:
+
+            hexShapeLinePos = [
+                {
+                    x: shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                },
+                {
+                    x: -shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                },
+                {
+                    x: 0,
+                    y: 0
+                },
+                {
+                    x: -(shapeTopPoint.x * 2),
+                    y: 0
+                },
+                {
+                    x: -shapeTopPoint.x,
+                    y: -shapeTopPoint.y
+                },
+                {
+                    x: shapeTopPoint.x,
+                    y: -shapeTopPoint.y
+                },
+                {
+                    x: shapeTopPoint.x * 2,
+                    y: 0
+                },
+                {
+                    x: 0,
+                    y: 0
+                },
+                {
+                    x: shapeTopPoint.x,
+                    y: shapeTopPoint.y
+                }
+            ]
+
+            break
+    }
+
+    // Draw shape path
+    for (const linePos of hexShapeLinePos) {
         hexShape.lineTo(
-            Math.cos(i * (Math.PI / 3)) * radius,
-            Math.sin(i * (Math.PI / 3)) * radius
-        );
+            linePos.x,
+            linePos.y
+        )
     }
 
     // Close the path to form a proper hexagon
@@ -54,7 +161,7 @@ function generateHexagonGeometry() {
     return new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
 }
 
-// Sphere
+// Sphere (DO NOT REMOVE, FOR DEBUGGING PURPOSES)
 
 function generateSphereGeometry() {
     return new THREE.SphereGeometry(
@@ -176,7 +283,7 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
             return
         }
 
-        const nodeGeom = generateHexagonGeometry()
+        const nodeGeom = generateHexagonGeometry(pos.node.block.cut)
         const nodeMaterial = builderUiToggled ?
             // No shading
             new THREE.MeshBasicMaterial(

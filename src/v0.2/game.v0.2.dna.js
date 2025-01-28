@@ -38,6 +38,7 @@ const enforceSymmetry = false
 
 // A "demo" DNA sequence that provides a prebuilt model, which is especially
 // handy when debugging
+
 const demoDnaSequence = new dnaNode(
     "root",
     new Blocks.HeartBlock(),
@@ -88,7 +89,8 @@ const placeholderDefaultRootNode = new dnaNode(
 function addNodeToParent(
     parentNode = null,
     edge = null,
-    blockType = Blocks.BLOCK_TYPENAME_DEFAULT
+    blockType = Blocks.BLOCK_TYPENAME_DEFAULT,
+    blockCut = Blocks.BLOCK_CUT_DEFAULT
 ) {
     console.log("creating...", { parentNode, edge })
 
@@ -105,9 +107,12 @@ function addNodeToParent(
     // Default state, will be changed dynamically when returned
     // if a different block type is intended
 
+    const nodeBlock = Blocks.getBlockInstanceFromTypeName(blockType)
+    nodeBlock.setCut(blockCut)
+
     const node = new dnaNode(
         /* role: */ "appendage",
-        /* block: */ Blocks.getBlockInstanceFromTypeName(blockType),
+        /* block: */ nodeBlock,
         /* edges: */[],
         /* detach: */ blockType == Blocks.BLOCK_TYPENAME_DETACHING
     )

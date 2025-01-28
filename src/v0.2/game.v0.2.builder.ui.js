@@ -233,6 +233,7 @@ builderWrapper.appendChild(nodeBin)
 // Node manipulating
 
 let selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT
+let selectedBlockCut = Blocks.BLOCK_CUT_DEFAULT
 
 function deleteNodeFromSequence(node) {
     // Parent null method
@@ -247,7 +248,8 @@ function createNode(parentNode, edge) {
     const createdNode = DNA.addNodeToParent(
         parentNode,
         edge,
-        selectedBlockType
+        selectedBlockType,
+        selectedBlockCut
     )
 
     renderFocusedOrganism()
@@ -271,6 +273,21 @@ function setNodeToolbar() {
 
     nodeBlockSelector.onchange = () => {
         selectedBlockType = nodeBlockSelector.value
+    }
+
+    // TODO: proper cut type selector
+
+    const nodeBlockCutSelector = document.createElement("select")
+    builderToolbar.appendChild(nodeBlockCutSelector)
+
+    Blocks.BLOCK_CUTS_LIST.forEach((blockCutName) => {
+        const selectorOption = document.createElement("option")
+        selectorOption.innerText = blockCutName
+        nodeBlockCutSelector.appendChild(selectorOption)
+    })
+
+    nodeBlockCutSelector.onchange = () => {
+        selectedBlockCut = nodeBlockCutSelector.value
     }
 }
 setNodeToolbar()

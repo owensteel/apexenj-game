@@ -7,7 +7,35 @@
 
 */
 
+// Block shapes/cuts
+
+const BLOCK_CUTS_LIST = []
+
+// Type constants
+const BLOCK_CUT_DEFAULT = "BLOCK_CUT_DEFAULT"
+BLOCK_CUTS_LIST.push(BLOCK_CUT_DEFAULT)
+const BLOCK_CUT_A = "BLOCK_CUT_A"
+BLOCK_CUTS_LIST.push(BLOCK_CUT_A)
+const BLOCK_CUT_B = "BLOCK_CUT_B"
+BLOCK_CUTS_LIST.push(BLOCK_CUT_B)
+const BLOCK_CUT_C = "BLOCK_CUT_C"
+BLOCK_CUTS_LIST.push(BLOCK_CUT_C)
+
+// Complements table
+const BLOCK_CUT_COMPLEMENTS = {}
+BLOCK_CUT_COMPLEMENTS[BLOCK_CUT_DEFAULT] = []
+BLOCK_CUT_COMPLEMENTS[BLOCK_CUT_A] = [BLOCK_CUT_DEFAULT, BLOCK_CUT_A]
+BLOCK_CUT_COMPLEMENTS[BLOCK_CUT_B] = [BLOCK_CUT_C]
+
+// Complement checker
+function areBlocksComplementaryCuts(block1, block2) {
+    return BLOCK_CUT_COMPLEMENTS[block1.cut].any(
+        (compCutN) => compCutN === block2.cut
+    )
+}
+
 // Types of block the player can use
+
 const PlayerAccessibleBlockTypeNamesList = []
 
 /*
@@ -18,7 +46,10 @@ const PlayerAccessibleBlockTypeNamesList = []
 
 const BLOCK_TYPENAME_DEFAULT = "default"
 class DefaultBlock {
-    constructor() {
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        this.cut = cut
+
+        // Default block settings
         this.typeName = BLOCK_TYPENAME_DEFAULT
         this.color = "#fff"
     }
@@ -28,8 +59,8 @@ class DefaultBlock {
     setColor(color) {
         this.color = color
     }
-    setSymbol(symbol) {
-        this.symbol = symbol
+    setCut(cutType) {
+        this.cut = cutType
     }
 }
 PlayerAccessibleBlockTypeNamesList.push("default")
@@ -42,8 +73,8 @@ PlayerAccessibleBlockTypeNamesList.push("default")
 
 const BLOCK_TYPENAME_PLANT = "plant"
 class PlantBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
 
         this.setTypeName(BLOCK_TYPENAME_PLANT)
         this.setColor("DarkViolet")
@@ -58,8 +89,9 @@ class PlantBlock extends DefaultBlock {
 
 const BLOCK_TYPENAME_MOTOR = "motor"
 class MotorBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
+
         this.isMotor = true
         this.appliedPowerPerc = 1 /* Perc of max power, 0 - 1 */
 
@@ -77,8 +109,9 @@ PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_MOTOR)
 
 const BLOCK_TYPENAME_HEART = "heart"
 class HeartBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
+
         this.isHeart = true
 
         this.setTypeName(BLOCK_TYPENAME_HEART)
@@ -94,8 +127,8 @@ class HeartBlock extends DefaultBlock {
 
 const BLOCK_TYPENAME_DETACHING = "detaching"
 class DetachingBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
 
         this.setTypeName(BLOCK_TYPENAME_DETACHING)
         this.setColor("blue")
@@ -111,8 +144,8 @@ PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
 
 const BLOCK_TYPENAME_FOOD = "food"
 class FoodBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
 
         this.setTypeName(BLOCK_TYPENAME_FOOD)
         this.setColor("Lavender")
@@ -127,8 +160,8 @@ class FoodBlock extends DefaultBlock {
 
 const BLOCK_TYPENAME_ABSORBER = "absorber"
 class AbsorberBlock extends DefaultBlock {
-    constructor() {
-        super();
+    constructor(cut = BLOCK_CUT_DEFAULT) {
+        super(cut);
 
         this.setTypeName(BLOCK_TYPENAME_ABSORBER)
         this.setColor("lightgreen")
@@ -178,5 +211,20 @@ export {
 
     // For converting block type names to instances
 
-    getBlockInstanceFromTypeName
+    getBlockInstanceFromTypeName,
+
+    // Block cut constants
+
+    BLOCK_CUTS_LIST,
+    BLOCK_CUT_COMPLEMENTS,
+
+    BLOCK_CUT_DEFAULT,
+    BLOCK_CUT_A,
+    BLOCK_CUT_B,
+    BLOCK_CUT_C,
+
+    // For checking if two blocks complement each
+    // other in cut shape
+
+    areBlocksComplementaryCuts
 }
