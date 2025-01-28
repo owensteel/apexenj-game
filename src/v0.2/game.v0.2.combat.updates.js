@@ -53,7 +53,7 @@ function updateOrganismInCombat(organism) {
 
         // Reduce blocks while being spent
 
-        const blocksLeft = Math.round(organism.energy / nutritionPerFoodBlock)
+        const blocksLeft = Math.ceil(organism.energy / nutritionPerFoodBlock)
         const foodBlockNodes = organism.nodePositions.filter((nodePos) => {
             return nodePos.node.block.typeName == BLOCK_TYPENAME_FOOD
         })
