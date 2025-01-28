@@ -289,13 +289,14 @@ class Organism {
                         totalMotorY += vy;
                         totalPower += motorPowerByEnergy;
 
-                        // Animate the "motor" mesh visually (e.g. spinning some axis)
-                        motorNodePos.mesh.rotation.x += vx;
-
-                        // Prevent "twisting"
-                        if (Math.abs(motorNodePos.mesh.rotation.x) > (Math.PI * 2)) {
-                            motorNodePos.mesh.rotation.x = 0
-                        }
+                        // Rotate motor node by factoring in rotation Z (motorAngle)
+                        const axis = new THREE.Vector3(
+                            -Math.sin(motorAngle - (Math.PI / 2)),
+                            Math.cos(motorAngle - (Math.PI / 2)),
+                            0
+                        ).normalize();
+                        const spinAmount = (Math.hypot(vx, vy));
+                        motorNodePos.mesh.rotateOnAxis(axis, spinAmount);
                     }
                 }
 
