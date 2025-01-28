@@ -11,7 +11,14 @@ import * as Blocks from './game.v0.2.blocks'
 // Node class
 
 class dnaNode {
-    constructor(role, block, edges = [], detach = false, parentNode = null, edgeOfParent = null) {
+    constructor(
+        role,
+        block,
+        edges = [],
+        detach = false,
+        parentNode = null,
+        edgeOfParent = null
+    ) {
         this.role = role
         this.block = block
 

@@ -56,7 +56,7 @@ const foodSequences = [
                     null,
                     new DNA.dnaNode(
                         "appendage",
-                        new Blocks.FoodBlock(Blocks.BLOCK_CUT_B),
+                        new Blocks.FoodBlock(),
                     )
                 ]
             )
@@ -111,7 +111,7 @@ const foodSequences = [
                                     null,
                                     new DNA.dnaNode(
                                         "appendage",
-                                        new Blocks.FoodBlock(Blocks.BLOCK_CUT_B),
+                                        new Blocks.FoodBlock(),
                                         []
                                     )
                                 ]

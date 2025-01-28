@@ -274,21 +274,6 @@ function setNodeToolbar() {
     nodeBlockSelector.onchange = () => {
         selectedBlockType = nodeBlockSelector.value
     }
-
-    // TODO: proper cut type selector
-
-    const nodeBlockCutSelector = document.createElement("select")
-    builderToolbar.appendChild(nodeBlockCutSelector)
-
-    Blocks.BLOCK_CUTS_LIST.forEach((blockCutName) => {
-        const selectorOption = document.createElement("option")
-        selectorOption.innerText = blockCutName
-        nodeBlockCutSelector.appendChild(selectorOption)
-    })
-
-    nodeBlockCutSelector.onchange = () => {
-        selectedBlockCut = nodeBlockCutSelector.value
-    }
 }
 setNodeToolbar()
 
@@ -346,7 +331,9 @@ function nodeClickHandler(e) {
     let connectingEdge = 0
 
     for (let hexEdgeIndex = 0; hexEdgeIndex < 6; hexEdgeIndex++) {
-        const neighbourHex = hexGrid.hexTable[clickedHex.neighbours[hexEdgeIndex]]
+        const neighbourHex = hexGrid.hexTable[
+            clickedHex.neighbours[hexEdgeIndex]
+        ]
         const actualEdge = hexEdgeIndex + 1
 
         const hit3DNode = get3DNodeAtScreenPos({
