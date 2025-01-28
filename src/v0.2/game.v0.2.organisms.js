@@ -21,6 +21,7 @@ const defaultCombatStartPos = {
     x: 0,
     y: -ThreeElements.stageEdges3D.top.left.y * 0.5
 }
+const ENABLE_NATURAL_RANDOM_ROTATION = false;
 
 // Provide Brownian-esque motion
 
@@ -316,10 +317,12 @@ class Organism {
 
             // Rotate slightly for natural randomness
 
-            const randomInterval = 750 * (1 + this.random)
-            this.mesh.rotation.z += Math.sin(
-                (Math.round(Date.now() / randomInterval) * randomInterval) * 2
-            ) * 0.00125;
+            if (ENABLE_NATURAL_RANDOM_ROTATION) {
+                const randomInterval = 750 * (1 + this.random)
+                this.mesh.rotation.z += Math.sin(
+                    (Math.round(Date.now() / randomInterval) * randomInterval) * 2
+                ) * 0.00125;
+            }
 
             // Prevent "twisting"
             if (this.mesh.rotation.z > Math.PI * 2) {
