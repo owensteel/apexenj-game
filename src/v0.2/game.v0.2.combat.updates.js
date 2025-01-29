@@ -270,7 +270,7 @@ function bumpNodes(organism, opponent, overlappingNodes) {
         const orgNode = pair.orgNodeWorldPos;
         const oppNode = pair.oppNodeWorldPos;
 
-        // circle-based overlap check
+        // Distance calculation
         const dx = orgNode.x - oppNode.x;
         const dy = orgNode.y - oppNode.y;
         const distSq = dx * dx + dy * dy;
@@ -281,27 +281,40 @@ function bumpNodes(organism, opponent, overlappingNodes) {
             const dist = Math.sqrt(distSq);
             const overlap = overlapRadius - dist;
 
-            // Normal from oppNode => orgNode
+            // Normalized push direction (opp -> org)
             let nx, ny;
             if (dist > 0) {
                 nx = dx / dist;
                 ny = dy / dist;
             } else {
-                // exact same coords => arbitrary direction
+                // If exactly overlapping, push in a default direction
                 nx = 1;
                 ny = 1;
             }
 
-            // Each is pushed back
-            const half = overlap * 0.25;
+            // Factor in velocity influence
+            const orgSpeedSq = organism.velocity.x ** 2 + organism.velocity.y ** 2;
+            const oppSpeedSq = opponent.velocity.x ** 2 + opponent.velocity.y ** 2;
 
-            // Move organism mesh outward
-            organism.mesh.position.x += nx * half;
-            organism.mesh.position.y += ny * half;
+            const orgSpeed = Math.sqrt(orgSpeedSq);
+            const oppSpeed = Math.sqrt(oppSpeedSq);
 
-            // Move opponent mesh inward
-            opponent.mesh.position.x -= nx * half;
-            opponent.mesh.position.y -= ny * half;
+            const totalSpeed = orgSpeed + oppSpeed;
+
+            let orgPushFactor = 0.5, oppPushFactor = 0.5;
+            if (totalSpeed > 0) {
+                // The faster object is affected more by the push
+                orgPushFactor = oppSpeed / totalSpeed;
+                oppPushFactor = orgSpeed / totalSpeed;
+            }
+
+            // Apply movement adjustments
+            const pushFactor = overlap * 0.25;  // Adjust influence
+            organism.mesh.position.x += nx * pushFactor * orgPushFactor;
+            organism.mesh.position.y += ny * pushFactor * orgPushFactor;
+
+            opponent.mesh.position.x -= nx * pushFactor * oppPushFactor;
+            opponent.mesh.position.y -= ny * pushFactor * oppPushFactor;
         }
     }
 }
