@@ -90,7 +90,7 @@ const maxAttractionVelocity = 0.005
 function startCombat() {
     console.log("starting combat...")
 
-    // Set players
+    // Init players
 
     const enemyDNA = Utils.cloneObject(playerOrganism.dnaSequence)
     enemyOrganism = Organisms.addOrganism(
@@ -102,9 +102,6 @@ function startCombat() {
     )
     combatSessionCache.originalEnemy = enemyOrganism
 
-    playerOrganism.totalEnergyAbsorbed = 0
-    enemyOrganism.totalEnergyAbsorbed = 0
-
     // Level
 
     combatSessionCache.level = new Levels.Level()
@@ -114,17 +111,17 @@ function startCombat() {
     combatSessionCache.result = null
     combatRunning = true
 
-    // Start organisms' initial velocity
-
-    playerOrganism.velocity.x = -maxAttractionVelocity
-    playerOrganism.velocity.y = maxAttractionVelocity
-
-    enemyOrganism.velocity.x = maxAttractionVelocity
-    enemyOrganism.velocity.y = -maxAttractionVelocity
-
     // Start movement
 
     Organisms.setMovementToggle(true, playerOrganism)
+
+    // Set player positions and variables
+
+    playerOrganism.totalEnergyAbsorbed = 0
+    enemyOrganism.totalEnergyAbsorbed = 0
+
+    playerOrganism.energy = 0.75
+    enemyOrganism.energy = 0.75
 
     playerOrganism.mesh.rotation.z = Math.atan2(
         playerOrganism.combatStartPos.x,
