@@ -189,6 +189,9 @@ function toggleCombat(playerOrganismImport) {
         combatToggled = false
         endCombat()
     }
+
+    document.getElementsByTagName("game-stage-wrapper")[0]
+        .setAttribute("mode", combatToggled ? "combat" : "builder")
 }
 
 /*

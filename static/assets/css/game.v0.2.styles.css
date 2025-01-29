@@ -29,8 +29,6 @@ game-wrapper {
     image-rendering: pixelated;
 
     color: #003f7d;
-
-    background-image: linear-gradient(#fff, #fff)
 }
 
 game-wrapper canvas {
@@ -39,9 +37,15 @@ game-wrapper canvas {
     user-select: none;
 }
 
-game-stage-wrapper {
+game-wrapper game-stage-wrapper {
+    display: block;
     user-select: none;
     position: relative;
+}
+
+game-wrapper game-stage-wrapper[mode="combat"] {
+    background-image: url("https://apexenj.com/static/media/bg.630eebcf0f2e7c5a5c34.png");
+    background-size: 200px;
 }
 
 game-wrapper game-builder-wrapper {
@@ -153,4 +157,14 @@ game-wrapper healthbar-container healthbar-wrapper {
 game-wrapper healthbar-container healthbar-wrapper progress,
 game-wrapper healthbar-container healthbar-wrapper span {
     display: inline-block;
+}
+
+@keyframes scroll-background {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: -100% -100%;
+    }
 }
