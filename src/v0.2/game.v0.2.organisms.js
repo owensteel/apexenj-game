@@ -413,12 +413,24 @@ class Organism {
             return false
         }
 
+        // Destroy any children to prevent "ghosts", i.e node positions
+        // without a visible mesh (since a child's mesh is destroyed when
+        // its parent's mesh is)
+        for (const child of toRemoveNodePos.mesh.children) {
+            if (child.nodePos) {
+                const childNodePos = child.nodePos
+                this.nodePositions.splice(childNodePos.index, 1).length < 1
+                console.log("destroyed child")
+            }
+        }
+
         const removedNode = cloneObject(toRemoveNodePos.node)
 
-        // Isolate, to get rid of any children the builder may try
-        // to "resurrect"
+        // Isolate, to stop the builder "resurrecting" any children
         removedNode.edges = Array(6)
-        // Add to scene, like it's "crumbled" off
+
+        // Add node to scene alone, like it's "crumbled" off
+
         const toRemoveNodePosWorld = {
             x: toRemoveNodePos.x + meshPos.x,
             y: toRemoveNodePos.y + meshPos.y

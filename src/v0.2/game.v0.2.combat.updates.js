@@ -204,8 +204,26 @@ function syncOrganismsInCombat(organism, opponent) {
                 ) ||
                 organism.nodePositions.length >= opponent.nodePositions.length
             ) {
-                // Break off first overlapping node
-                opponent.hit(overlappingNodes[0].oppNodeWorldPos)
+                // Break off most childless overlapping node
+
+                const getNullEdgesInNode = (a) => {
+                    return a.edges.filter((nodeEdge) => {
+                        return nodeEdge == null
+                    })
+                }
+
+                // Get all overlapping opponent nodes
+                const oppOvNodesPos = overlappingNodes.map((ovNode) => {
+                    return ovNode.oppNodeWorldPos
+                })
+
+                // Get one with the most null edges
+                const hitOvNodePos = oppOvNodesPos.sort((a, b) => {
+                    return getNullEdgesInNode(b.node).length - getNullEdgesInNode(a.node).length
+                })[0]
+
+                // Specify that node to be the one that is 'hit'
+                opponent.hit(hitOvNodePos)
             }
         }
 
