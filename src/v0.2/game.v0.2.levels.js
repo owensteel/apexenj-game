@@ -17,8 +17,8 @@ class Level {
 
         // Selected food types
         const foodTypesInLevel = [
-            Food.FOOD_SEQ_TYPE_A,
-            Food.FOOD_SEQ_TYPE_B
+            Food.FOOD_SEQ_TYPE_B,
+            Food.FOOD_SEQ_TYPE_C
         ]
 
         // Rings of food around organisms
