@@ -19,7 +19,7 @@ import * as Blocks from './game.v0.2.blocks.js';
 const organisms = [];
 const defaultCombatStartPos = {
     x: 0,
-    y: -ThreeElements.stageEdges3D.top.left.y * 0.5
+    y: -ThreeElements.stageEdges3D.top.left.y * 0.75
 }
 const ENABLE_NATURAL_RANDOM_ROTATION = false;
 

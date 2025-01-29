@@ -97,7 +97,7 @@ function startCombat() {
         enemyDNA,
         {
             x: 0,
-            y: stageEdges3D.top.right.y * 0.5
+            y: stageEdges3D.top.right.y * 0.75
         }
     )
     combatSessionCache.originalEnemy = enemyOrganism
