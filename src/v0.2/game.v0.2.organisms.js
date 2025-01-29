@@ -80,7 +80,9 @@ class Organism {
         this.combatStartPos = combatStartPos
 
         // Animation utilities
-        this.currentAnimations = {}
+        this.currentAnimations = {
+            "hit": false
+        }
         this.hasExploded = false
         this.noMovement = false
 
@@ -93,7 +95,9 @@ class Organism {
         // The actual velocity ultimately applied
         this.appliedVelocity = {
             x: 0,
-            y: 0
+            y: 0,
+            finalX: 0,
+            finalY: 0
         }
 
         // Root can never detach (obviously) so prevent such
@@ -331,20 +335,23 @@ class Organism {
 
             // Actually apply movement
 
-            this.mesh.position.x += (
+            this.appliedVelocity.finalX = (
                 maxXDistInTick *
                 (
                     (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z)) -
                     (this.appliedVelocity.y * Math.sin(this.mesh.rotation.z))
                 )
             )
-            this.mesh.position.y += (
+            this.appliedVelocity.finalY = (
                 maxYDistInTick *
                 (
                     (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z)) +
                     (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
                 )
             )
+
+            this.mesh.position.x += this.appliedVelocity.finalX
+            this.mesh.position.y += this.appliedVelocity.finalY
         }
     }
 
@@ -365,7 +372,7 @@ class Organism {
     }
 
     // An effect that visually shows the damage done to an organism
-    breakOffNode() {
+    breakOffNode(setNodePos = null) {
         if (!this.mesh || this.nodePositions.length < 1) {
             return false
         }
@@ -374,57 +381,63 @@ class Organism {
         const meshPos = this.mesh.position
         const meshRot = this.mesh.rotation
 
-        // Remove the most childless node possible
+        let toRemoveNodePos;
 
-        const getNullEdgesInNode = (a) => {
-            return a.edges.filter((nodeEdge) => {
-                return nodeEdge == null
-            })
+        if (setNodePos == null) {
+            // Remove the most childless node possible
+
+            const getNullEdgesInNode = (a) => {
+                return a.edges.filter((nodeEdge) => {
+                    return nodeEdge == null
+                })
+            }
+
+            const clonedNPForSorting = cloneArray(this.nodePositions)
+
+            toRemoveNodePos = clonedNPForSorting.sort((a, b) => {
+                return getNullEdgesInNode(b.node).length - getNullEdgesInNode(a.node).length
+            })[0]
+        } else {
+            toRemoveNodePos = setNodePos
         }
 
-        const clonedNPForSorting = cloneArray(this.nodePositions)
-
-        const removedNodePos = clonedNPForSorting.sort((a, b) => {
-            return getNullEdgesInNode(b.node).length - getNullEdgesInNode(a.node).length
-        })[0]
-
-        if (!removedNodePos) {
+        if (!toRemoveNodePos) {
             return false
         }
 
-        console.log("removing nodepos...", removedNodePos, removedNodePos.index)
+        console.log("removing nodepos...", toRemoveNodePos, toRemoveNodePos.index)
 
         // Remove the node from the positions by index
-        if (this.nodePositions.splice(removedNodePos.index, 1).length < 1) {
+        if (this.nodePositions.splice(toRemoveNodePos.index, 1).length < 1) {
             console.warn("failed to delete node pos")
             return false
         }
 
-        const removedNode = cloneObject(removedNodePos.node)
+        const removedNode = cloneObject(toRemoveNodePos.node)
 
         // Isolate, to get rid of any children the builder may try
         // to "resurrect"
         removedNode.edges = Array(6)
         // Add to scene, like it's "crumbled" off
-        const removedNodePosWorld = {
-            x: removedNodePos.x + meshPos.x,
-            y: removedNodePos.y + meshPos.y
+        const toRemoveNodePosWorld = {
+            x: toRemoveNodePos.x + meshPos.x,
+            y: toRemoveNodePos.y + meshPos.y
         }
-        if ("worldPos" in removedNodePos) {
-            removedNodePosWorld.x = removedNodePos.worldPos.x
-            removedNodePosWorld.y = removedNodePos.worldPos.y
+        if ("worldPos" in toRemoveNodePos) {
+            toRemoveNodePosWorld.x = toRemoveNodePos.worldPos.x
+            toRemoveNodePosWorld.y = toRemoveNodePos.worldPos.y
         }
         const removedNodeAsOrg = addOrganism(
             removedNode,
             {
-                x: removedNodePosWorld.x + (
+                x: toRemoveNodePosWorld.x + (
                     Math.sign(
-                        removedNodePosWorld.x - meshPos.x
+                        toRemoveNodePosWorld.x - meshPos.x
                     ) * OrganismBuilder.nodeSize
                 ),
-                y: removedNodePosWorld.y + (
+                y: toRemoveNodePosWorld.y + (
                     Math.sign(
-                        removedNodePosWorld.y - meshPos.y
+                        toRemoveNodePosWorld.y - meshPos.y
                     ) * OrganismBuilder.nodeSize
                 )
             }
@@ -453,7 +466,7 @@ class Organism {
             this.mesh.rotation.set(meshRot.x, meshRot.y, meshRot.z)
         }
 
-        return true
+        return toRemoveNodePos
     }
 
     // Remove organism from scene
@@ -477,6 +490,20 @@ class Organism {
 
         // Remove what remains of the organism
         this.die()
+    }
+
+    // Get hit
+    hit(hitNode = null) {
+        if (!this.mesh || this.currentAnimations.hit) {
+            return false
+        }
+
+        this.currentAnimations.hit = true
+        this.breakOffNode(hitNode)
+
+        setTimeout(() => {
+            this.currentAnimations.hit = false
+        }, 500)
     }
 }
 

@@ -17,6 +17,8 @@ import * as OrganismBuilder from "./game.v0.2.organism.builder"
 // world positions of nodes) being needlessly recalculated in
 // the same update. Is cleared after every combatUpdate
 const combatUpdateCache = {
+    playerId: null,
+    enemyId: null,
     nodeWorldPositions: {}
 }
 
@@ -177,11 +179,34 @@ function syncOrganismsInCombat(organism, opponent) {
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpNodes(organism, opponent, overlappingNodes);
 
-        // Check block types for block interactions
+        // Check for interactions
 
         // Food itself cannot have interactions
         if (organism.isFood || organism.isPlant) {
             return
+        }
+
+        // Bash opponent if stronger than it
+        if (
+            (organism.id == combatUpdateCache.playerId && opponent.id == combatUpdateCache.enemyId) ||
+            (organism.id == combatUpdateCache.enemyId && opponent.id == combatUpdateCache.playerId)
+        ) {
+            if (
+                (
+                    Math.hypot(
+                        Math.abs(organism.appliedVelocity.finalX),
+                        Math.abs(organism.appliedVelocity.finalY)
+                    ) >=
+                    Math.hypot(
+                        Math.abs(opponent.appliedVelocity.finalX),
+                        Math.abs(opponent.appliedVelocity.finalY)
+                    )
+                ) ||
+                organism.nodePositions.length >= opponent.nodePositions.length
+            ) {
+                // Break off first overlapping node
+                opponent.hit(overlappingNodes[0].oppNodeWorldPos)
+            }
         }
 
         // Absorb food
@@ -342,7 +367,12 @@ function bumpCanvasEdges(organism, organismNodesWorld) {
 */
 
 // Updates each organism, syncs it with all its opponents
-function combatUpdate() {
+function combatUpdate(playerOrg, enemyOrg) {
+    // For direct player v enemy combat
+    combatUpdateCache.playerId = playerOrg.id
+    combatUpdateCache.enemyId = enemyOrg.id
+
+    // Feedback to combat session
     const postUpdateCombatStatus = {
         ended: false, loser: null
     }
@@ -360,7 +390,7 @@ function combatUpdate() {
         }
         // Sync with all other organisms
         for (const opponent of currentOrganisms) {
-            if (organism.id !== opponent.id) {
+            if (opponent.id !== organism.id) {
                 syncOrganismsInCombat(organism, opponent);
             }
         }

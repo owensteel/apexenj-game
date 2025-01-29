@@ -215,7 +215,9 @@ function combatTick() {
     // Execute as many updates in this tick as UPT specifies, until
     // end of combat is reached
     for (let i = 0; i < combatUpdatesPerTick; i++) {
-        const postUpdateCombatStatus = CombatUpdates.combatUpdate()
+        const postUpdateCombatStatus = CombatUpdates.combatUpdate(
+            playerOrganism, enemyOrganism
+        )
         if (postUpdateCombatStatus.ended && !combatSessionCache.result) {
             // Player's organism has been destroyed
             // But let player end the combat mode when they want to
