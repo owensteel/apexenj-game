@@ -12,8 +12,8 @@ import { CSG } from 'three-csg-ts';
 import { builderUiToggled } from './game.v0.2.builder.ui';
 import * as Blocks from './game.v0.2.blocks'
 
-const NODESIZE_DEFAULT = 9
-const NODESIZE_BUILDER = 14
+const NODESIZE_DEFAULT = 6
+const NODESIZE_BUILDER = 18
 
 let nodeSize = NODESIZE_DEFAULT;
 
