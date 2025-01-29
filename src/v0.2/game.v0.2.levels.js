@@ -6,7 +6,7 @@
 
 import * as Food from "./game.v0.2.food"
 
-const foodRingRadius = 50
+const foodRingRadius = 100
 const foodRingNumOfItems = 6
 
 class Level {
