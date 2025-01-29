@@ -6,7 +6,7 @@
 
 import * as Food from "./game.v0.2.food"
 
-const foodRingRadius = 100
+const foodRingRadius = 50
 const foodRingNumOfItems = 6
 
 class Level {
@@ -24,7 +24,7 @@ class Level {
         // Rings of food around organisms
         foodTypesInLevel.forEach((foodTypeId, fI) => {
             // One ring per food type
-            const ringRadius = foodRingRadius * fI
+            const ringRadius = foodRingRadius * (fI + 1)
             for (let rI = 0; rI < foodRingNumOfItems; rI++) {
                 const foodStartPos = {
                     x: Math.cos(
