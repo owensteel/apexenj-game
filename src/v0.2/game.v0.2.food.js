@@ -11,12 +11,19 @@ import * as Blocks from './game.v0.2.blocks'
 import { cloneObject } from './game.v0.2.utils'
 
 // Different shapes of food
-const foodSequences = [
+
+const foodSequences = {}
+
+const FOOD_SEQ_TYPE_A = "FOOD_SEQ_TYPE_A"
+foodSequences[FOOD_SEQ_TYPE_A] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
         []
-    ),
+    )
+)
+const FOOD_SEQ_TYPE_B = "FOOD_SEQ_TYPE_B"
+foodSequences[FOOD_SEQ_TYPE_B] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
@@ -26,7 +33,10 @@ const foodSequences = [
                 new Blocks.FoodBlock(),
             )
         ]
-    ),
+    )
+)
+const FOOD_SEQ_TYPE_C = "FOOD_SEQ_TYPE_C"
+foodSequences[FOOD_SEQ_TYPE_C] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
@@ -40,7 +50,10 @@ const foodSequences = [
                 new Blocks.FoodBlock(),
             )
         ]
-    ),
+    )
+)
+const FOOD_SEQ_TYPE_D = "FOOD_SEQ_TYPE_D"
+foodSequences[FOOD_SEQ_TYPE_D] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
@@ -61,7 +74,10 @@ const foodSequences = [
                 ]
             )
         ]
-    ),
+    )
+)
+const FOOD_SEQ_TYPE_E = "FOOD_SEQ_TYPE_E"
+foodSequences[FOOD_SEQ_TYPE_E] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
@@ -87,7 +103,10 @@ const foodSequences = [
                 new Blocks.FoodBlock(),
             )
         ]
-    ),
+    )
+)
+const FOOD_SEQ_TYPE_F = "FOOD_SEQ_TYPE_F"
+foodSequences[FOOD_SEQ_TYPE_F] = (
     new DNA.dnaNode(
         "root",
         new Blocks.FoodBlock(),
@@ -122,7 +141,7 @@ const foodSequences = [
             )
         ]
     )
-]
+)
 
 const nutritionPerFoodBlock = 0.1
 const foodVelocity = 0.005
@@ -131,6 +150,7 @@ const foodVelocity = 0.005
 function createFood(foodStartPos = null, typeId = null) {
 
     if (!foodStartPos) {
+        // Random pos
         foodStartPos = {
             x: Math.random() > 0.5
                 ? ThreeElements.stageEdges3D.top.left.x :
@@ -141,7 +161,10 @@ function createFood(foodStartPos = null, typeId = null) {
         }
     }
     if (!typeId) {
-        typeId = Math.floor(Math.random() * (foodSequences.length))
+        // Random type
+        typeId = Object.keys(foodSequences)[
+            Math.floor(Math.random() * (Object.keys(foodSequences).length))
+        ]
     }
 
     const foodInstance = Organism.addOrganism(
@@ -174,4 +197,19 @@ function createFood(foodStartPos = null, typeId = null) {
     return foodInstance
 }
 
-export { createFood, nutritionPerFoodBlock, foodVelocity }
+export {
+    // Constants
+
+    createFood,
+    nutritionPerFoodBlock,
+    foodVelocity,
+
+    // Food type IDs
+
+    FOOD_SEQ_TYPE_A,
+    FOOD_SEQ_TYPE_B,
+    FOOD_SEQ_TYPE_C,
+    FOOD_SEQ_TYPE_D,
+    FOOD_SEQ_TYPE_E,
+    FOOD_SEQ_TYPE_F
+}
