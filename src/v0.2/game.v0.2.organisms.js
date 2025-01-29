@@ -337,14 +337,14 @@ class Organism {
                     (this.appliedVelocity.x * Math.cos(this.mesh.rotation.z)) -
                     (this.appliedVelocity.y * Math.sin(this.mesh.rotation.z))
                 )
-            ) + randomOffset()
+            )
             this.mesh.position.y += (
                 maxYDistInTick *
                 (
                     (this.appliedVelocity.x * Math.sin(this.mesh.rotation.z)) +
                     (this.appliedVelocity.y * Math.cos(this.mesh.rotation.z))
                 )
-            ) + randomOffset()
+            )
         }
     }
 
