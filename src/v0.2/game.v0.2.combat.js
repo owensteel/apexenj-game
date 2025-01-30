@@ -90,22 +90,6 @@ const maxAttractionVelocity = 0.005
 function startCombat() {
     console.log("starting combat...")
 
-    // Init players
-
-    const enemyDNA = Utils.cloneObject(playerOrganism.dnaSequence)
-    enemyOrganism = Organisms.addOrganism(
-        enemyDNA,
-        {
-            x: 0,
-            y: stageEdges3D.top.right.y * 0.75
-        }
-    )
-    combatSessionCache.originalEnemy = enemyOrganism
-
-    // Level
-
-    combatSessionCache.level = new Levels.Level()
-
     // Set session values
 
     combatSessionCache.result = null
@@ -172,13 +156,21 @@ function endCombat() {
 
     Organisms.setMovementToggle(false, playerOrganism)
 
+    // Reset level
+    
+    combatSessionCache.level.init()
+
     // Hide UI
 
     healthbarContainer.style.display = "none"
 }
 
-function toggleCombat(playerOrganismImport) {
-    playerOrganism = playerOrganismImport
+function toggleCombat(currentLevel) {
+    combatSessionCache.level = currentLevel
+
+    playerOrganism = currentLevel.playerOrganism
+    enemyOrganism = currentLevel.enemyOrganism
+    combatSessionCache.originalEnemy = enemyOrganism
 
     // Begin/end combat session
 

@@ -10,6 +10,7 @@ import * as DNA from "./game.v0.2.dna";
 import * as OrganismBuilderUI from "./game.v0.2.builder.ui";
 import * as Organisms from "./game.v0.2.organisms"
 import * as Combat from "./game.v0.2.combat"
+import * as Levels from "./game.v0.2.levels"
 import { cloneObject } from "./game.v0.2.utils";
 
 // Init (temporary) combat toggle button
@@ -46,9 +47,15 @@ function init() {
             // get corrupted
         )
     )
+    playerOrganism.isPlayer = true
 
     // TODO: remove, debugging only
     window.pO = playerOrganism
+
+    // Init level
+
+    const currentLevel = new Levels.Level()
+    currentLevel.playerOrganism = playerOrganism
 
     // Init DNA renderer
 
@@ -58,7 +65,7 @@ function init() {
 
     combatToggleButton.addEventListener("click", () => {
         OrganismBuilderUI.toggleVisibility()
-        Combat.toggleCombat(playerOrganism)
+        Combat.toggleCombat(currentLevel)
     })
     document.body.appendChild(combatToggleButton)
 

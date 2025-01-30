@@ -5,15 +5,76 @@
 */
 
 import * as Food from "./game.v0.2.food"
+import * as Blocks from "./game.v0.2.blocks"
+import * as Organisms from "./game.v0.2.organisms"
+import { dnaNode } from "./game.v0.2.dna"
+import { cloneObject } from "./game.v0.2.utils"
+import { stageEdges3D } from "./game.v0.2.3d"
 
 const foodRingRadius = 50
 const foodRingNumOfItems = 6
 
 class Level {
     constructor(presetSeed = null) {
+        // Features
         this.plants = []
         this.food = []
         this.temperature = 0
+
+        // Player (defined centrally)
+        this.playerOrganism = null
+
+        // Enemy values (to be initialised)
+        this.enemyDna = null
+        this.enemyOrganism = null
+
+        this.init()
+    }
+    init() {
+        // Enemy
+        this.enemyDna = new dnaNode(
+            "root",
+            new Blocks.HeartBlock(),
+            [
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                ),
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                ),
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                ),
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                ),
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                ),
+                new dnaNode(
+                    "appendage",
+                    new Blocks.DefaultBlock(),
+                    []
+                )
+            ]
+        )
+        this.enemyOrganism = Organisms.addOrganism(
+            cloneObject(this.enemyDna),
+            {
+                x: 0,
+                y: stageEdges3D.top.right.y * 0.75
+            }
+        )
 
         // Selected food types
         const foodTypesInLevel = [
