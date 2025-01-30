@@ -13,6 +13,7 @@ import * as OrganismBuilder from './game.v0.2.organism.builder.js'
 import { cloneArray, cloneObject } from './game.v0.2.utils.js';
 import * as DNA from './game.v0.2.dna.js';
 import * as Blocks from './game.v0.2.blocks.js';
+import { builderUiToggled } from './game.v0.2.builder.ui.js';
 
 // Global variables for setup
 
@@ -147,84 +148,64 @@ class Organism {
     rebuildMesh() {
         // Create mesh for all nodes
 
-        // For combat mode, setup is more complex
-        if (movementToggle) {
+        // Save positions of (attached) nodes for overlapping
+        // detection in combat
+        this.nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
+            OrganismBuilder.NODESIZE_DEFAULT,
+            this.dnaSequence,
+            /* allowDetachingParts: */ false
+        )
 
-            // Save positions of (attached) nodes for overlapping
-            // detection in combat
-            this.nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
-                this.dnaSequence,
-                /* allowDetachingParts: */ false
-            )
+        if (this.mesh) {
+            ThreeElements.scene.remove(this.mesh)
+        }
 
-            this.mesh = OrganismBuilder.buildBodyFromNodePositions(
-                this.nodePositions,
+        this.mesh = OrganismBuilder.buildBodyFromNodePositions(
+            this.nodePositions,
                 /* allowDetachingParts: */ false,
                 /* formUnionMesh: */ false
+        )
+        this.mesh.position.set(
+            this.combatStartPos.x,
+            this.combatStartPos.y,
+            0
+        )
+
+        if (this.isPlant) {
+            // Direct towards the centre
+            const directionToFace = Math.atan2(
+                0 - this.mesh.position.x,
+                0 - this.mesh.position.y
             )
-            this.mesh.position.set(
-                this.combatStartPos.x,
-                this.combatStartPos.y,
+            this.mesh.rotation.z = directionToFace
+        }
+
+        // Separate detachable parts into individual organisms
+        const detachedParts = OrganismBuilder.generateAbsoluteNodePositions(
+            OrganismBuilder.NODESIZE_DEFAULT,
+            this.dnaSequence,
+                /* allowDetachingParts: */ true
+        ).filter(
+            (obj) => {
+                return obj.detach
+            }
+        )
+        detachedParts.forEach((detachedPartPos) => {
+            // Clone to prevent main DNA being corrupted
+            const detachedPartDNA = cloneObject(detachedPartPos.node)
+            const detachedPartOrganism = addOrganism(detachedPartDNA)
+
+            // Move part to starting position
+            detachedPartOrganism.mesh.position.set(
+                this.combatStartPos.x + detachedPartPos.x,
+                this.combatStartPos.y + detachedPartPos.y,
                 0
             )
 
-            if (this.isPlant) {
-                // Direct towards the centre
-                const directionToFace = Math.atan2(
-                    0 - this.mesh.position.x,
-                    0 - this.mesh.position.y
-                )
-                this.mesh.rotation.z = directionToFace
-            }
-
-            // Separate detachable parts into individual organisms
-            const detachedParts = OrganismBuilder.generateAbsoluteNodePositions(
-                this.dnaSequence,
-                /* allowDetachingParts: */ true
-            ).filter(
-                (obj) => {
-                    return obj.detach
-                }
-            )
-            detachedParts.forEach((detachedPartPos) => {
-                // Clone to prevent main DNA being corrupted
-                const detachedPartDNA = cloneObject(detachedPartPos.node)
-                const detachedPartOrganism = addOrganism(detachedPartDNA)
-
-                // Move part to starting position
-                detachedPartOrganism.mesh.position.set(
-                    this.combatStartPos.x + detachedPartPos.x,
-                    this.combatStartPos.y + detachedPartPos.y,
-                    0
-                )
-
-                // Set velocity to spin away from parent
-                detachedPartOrganism.velocity.x = 0 - this.velocity.x
-                detachedPartOrganism.velocity.y = 0 - this.velocity.y
-            })
-        } else {
-            // Build mode, static
-
-            this.nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
-                this.dnaSequence,
-                /* allowDetachingParts: */ true
-            )
-
-            const newMesh = OrganismBuilder.buildBodyFromNodePositions(
-                this.nodePositions,
-                /* allowDetachingParts: */ true,
-                /* formUnionMesh: */ false
-            )
-            if (this.mesh) {
-                ThreeElements.scene.remove(this.mesh)
-                newMesh.rotation.copy(this.mesh.rotation)
-            }
-            this.mesh = newMesh
-
-            // Center stage during design
-            this.mesh.position.set(0, 0, 0)
-            this.mesh.rotation.set(0, 0, 0)
-        }
+            // Set velocity to spin away from parent
+            detachedPartOrganism.velocity.x = 0 - this.velocity.x
+            detachedPartOrganism.velocity.y = 0 - this.velocity.y
+        })
 
         this.updateNodePosByBlockTypeCache()
         this.hasExploded = false
@@ -445,12 +426,12 @@ class Organism {
                 x: toRemoveNodePosWorld.x + (
                     Math.sign(
                         toRemoveNodePosWorld.x - meshPos.x
-                    ) * OrganismBuilder.nodeSize
+                    ) * OrganismBuilder.NODESIZE_DEFAULT
                 ),
                 y: toRemoveNodePosWorld.y + (
                     Math.sign(
                         toRemoveNodePosWorld.y - meshPos.y
-                    ) * OrganismBuilder.nodeSize
+                    ) * OrganismBuilder.NODESIZE_DEFAULT
                 )
             }
         )
