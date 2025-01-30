@@ -327,7 +327,16 @@ function bumpNodes(organism, opponent, overlappingNodes) {
             }
 
             // Apply movement adjustments
-            const pushFactor = overlap * 0.25;  // Adjust influence
+            const pushFactor = overlap * (
+                (
+                    (organism.id == combatUpdateCache.playerId && opponent.id == combatUpdateCache.enemyId) ||
+                    (organism.id == combatUpdateCache.enemyId && opponent.id == combatUpdateCache.playerId)
+                ) ?
+                    // Bashing, throw two organisms backwards
+                    1.5 :
+                    // Normal bouncing
+                    0.25
+            );
             organism.mesh.position.x += nx * pushFactor * orgPushFactor;
             organism.mesh.position.y += ny * pushFactor * orgPushFactor;
 
