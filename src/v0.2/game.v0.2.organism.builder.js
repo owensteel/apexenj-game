@@ -15,13 +15,12 @@ import * as Blocks from './game.v0.2.blocks'
 const NODESIZE_DEFAULT = 6
 const NODESIZE_BUILDER = 18
 
-let nodeSize = NODESIZE_DEFAULT;
-
 // Hexagon (for builder)
 
 function generateHexagonGeometry(
     blockCut = Blocks.BLOCK_CUT_DEFAULT,
-    zAngle = 0
+    zAngle = 0,
+    nodeSize = NODESIZE_DEFAULT
 ) {
     // Create a new shape for the hexagon
     const hexShape = new THREE.Shape();
@@ -172,7 +171,7 @@ function generateHexagonGeometry(
 
 // Sphere (DO NOT REMOVE, FOR DEBUGGING PURPOSES)
 
-function generateSphereGeometry() {
+function generateSphereGeometry(nodeSize = NODESIZE_DEFAULT) {
     return new THREE.SphereGeometry(
         nodeSize * 1.1,
         6,
@@ -184,6 +183,7 @@ function generateSphereGeometry() {
 // So converting the node tree into a 2D array of positions
 
 function generateAbsoluteNodePositions(
+    nodeSize = NODESIZE_DEFAULT,
     currentNode,
     allowDetachingParts = false,
     x = 0,
@@ -193,9 +193,6 @@ function generateAbsoluteNodePositions(
     parentNodePos = null,
     currentNodeAngle = 0
 ) {
-    // Set node size
-
-    nodeSize = builderUiToggled ? NODESIZE_BUILDER : NODESIZE_DEFAULT
 
     // Prevent null crash
     if (!currentNode) {
@@ -230,6 +227,7 @@ function generateAbsoluteNodePositions(
         index: currentNodePosIndex,
         parentNodePos,
         mesh: null,
+        nodeSize: nodeSize,
         angle: currentNodeAngle
     };
     positionsArray.push(currentNodePosFinal);
@@ -257,6 +255,7 @@ function generateAbsoluteNodePositions(
 
         // Recurse
         generateAbsoluteNodePositions(
+            nodeSize,
             child,
             allowDetachingParts,
             childX,
@@ -274,7 +273,11 @@ function generateAbsoluteNodePositions(
 // Build either a union mesh or tree of parent and child meshes
 // from nodes or node positions
 
-function buildBodyFromNodePositions(positions, allowDetachingParts = false, formUnionMesh = false) {
+function buildBodyFromNodePositions(
+    positions,
+    allowDetachingParts = false,
+    formUnionMesh = false
+) {
     if (positions.length === 0) {
         // No appendage/root nodes
         return null;
@@ -294,7 +297,8 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
 
         const nodeGeom = generateHexagonGeometry(
             pos.node.block.cut,
-            pos.angle
+            pos.angle,
+            pos.nodeSize
         )
         const nodeMaterial = builderUiToggled ?
             // No shading
@@ -375,6 +379,6 @@ function buildBodyFromNodePositions(positions, allowDetachingParts = false, form
 export {
     generateAbsoluteNodePositions,
     buildBodyFromNodePositions,
-    nodeSize,
-    NODESIZE_BUILDER
+    NODESIZE_BUILDER,
+    NODESIZE_DEFAULT
 }
