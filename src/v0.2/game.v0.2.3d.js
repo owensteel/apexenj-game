@@ -212,27 +212,26 @@ function hit3DFromCanvasClickPos(clickPos) {
 }
 
 // Get 3D stage edges
-const stageBorder = 15;
 
 const stageEdges3D = {
     top: {
         left: {
-            x: -(canvasWidth / 2) + stageBorder,
-            y: (canvasHeight / 2) - stageBorder
+            x: -(canvasWidth / 2),
+            y: (canvasHeight / 2)
         },
         right: {
-            x: (canvasWidth / 2) - stageBorder,
-            y: (canvasHeight / 2) - stageBorder
+            x: (canvasWidth / 2),
+            y: (canvasHeight / 2)
         }
     },
     bottom: {
         left: {
-            x: -(canvasWidth / 2) + stageBorder,
-            y: -(canvasHeight / 2) + stageBorder
+            x: -(canvasWidth / 2),
+            y: -(canvasHeight / 2)
         },
         right: {
-            x: (canvasWidth / 2) - stageBorder,
-            y: -(canvasHeight / 2) + stageBorder
+            x: (canvasWidth / 2),
+            y: -(canvasHeight / 2)
         }
     }
 }
