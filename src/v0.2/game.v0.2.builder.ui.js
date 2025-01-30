@@ -17,13 +17,76 @@ import { getGlobalBoundingBoxOfHTMLElement } from "./game.v0.2.utils";
 
 let builderUiToggled = false
 
+// Setup for globally-used DOM elements
+
+const builderWrapper = document.createElement("game-builder-wrapper")
+builderWrapper.isHidden = true
+
+const builderClickField = document.createElement("click-field")
+builderWrapper.appendChild(builderClickField)
+
+const builderHexGrid = document.createElement("hex-grid")
+builderWrapper.appendChild(builderHexGrid)
+
+const builderCanvas = document.createElement("canvas");
+builderCanvas.className = "builder-canvas"
+builderWrapper.appendChild(builderCanvas)
+
+const builderToolbar = document.createElement("node-toolbar")
+builderWrapper.appendChild(builderToolbar)
+
+const nodeBin = document.createElement("node-bin")
+builderWrapper.appendChild(nodeBin)
+
 // Hexagons
 
 const hexGrid = {
-    side: OrganismBuilder.NODESIZE_BUILDER * 0.9863636363636363,
+    side: OrganismBuilder.NODESIZE_BUILDER,
     hexPositions: [],
     hexTable: {},
     image: null
+}
+
+// Draw a single flat-topped hex at (cx, cy)
+function drawHexagon(cx, cy, ctx, fillColor = "transparent", strokeWidth = 1) {
+    // Style
+
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = strokeWidth;
+
+    // Draw
+
+    ctx.beginPath();
+
+    const side = hexGrid.side;
+
+    // For flat-topped: angles 0°, 60°, 120°, 180°, 240°, 300°
+    for (let i = 0; i < 6; i++) {
+        const angleDeg = 60 * i; // degrees
+        const angleRad = (Math.PI / 180) * angleDeg;
+        const x = (cx + side * Math.cos(angleRad));
+        const y = (cy + side * Math.sin(angleRad));
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.closePath();
+
+    // Fill + stroke
+
+    ctx.fill();
+    ctx.stroke();
+
+    // Save
+    const hexPos = {
+        x: cx,
+        y: cy
+    }
+
+    return hexPos
 }
 
 function generateHexagonGrid() {
@@ -31,13 +94,10 @@ function generateHexagonGrid() {
     hexGrid.hexPositions = []
     hexGrid.hexTable = {}
 
-    // Use same dimensions as wrapper
-    const gameWrapper = document.getElementById('game-wrapper')
-
     // Grab the canvas and its 2D context
     const canvas = document.createElement("canvas");
-    canvas.width = gameWrapper.clientWidth
-    canvas.height = gameWrapper.clientHeight
+    canvas.width = builderWrapper.clientWidth
+    canvas.height = builderWrapper.clientHeight
     const ctx = canvas.getContext("2d");
 
     // Side length of each hex
@@ -47,8 +107,8 @@ function generateHexagonGrid() {
     // - The 'width' of each hex is 2 * side
     // - The vertical distance between columns is sqrt(3) * side
     // - The horizontal distance between centres of adjacent columns is 1.5 * side
-    const columns = Math.ceil(gameWrapper.clientWidth / (side)) + 5;
-    const rows = Math.ceil(gameWrapper.clientHeight / (side)) + 5;
+    const columns = Math.ceil(builderWrapper.clientWidth / (side)) + 5;
+    const rows = Math.ceil(builderWrapper.clientHeight / (side)) + 5;
     const horizontalSpacing = 1.5 * side;       // gap between columns
     const verticalSpacing = Math.sqrt(3) * side; // gap between rows
 
@@ -74,40 +134,6 @@ function generateHexagonGrid() {
     const halfWidth = canvas.width / 2;
     const halfHeight = canvas.height / 2;
 
-    // Draw a single flat-topped hex at (cx, cy)
-    function drawHexagon(cx, cy) {
-        ctx.beginPath();
-        // For flat-topped: angles 0°, 60°, 120°, 180°, 240°, 300°
-        for (let i = 0; i < 6; i++) {
-            const angleDeg = 60 * i; // degrees
-            const angleRad = (Math.PI / 180) * angleDeg;
-            const x = (cx + side * Math.cos(angleRad));
-            const y = (cy + side * Math.sin(angleRad));
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-        ctx.closePath();
-
-        // Fill + stroke
-        ctx.fillStyle = "transparent";
-        ctx.fill();
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Save
-        const hexPos = {
-            x: cx,
-            y: cy
-        }
-        hexGrid.hexPositions.push(hexPos)
-
-        return hexPos
-    }
-
     // Loop through each column and row
     for (let col = 0; col < columns; col++) {
         for (let row = 0; row < rows; row++) {
@@ -119,7 +145,8 @@ function generateHexagonGrid() {
             const finalY = localY - centreLocalY + halfHeight;
 
             // Draw the hex
-            const hexPos = drawHexagon(finalX, finalY);
+            const hexPos = drawHexagon(finalX, finalY, ctx);
+            hexGrid.hexPositions.push(hexPos)
             hexPos.col = col
             hexPos.row = row
 
@@ -213,23 +240,6 @@ const hexConnectingEdgeMap = {
 let currentDNASequence = null
 let focusedOrganism = null
 
-// Setup for globally-used DOM elements
-
-const builderWrapper = document.createElement("game-builder-wrapper")
-builderWrapper.isHidden = true
-
-const builderClickField = document.createElement("click-field")
-builderWrapper.appendChild(builderClickField)
-
-const builderHexGrid = document.createElement("hex-grid")
-builderWrapper.appendChild(builderHexGrid)
-
-const builderToolbar = document.createElement("node-toolbar")
-builderWrapper.appendChild(builderToolbar)
-
-const nodeBin = document.createElement("node-bin")
-builderWrapper.appendChild(nodeBin)
-
 // Node manipulating
 
 let selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT
@@ -277,20 +287,23 @@ function setNodeToolbar() {
 }
 setNodeToolbar()
 
-// Node click
+// Node mouse interactions
 
+const hexToNodePos = {}
 let isMouseDrawingNodes = false
+let renderedVisualNodePositions = null
 
-const get3DNodeAtScreenPos = (pos) => {
-    const hit3D = ThreeElements.hit3DFromCanvasClickPos(pos)
-    if (hit3D) {
-        return hit3D.object.nodePos.node
-    } else {
-        return false
+function getClickPosFromScreenPos(screenPos) {
+    const rect = builderClickField.getBoundingClientRect();
+    const clickX = screenPos.x - rect.left;
+    const clickY = screenPos.y - rect.top;
+
+    return {
+        x: clickX, y: clickY
     }
 }
 
-function nodeClickHandler(e) {
+function getHexAtClickPos(clickPos) {
     // Get selected hexagon
 
     let clickedHex = null
@@ -298,12 +311,12 @@ function nodeClickHandler(e) {
     for (const hexPos of hexGrid.hexPositions) {
         if (
             (
-                (e.pageX > hexPos.x - (hexGrid.side / 2)) &&
-                (e.pageX < (hexPos.x + (hexGrid.side / 2)))
+                (clickPos.x > hexPos.x - (hexGrid.side / 2)) &&
+                (clickPos.x < (hexPos.x + (hexGrid.side / 2)))
             ) &&
             (
-                (e.pageY > hexPos.y - (hexGrid.side / 2)) &&
-                (e.pageY < (hexPos.y + (hexGrid.side / 2)))
+                (clickPos.y > hexPos.y - (hexGrid.side / 2)) &&
+                (clickPos.y < (hexPos.y + (hexGrid.side / 2)))
             )
         ) {
             clickedHex = hexPos
@@ -311,17 +324,50 @@ function nodeClickHandler(e) {
         }
     }
 
+    return clickedHex
+}
+
+function getVisNodeAtClickPos(clickPos) {
+    // Get selected node
+
+    let clickedNode = null
+
+    for (const nodePos of renderedVisualNodePositions) {
+        if (
+            (
+                (clickPos.x > nodePos.uiClickX - (hexGrid.side / 2)) &&
+                (clickPos.x < (nodePos.uiClickX + (hexGrid.side / 2)))
+            ) &&
+            (
+                (clickPos.y > nodePos.uiClickY - (hexGrid.side / 2)) &&
+                (clickPos.y < (nodePos.uiClickY + (hexGrid.side / 2)))
+            )
+        ) {
+            clickedNode = nodePos.node
+            break
+        }
+    }
+
+    return clickedNode
+}
+
+function nodeClickHandler(e) {
+    // Check if a node exists at this point
+
+    // Get position of mouse on clickField
+    const clickPos = getClickPosFromScreenPos({
+        x: e.pageX,
+        y: e.pageY
+    })
+
+    const clickedHex = getHexAtClickPos(clickPos)
     if (!clickedHex) {
         return
     }
 
-    // Check if a node exists at this point
-
-    const nodeAtClickPoint = get3DNodeAtScreenPos({
-        x: clickedHex.x, y: clickedHex.y
-    })
+    const nodeAtClickPoint = getVisNodeAtClickPos(clickPos)
     if (nodeAtClickPoint) {
-        console.log("clicked node", nodeAtClickPoint)
+        console.log("found node", nodeAtClickPoint)
         return
     }
 
@@ -336,11 +382,12 @@ function nodeClickHandler(e) {
         ]
         const actualEdge = hexEdgeIndex + 1
 
-        const hit3DNode = get3DNodeAtScreenPos({
-            x: neighbourHex.x, y: neighbourHex.y
+        const hitVisNode = getVisNodeAtClickPos({
+            x: neighbourHex.x,
+            y: neighbourHex.y
         })
-        if (hit3DNode) {
-            connectingNode = hit3DNode
+        if (hitVisNode) {
+            connectingNode = hitVisNode
 
             connectingEdge = hexConnectingEdgeMap[actualEdge] - 1
 
@@ -383,16 +430,6 @@ const nodeDraggingMouseMoveHandler = (e) => {
         } else {
             nodeBin.style.transform = "scale(1)"
         }
-
-        // Get world pos of mouse pos
-        const pos3D = ThreeElements.mousePosTo3DPos({ x: e.pageX, y: e.pageY })
-
-        // Render drag visuals
-        nodeDragging.fakeTreeMesh.position.set(
-            pos3D.x,
-            pos3D.y,
-            0
-        )
     } else {
         if (isMouseDrawingNodes) {
             nodeClickHandler(e)
@@ -414,11 +451,13 @@ const nodeDraggingMouseUpHandler = (e) => {
         // Reset drag visuals
         nodeBin.style.transform = "scale(1)"
         builderWrapper.appendChild(builderHexGrid)
-        ThreeElements.scene.remove(nodeDragging.fakeTreeMesh)
 
-        // Reset organism to original state
+        // Reset visual
         delete nodeDragging.currentNode["builderUIBeingDragged"]
         nodeDragging.currentNode = null
+        renderBuilderUIVisual()
+
+        // Update organism mesh
         focusedOrganism.rebuildMesh()
     }
 }
@@ -447,17 +486,14 @@ function startDraggingNode(node, e) {
     // Re-render main sequence so this node has
     // appears "removed"
     node.builderUIBeingDragged = true
-    focusedOrganism.rebuildMesh()
+    renderBuilderUIVisual()
 
     // Build fake node that appears dragged
     const fakeTreeNodePositions = OrganismBuilder.generateAbsoluteNodePositions(
+        OrganismBuilder.NODESIZE_BUILDER,
         clonedNode,
         true
     )
-    nodeDragging.fakeTreeMesh = OrganismBuilder.buildBodyFromNodePositions(
-        fakeTreeNodePositions
-    )
-    ThreeElements.scene.add(nodeDragging.fakeTreeMesh)
 
     // Initial render for drag visuals
     nodeDraggingMouseMoveHandler(e)
@@ -469,15 +505,15 @@ const nodeDraggingMouseDownHandler = (e) => {
     if (isMouseDrawingNodes) {
         return
     }
-
     isMouseDrawingNodes = true
 
-    const clickedNode = get3DNodeAtScreenPos(
-        {
-            x: e.pageX,
-            y: e.pageY
-        }
-    )
+    // Get position of mouse on clickField
+    const clickPos = getClickPosFromScreenPos({
+        x: e.pageX,
+        y: e.pageY
+    })
+
+    const clickedNode = getVisNodeAtClickPos(clickPos)
 
     if (!clickedNode) {
         return
@@ -507,11 +543,48 @@ const nodeDraggingMouseDownHandler = (e) => {
 builderClickField.addEventListener("mousedown", nodeDraggingMouseDownHandler)
 builderClickField.addEventListener("touchstart", nodeDraggingMouseDownHandler)
 
+// Render visual for Builder UI
+
+function renderBuilderUIVisual() {
+    const builderCanvasCtx = builderCanvas.getContext("2d")
+
+    const cW = builderCanvas.clientWidth
+    const cH = builderCanvas.clientHeight
+
+    builderCanvasCtx.clearRect(0, 0, cW, cH)
+
+    const nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
+        OrganismBuilder.NODESIZE_BUILDER,
+        currentDNASequence,
+        /* allowDetachingParts: */ false
+    )
+    renderedVisualNodePositions = nodePositions
+
+    for (const nodePos of nodePositions) {
+        if (nodePos.node.builderUIBeingDragged) {
+            continue
+        }
+
+        nodePos.uiClickX = (cW / 2) + nodePos.x
+        nodePos.uiClickY = (cH / 2) - nodePos.y
+
+        const hexPos = drawHexagon(
+            nodePos.uiClickX,
+            nodePos.uiClickY,
+            builderCanvasCtx,
+            nodePos.node.block.color,
+            2.5
+        )
+        hexToNodePos[`${Math.round(hexPos.x)},${Math.round(hexPos.y)}`] = nodePos
+    }
+}
+
 // Organism rendering
 
 function renderFocusedOrganism() {
     if (focusedOrganism) {
         focusedOrganism.updateTraitsFromDNA(currentDNASequence);
+        renderBuilderUIVisual()
     } else {
         focusedOrganism = Organisms.addOrganism(currentDNASequence)
     }
@@ -523,6 +596,10 @@ function init(playerOrganism) {
     // Init focused organism and DNA sequence
     focusedOrganism = playerOrganism
     currentDNASequence = focusedOrganism.dnaSequence
+
+    // Init builder canvas
+    builderCanvas.width = builderWrapper.clientWidth
+    builderCanvas.height = builderWrapper.clientHeight
 
     // Initial render of organism
     renderFocusedOrganism()
