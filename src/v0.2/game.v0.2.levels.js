@@ -40,6 +40,12 @@ class Level {
             }
         )
 
+        // Initialise appearance
+        this.enemyOrganism.mesh.rotation.z = Math.atan2(
+            this.enemyOrganism.combatStartPos.x,
+            -this.enemyOrganism.combatStartPos.y
+        )
+
         // Selected food types
         const foodTypesInLevel = [
             Food.FOOD_SEQ_TYPE_B,
