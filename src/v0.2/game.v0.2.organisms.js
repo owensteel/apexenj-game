@@ -354,7 +354,12 @@ class Organism {
 
     // An effect that visually shows the damage done to an organism
     breakOffNode(setNodePos = null) {
-        if (!this.mesh || this.nodePositions.length < 1) {
+        if (!this.mesh) {
+            return false
+        }
+
+        if (this.nodePositions.length < 2) {
+            this.hasExploded = true
             return false
         }
 
@@ -403,6 +408,11 @@ class Organism {
         }
 
         const removedNode = cloneObject(toRemoveNodePos.node)
+        if (removedNode.role == "root") {
+            // Root exposed, die
+            this.hasExploded = true
+            return
+        }
 
         // Isolate, to stop the builder "resurrecting" any children
         removedNode.edges = Array(6)
