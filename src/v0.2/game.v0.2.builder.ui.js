@@ -563,8 +563,8 @@ function renderBuilderUIVisual() {
 
     builderCanvasCtx.clearRect(0, 0, cW, cH)
 
-    // Drawing
-
+    // Preparing a path allows the same shape to be drawn
+    // in different ways, i.e filled or as strokes
     const prepareHexagonPath = (cx, cy, side) => {
         builderCanvasCtx.beginPath();
         for (let i = 0; i < 6; i++) {
