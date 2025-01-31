@@ -503,7 +503,7 @@ class Organism {
 
         setTimeout(() => {
             this.currentAnimations.hit = false
-        }, 500)
+        }, 1000)
     }
 }
 
