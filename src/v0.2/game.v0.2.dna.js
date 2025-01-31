@@ -140,10 +140,24 @@ function addNodeToParent(
     return node
 }
 
+// Import
+function newDnaNodeFromImport(jsonDnaNode) {
+    // For now just make sure blocks are updated
+    jsonDnaNode.block = Blocks.getBlockInstanceFromTypeName(jsonDnaNode.block.typeName)
+    for (const edge of jsonDnaNode.edges) {
+        if (edge) {
+            newDnaNodeFromImport(edge)
+        }
+    }
+
+    return jsonDnaNode
+}
+
 export {
     dnaNode,
     addNodeToParent,
     demoDnaSequence,
     placeholderDefaultRootNode,
-    enforceSymmetry
+    enforceSymmetry,
+    newDnaNodeFromImport
 }

@@ -178,6 +178,12 @@ function getBlockInstanceFromTypeName(typeName) {
             return new DetachingBlock()
         case BLOCK_TYPENAME_ABSORBER:
             return new AbsorberBlock()
+        case BLOCK_TYPENAME_HEART:
+            return new HeartBlock()
+        case BLOCK_TYPENAME_FOOD:
+            return new FoodBlock()
+        case BLOCK_TYPENAME_PLANT:
+            return new PlantBlock()
         default:
             return new DefaultBlock()
     }
