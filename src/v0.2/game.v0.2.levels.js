@@ -5,9 +5,8 @@
 */
 
 import * as Food from "./game.v0.2.food"
-import * as Blocks from "./game.v0.2.blocks"
 import * as Organisms from "./game.v0.2.organisms"
-import { dnaNode } from "./game.v0.2.dna"
+import { newDnaNodeFromImport } from "./game.v0.2.dna"
 import { cloneObject } from "./game.v0.2.utils"
 import { stageEdges3D } from "./game.v0.2.3d"
 
@@ -32,42 +31,7 @@ class Level {
     }
     init() {
         // Enemy
-        this.enemyDna = new dnaNode(
-            "root",
-            new Blocks.HeartBlock(),
-            [
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                ),
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                ),
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                ),
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                ),
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                ),
-                new dnaNode(
-                    "appendage",
-                    new Blocks.DefaultBlock(),
-                    []
-                )
-            ]
-        )
+        this.enemyDna = newDnaNodeFromImport({ "role": "root", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "heart", "color": "black", "isHeart": true }, "edges": [{ "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "0" }, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "1" }, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "2" }, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "motor", "color": "hotpink", "isMotor": true, "appliedPowerPerc": 0.2833076118465535 }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "3" }, null, null], "detach": false, "edgeOfParent": "3" }, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "4" }, { "role": "appendage", "block": { "cut": "BLOCK_CUT_DEFAULT", "typeName": "default", "color": "#fff" }, "edges": [null, null, null, null, null, null], "detach": false, "edgeOfParent": "5" }], "detach": false, "edgeOfParent": null })
         this.enemyOrganism = Organisms.addOrganism(
             cloneObject(this.enemyDna),
             {
