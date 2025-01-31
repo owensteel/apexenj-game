@@ -1,0 +1,103 @@
+{
+    "role": "root",
+    "block": {
+        "cut": "BLOCK_CUT_DEFAULT",
+        "typeName": "plant",
+        "color": "#fff"
+    },
+    "edges": [
+        null,
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "1"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "2"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "3"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "4"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "5"
+        }
+    ],
+    "detach": false,
+    "edgeOfParent": null
+}

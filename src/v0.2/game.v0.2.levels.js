@@ -10,7 +10,7 @@ import { newDnaNodeFromImport } from "./game.v0.2.dna"
 import { cloneObject } from "./game.v0.2.utils"
 import { stageEdges3D } from "./game.v0.2.3d"
 
-import importedEnemyDNA from "./placeholder_dna/1.json"
+import importedEnemyDNA from "./preset_dna/default_enemies/1.json"
 
 const foodRingRadius = 50
 const foodRingNumOfItems = 6
@@ -51,7 +51,7 @@ class Level {
         // Selected food types
         const foodTypesInLevel = [
             Food.FOOD_SEQ_TYPE_B,
-            Food.FOOD_SEQ_TYPE_C
+            Food.FOOD_SEQ_TYPE_E
         ]
 
         // Rings of food around organisms

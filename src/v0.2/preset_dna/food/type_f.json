@@ -1,0 +1,87 @@
+{
+    "role": "root",
+    "block": {
+        "cut": "BLOCK_CUT_DEFAULT",
+        "typeName": "plant",
+        "color": "black",
+        "isHeart": true
+    },
+    "edges": [
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "food",
+                        "color": "#fff"
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "0"
+                },
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "0"
+        },
+        null,
+        null,
+        null,
+        null,
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "food",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "food",
+                        "color": "#fff"
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "5"
+                }
+            ],
+            "detach": false,
+            "edgeOfParent": "5"
+        }
+    ],
+    "detach": false,
+    "edgeOfParent": null
+}
