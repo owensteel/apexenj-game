@@ -267,9 +267,9 @@ function createNode(parentNode, edge) {
     return createdNode
 }
 
-// Node block-selection toolbar
+// Builder toolbar
 
-function setNodeToolbar() {
+function setBuilderToolbar() {
     // TODO: proper node type selector
 
     const nodeBlockSelector = document.createElement("select")
@@ -284,8 +284,27 @@ function setNodeToolbar() {
     nodeBlockSelector.onchange = () => {
         selectedBlockType = nodeBlockSelector.value
     }
+
+    // UI show/hide button
+    // (unrelated to Builder UI toggle)
+
+    const showHideButton = document.createElement("show-hide-button")
+    showHideButton.innerHTML = "See level"
+    builderWrapper.appendChild(showHideButton)
+
+    let shbHidden = false
+    showHideButton.onclick = () => {
+        if (shbHidden) {
+            showHideButton.innerHTML = "See level"
+            builderWrapper.style.bottom = ""
+        } else {
+            showHideButton.innerHTML = "Open builder"
+            builderWrapper.style.bottom = -builderWrapper.clientHeight
+        }
+        shbHidden = !shbHidden
+    }
 }
-setNodeToolbar()
+setBuilderToolbar()
 
 // Node mouse interactions
 

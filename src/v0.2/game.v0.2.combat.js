@@ -61,12 +61,14 @@ const newHealthbar = () => {
     hbWrapper.updateWithEnergyValue(0)
 
     const fS = document.createElement("p")
-    fS.style.color = "purple"
+    fS.className = "food-score"
     hbWrapper.appendChild(fS)
 
     hbWrapper.updateWithFoodScore = (score) => {
-        fS.innerHTML = score
-        hbWrapper.currentFoodScore = score
+        if (hbWrapper.currentFoodScore !== score) {
+            fS.innerHTML = score
+            hbWrapper.currentFoodScore = score
+        }
     }
     hbWrapper.updateWithFoodScore(0)
 
@@ -79,9 +81,11 @@ healthbarContainer.style.display = "none"
 document.getElementById("game-wrapper").appendChild(healthbarContainer)
 
 const playerHealthbar = newHealthbar()
+playerHealthbar.classList.add("player")
 healthbarContainer.appendChild(playerHealthbar)
 
 const enemyHealthbar = newHealthbar()
+enemyHealthbar.classList.add("enemy")
 healthbarContainer.appendChild(enemyHealthbar)
 
 // Starting velocity, to be directed towards centre
@@ -157,7 +161,7 @@ function endCombat() {
     Organisms.setMovementToggle(false, playerOrganism)
 
     // Reset level
-    
+
     combatSessionCache.level.init()
 
     // Hide UI

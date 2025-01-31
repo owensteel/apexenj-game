@@ -36,6 +36,7 @@ game-wrapper canvas {
     border-top: solid 1px #000;
     border-bottom: solid 1px #000;
     user-select: none;
+    filter: saturate(1.5);
 }
 
 game-wrapper game-stage-wrapper {
@@ -43,6 +44,7 @@ game-wrapper game-stage-wrapper {
     user-select: none;
     position: relative;
 
+    background-color: #0000ff;
     background-image: url("https://apexenj.com/static/media/bg.630eebcf0f2e7c5a5c34.png");
     background-size: 200px;
 }
@@ -58,30 +60,8 @@ game-wrapper game-builder-wrapper {
     height: 50%;
     border-top: solid 2.5px #000;
     background-color: #fff;
-}
 
-game-wrapper game-builder-wrapper builder-canvas {
-    display: block;
-    position: absolute;
-    z-index: 1;
-
-    top: 0px;
-    bottom: 0px;
-    right: 0px;
-    left: 0px;
-
-    width: 100%;
-    height: 100%;
-}
-
-game-wrapper game-builder-wrapper builder-canvas node {
-    z-index: 1;
-    background-color: #fff;
-    position: absolute;
-    display: block;
-    clip-path: polygon(25% 0%, 75% 0%,
-            100% 50%, 75% 100%,
-            25% 100%, 0% 50%);
+    transition: bottom 0.5s;
 }
 
 game-wrapper click-field {
@@ -161,25 +141,66 @@ game-wrapper game-builder-wrapper node-bin:after {
     line-height: 25px;
 }
 
-game-wrapper healthbar-container {
-    text-align: center;
+game-wrapper game-builder-wrapper show-hide-button {
+    position: absolute;
     display: block;
-    width: calc(100% - 32px);
-    padding: 15px;
-    border: solid 1px #000;
+    right: 0px;
+    top: -51px;
+    height: 50px;
+    width: 100px;
+    background-color: black;
+    color: #fff;
+    cursor: pointer;
 }
 
-game-wrapper healthbar-container progress.alert {
-    filter: hue-rotate(90deg)
+game-wrapper healthbar-container {
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: transparent;
 }
 
 game-wrapper healthbar-container healthbar-wrapper {
-    display: inline-block;
-    width: 50%;
+    display: block;
+    position: absolute;
+    width: 100%;
+}
+
+game-wrapper healthbar-container healthbar-wrapper.enemy {
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+game-wrapper healthbar-container healthbar-wrapper.player {
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+game-wrapper healthbar-container healthbar-wrapper progress {
+    filter: hue-rotate(90deg)
+}
+
+game-wrapper healthbar-container healthbar-wrapper progress.alert {
+    filter: hue-rotate(145deg)
+}
+
+game-wrapper healthbar-container healthbar-wrapper .food-score {
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #000;
+    margin-left: 7.5px;
 }
 
 game-wrapper healthbar-container healthbar-wrapper progress,
-game-wrapper healthbar-container healthbar-wrapper span {
+game-wrapper healthbar-container healthbar-wrapper .food-score {
     display: inline-block;
 }
 
