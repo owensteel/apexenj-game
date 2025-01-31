@@ -48,7 +48,6 @@ function init() {
         )
     )
     playerOrganism.isPlayer = true
-
     // TODO: remove, debugging only
     window.pO = playerOrganism
 
@@ -56,6 +55,8 @@ function init() {
 
     const currentLevel = new Levels.Level()
     currentLevel.playerOrganism = playerOrganism
+    // TODO: remove, debugging only
+    window.cL = currentLevel
 
     // Init DNA renderer
 
