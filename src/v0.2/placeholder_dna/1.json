@@ -1,0 +1,314 @@
+{
+    "role": "root",
+    "block": {
+        "cut": "BLOCK_CUT_DEFAULT",
+        "typeName": "heart",
+        "color": "black",
+        "isHeart": true
+    },
+    "edges": [
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "0"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "absorber",
+                        "color": "lightgreen"
+                    },
+                    "edges": [
+                        null,
+                        {
+                            "role": "appendage",
+                            "block": {
+                                "cut": "BLOCK_CUT_DEFAULT",
+                                "typeName": "absorber",
+                                "color": "lightgreen"
+                            },
+                            "edges": [
+                                null,
+                                {
+                                    "role": "appendage",
+                                    "block": {
+                                        "cut": "BLOCK_CUT_DEFAULT",
+                                        "typeName": "absorber",
+                                        "color": "lightgreen"
+                                    },
+                                    "edges": [
+                                        {
+                                            "role": "appendage",
+                                            "block": {
+                                                "cut": "BLOCK_CUT_DEFAULT",
+                                                "typeName": "absorber",
+                                                "color": "lightgreen"
+                                            },
+                                            "edges": [
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                            ],
+                                            "detach": false,
+                                            "edgeOfParent": "0"
+                                        },
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    ],
+                                    "detach": false,
+                                    "edgeOfParent": "1"
+                                },
+                                null,
+                                null,
+                                null,
+                                null
+                            ],
+                            "detach": false,
+                            "edgeOfParent": "1"
+                        },
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "1"
+                },
+                null,
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "1"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "motor",
+                        "color": "hotpink",
+                        "isMotor": true,
+                        "appliedPowerPerc": 0.4087245333994344
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "2"
+                },
+                null,
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "2"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "motor",
+                        "color": "hotpink",
+                        "isMotor": true,
+                        "appliedPowerPerc": 0.21670844986228122
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "3"
+                },
+                null,
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "3"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "motor",
+                        "color": "hotpink",
+                        "isMotor": true,
+                        "appliedPowerPerc": 0.21670844986228122
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "4"
+                },
+                null
+            ],
+            "detach": false,
+            "edgeOfParent": "4"
+        },
+        {
+            "role": "appendage",
+            "block": {
+                "cut": "BLOCK_CUT_DEFAULT",
+                "typeName": "default",
+                "color": "#fff"
+            },
+            "edges": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    "role": "appendage",
+                    "block": {
+                        "cut": "BLOCK_CUT_DEFAULT",
+                        "typeName": "absorber",
+                        "color": "lightgreen"
+                    },
+                    "edges": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        {
+                            "role": "appendage",
+                            "block": {
+                                "cut": "BLOCK_CUT_DEFAULT",
+                                "typeName": "absorber",
+                                "color": "lightgreen"
+                            },
+                            "edges": [
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                {
+                                    "role": "appendage",
+                                    "block": {
+                                        "cut": "BLOCK_CUT_DEFAULT",
+                                        "typeName": "absorber",
+                                        "color": "lightgreen"
+                                    },
+                                    "edges": [
+                                        {
+                                            "role": "appendage",
+                                            "block": {
+                                                "cut": "BLOCK_CUT_DEFAULT",
+                                                "typeName": "absorber",
+                                                "color": "lightgreen"
+                                            },
+                                            "edges": [
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                            ],
+                                            "detach": false,
+                                            "edgeOfParent": "0"
+                                        },
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    ],
+                                    "detach": false,
+                                    "edgeOfParent": "5"
+                                }
+                            ],
+                            "detach": false,
+                            "edgeOfParent": "5"
+                        }
+                    ],
+                    "detach": false,
+                    "edgeOfParent": "5"
+                }
+            ],
+            "detach": false,
+            "edgeOfParent": "5"
+        }
+    ],
+    "detach": false,
+    "edgeOfParent": null
+}
