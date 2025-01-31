@@ -192,8 +192,6 @@ function createFood(foodStartPos = null, typeId = null) {
     })
     foodInstance.energy = nutritionPerFoodBlock * foodBlockNodes.length
 
-    console.log("created food")
-
     return foodInstance
 }
 

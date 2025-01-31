@@ -386,8 +386,6 @@ class Organism {
             return false
         }
 
-        console.log("removing nodepos...", toRemoveNodePos, toRemoveNodePos.index)
-
         // Remove the node from the positions by index
         if (this.nodePositions.splice(toRemoveNodePos.index, 1).length < 1) {
             console.warn("failed to delete node pos")
@@ -401,7 +399,6 @@ class Organism {
             if (child.nodePos) {
                 const childNodePos = child.nodePos
                 this.nodePositions.splice(childNodePos.index, 1).length < 1
-                console.log("destroyed child")
             }
         }
 
@@ -547,7 +544,6 @@ animate()
 
 function addOrganism(dnaSequence, combatStartPos = defaultCombatStartPos) {
     const newOrganism = new Organism(dnaSequence, combatStartPos);
-    console.log("created organism", newOrganism)
     organisms.push(newOrganism);
     return newOrganism
 }
@@ -701,7 +697,6 @@ function bondOrganisms(joineeNode, joinerNode) {
         ...newJoinerNodes,
         ...newJoineeNodes
     ];
-    console.log(combinedNodes)
 
     // Configure new nodes for rendering
 
@@ -740,8 +735,6 @@ function bondOrganisms(joineeNode, joinerNode) {
             combinedNodes
         );
         return;
-    } else {
-        console.log("built combined mesh", combinedOrganism)
     }
 
     // Place the new mesh so that pivot remains at the same world position
