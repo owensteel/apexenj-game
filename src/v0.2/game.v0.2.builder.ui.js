@@ -546,13 +546,7 @@ builderClickField.addEventListener("touchstart", nodeDraggingMouseDownHandler)
 // Render visual for Builder UI
 
 function renderBuilderUIVisual() {
-    const builderCanvasCtx = builderCanvas.getContext("2d")
-
-    const cW = builderCanvas.clientWidth
-    const cH = builderCanvas.clientHeight
-
-    builderCanvasCtx.clearRect(0, 0, cW, cH)
-
+    // Get node positions in 'builder size'
     const nodePositions = OrganismBuilder.generateAbsoluteNodePositions(
         OrganismBuilder.NODESIZE_BUILDER,
         currentDNASequence,
@@ -560,6 +554,62 @@ function renderBuilderUIVisual() {
     )
     renderedVisualNodePositions = nodePositions
 
+    // Draw node positions
+
+    const builderCanvasCtx = builderCanvas.getContext("2d")
+
+    const cW = builderCanvas.clientWidth
+    const cH = builderCanvas.clientHeight
+
+    builderCanvasCtx.clearRect(0, 0, cW, cH)
+
+    // Drawing
+
+    const prepareHexagonPath = (cx, cy, side) => {
+        builderCanvasCtx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angleDeg = 60 * i;
+            const angleRad = (Math.PI / 180) * angleDeg;
+            const x = cx + side * Math.cos(angleRad);
+            const y = cy + side * Math.sin(angleRad);
+
+            if (i === 0) {
+                builderCanvasCtx.moveTo(x, y);
+            } else {
+                builderCanvasCtx.lineTo(x, y);
+            }
+        }
+        builderCanvasCtx.closePath();
+    }
+
+    // Draw hexagon outline
+    const drawNodeOutline = (cx, cy) => {
+        prepareHexagonPath(cx, cy, hexGrid.side * 1.1)
+        builderCanvasCtx.strokeStyle = "#000"
+        builderCanvasCtx.lineWidth = 3.5
+        builderCanvasCtx.stroke();
+    }
+
+    // Draw outlines
+    for (const nodePos of nodePositions) {
+        if (nodePos.node.builderUIBeingDragged) {
+            continue
+        }
+
+        drawNodeOutline(
+            (cW / 2) + nodePos.x,
+            (cH / 2) - nodePos.y
+        )
+    }
+
+    // Draw filled hexagon
+    const drawNode = (cx, cy, node) => {
+        prepareHexagonPath(cx, cy, hexGrid.side)
+        builderCanvasCtx.fillStyle = node.block.color;
+        builderCanvasCtx.fill();
+    }
+
+    // Draw fills
     for (const nodePos of nodePositions) {
         if (nodePos.node.builderUIBeingDragged) {
             continue
@@ -568,14 +618,11 @@ function renderBuilderUIVisual() {
         nodePos.uiClickX = (cW / 2) + nodePos.x
         nodePos.uiClickY = (cH / 2) - nodePos.y
 
-        const hexPos = drawHexagon(
+        drawNode(
             nodePos.uiClickX,
             nodePos.uiClickY,
-            builderCanvasCtx,
-            nodePos.node.block.color,
-            2.5
+            nodePos.node
         )
-        hexToNodePos[`${Math.round(hexPos.x)},${Math.round(hexPos.y)}`] = nodePos
     }
 }
 
