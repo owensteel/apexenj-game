@@ -45,7 +45,7 @@ game-wrapper game-stage-wrapper {
     position: relative;
 
     background-color: #0000ff;
-    background-image: url("https://apexenj.com/static/media/bg.630eebcf0f2e7c5a5c34.png");
+    background-image: url("../img/bg.png");
     background-size: 200px;
 }
 
