@@ -6,12 +6,10 @@
 
 */
 
-import { stageEdges3D, ThreeCanvas, ThreeRenderer } from "./game.v0.2.3d";
-import * as DNA from "./game.v0.2.dna";
+import { ThreeCanvas } from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
-import * as Levels from "./game.v0.2.levels"
 import * as CombatUpdates from "./game.v0.2.combat.updates"
-import * as Utils from "./game.v0.2.utils"
+import * as OrganismBuilderUI from "./game.v0.2.builder.ui"
 import { nutritionPerFoodBlock } from "./game.v0.2.food";
 
 /*
@@ -32,14 +30,13 @@ let enemyOrganism = null;
 const combatSessionTimeouts = []
 
 // Cache for the entire combat session
-const combatSessionCache = {
-    originalEnemy: null,
+const combatCache = {
+    seriesRunning: false,
     level: null,
     result: null
 }
 
 // Healthbars
-
 
 const newHealthbar = () => {
     const hbWrapper = document.createElement("healthbar-wrapper")
@@ -88,20 +85,19 @@ const enemyHealthbar = newHealthbar()
 enemyHealthbar.classList.add("enemy")
 healthbarContainer.appendChild(enemyHealthbar)
 
-// Starting velocity, to be directed towards centre
-const maxAttractionVelocity = 0.005
+/*
+
+    Combat session
+
+*/
 
 function startCombat() {
     console.log("starting combat...")
 
     // Set session values
 
-    combatSessionCache.result = null
+    combatCache.result = null
     combatRunning = true
-
-    // Start movement
-
-    Organisms.setMovementToggle(true, playerOrganism)
 
     // Set player positions and variables
 
@@ -156,38 +152,110 @@ function endCombat() {
         clearTimeout(timeout)
     })
 
-    // Stop movement
-
-    Organisms.setMovementToggle(false, playerOrganism)
-
-    // Reset level
-
-    combatSessionCache.level.init()
-
     // Hide UI
 
     healthbarContainer.style.display = "none"
 }
 
-function toggleCombat(currentLevel) {
-    combatSessionCache.level = currentLevel
+function toggleCombat() {
+    // Toggle
+
+    combatToggled = !combatToggled
+
+    // Set session
+
+    const currentLevel = combatCache.level
 
     playerOrganism = currentLevel.playerOrganism
     enemyOrganism = currentLevel.enemyOrganism
-    combatSessionCache.originalEnemy = enemyOrganism
+
+    // Start/stop movement
+
+    Organisms.setMovementToggle(combatToggled, playerOrganism)
+
+    // Reset level stage
+
+    combatCache.level.reset()
 
     // Begin/end combat session
 
-    if (!combatToggled) {
-        combatToggled = true
+    if (combatToggled) {
         startCombat()
     } else {
-        combatToggled = false
         endCombat()
     }
 
+    // Reset UI
+
     document.getElementsByTagName("game-stage-wrapper")[0]
         .setAttribute("mode", combatToggled ? "combat" : "builder")
+    OrganismBuilderUI.toggleVisibility()
+}
+
+function combatResult() {
+    const currentLevel = combatCache.level
+    // Game over screen
+    if (combatCache.result == playerOrganism.id) {
+        // Player lost
+        console.log("player lost!")
+    } else {
+        // Player won
+        console.log("opponent lost! next stage...")
+    }
+    // Delay so the player can see game over screen
+    setTimeout(() => {
+        if (combatCache.result == playerOrganism.id) {
+            // Player lost so streak is over, end combat series
+            toggleCombatSeries(currentLevel)
+        } else {
+            // Player won, auto-continue with next enemy
+
+            // Stop current combat session (also resets level)
+            toggleCombat()
+
+            // Move onto next enemy in the leaderboard
+            currentLevel.leaderboardCurrentStage++
+            if (currentLevel.leaderboardCurrentStage > currentLevel.leaderboardProgress) {
+                // By moving onto this enemy we have now exceeded
+                // the initial level of progress
+                currentLevel.leaderboardProgress = currentLevel.leaderboardCurrentStage
+                console.log("new progress level!")
+            }
+            if (currentLevel.leaderboardProgress >= currentLevel.leaderboard.length) {
+                // No more enemies
+                currentLevel.leaderboardCurrentStage = currentLevel.leaderboard.length - 1
+                currentLevel.leaderboardProgress = currentLevel.leaderboardCurrentStage
+                console.log("All enemies in level leaderboard defeated!")
+                // Stop combat series
+                toggleCombatSeries(combatCache.level, false)
+            } else {
+                // Start a new session if progress has not
+                // yet been beaten
+                if (currentLevel.leaderboardCurrentStage <= currentLevel.leaderboardProgress) {
+                    toggleCombat()
+                }
+            }
+        }
+    }, 2000)
+}
+
+function toggleCombatSeries(combatLevel, toggleCombatSession = true) {
+    // Cache toggle state
+    combatCache.seriesRunning = !combatCache.seriesRunning
+    console.log("combat series", combatCache.seriesRunning ? "started" : "ended")
+
+    // Cache current level
+    combatCache.level = combatLevel
+
+    // Reset stage (not progress) to 0 for a new combat series
+    if (combatCache.seriesRunning) {
+        combatCache.level.leaderboardCurrentStage = 0
+    }
+
+    // Start/stop session
+    if (toggleCombatSession) {
+        toggleCombat()
+    }
 }
 
 /*
@@ -214,26 +282,25 @@ function combatTick() {
     // Execute as many updates in this tick as UPT specifies, until
     // end of combat is reached
     for (let i = 0; i < combatUpdatesPerTick; i++) {
-        const postUpdateCombatStatus = CombatUpdates.combatUpdate(
-            playerOrganism, enemyOrganism
-        )
-        if (postUpdateCombatStatus.ended && !combatSessionCache.result) {
-            // Player's organism has been destroyed
-            // But let player end the combat mode when they want to
-            combatSessionCache.result = postUpdateCombatStatus.loser
-            console.log("combat ended; result:", combatSessionCache.result)
+        const postUpdateCombatStatus = CombatUpdates.combatUpdate(combatCache.level)
+        if (postUpdateCombatStatus.ended && !combatCache.result) {
+            // An organism has been destroyed
+            combatCache.result = postUpdateCombatStatus.loser
+            console.log("combat ended; result:", combatCache.result)
+
+            combatResult()
         }
     }
 
     // Set healthbars
 
     // Energy
-    if (combatSessionCache.result == playerOrganism.id) {
+    if (combatCache.result == playerOrganism.id) {
         playerHealthbar.updateWithEnergyValue(0)
     } else {
         playerHealthbar.updateWithEnergyValue(playerOrganism.energy)
     }
-    if (combatSessionCache.result == enemyOrganism.id) {
+    if (combatCache.result == enemyOrganism.id) {
         enemyHealthbar.updateWithEnergyValue(0)
     } else {
         enemyHealthbar.updateWithEnergyValue(enemyOrganism.energy)
@@ -248,4 +315,4 @@ function combatTick() {
     )
 }
 
-export { toggleCombat }
+export { toggleCombatSeries }
