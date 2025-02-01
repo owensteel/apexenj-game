@@ -411,10 +411,10 @@ function bumpCanvasEdges(organism, organismNodesWorld) {
 */
 
 // Updates each organism, syncs it with all its opponents
-function combatUpdate(playerOrg, enemyOrg) {
+function combatUpdate(currentLevel) {
     // For direct player v enemy combat
-    combatUpdateCache.playerId = playerOrg.id
-    combatUpdateCache.enemyId = enemyOrg.id
+    combatUpdateCache.playerId = currentLevel.playerOrganism.id
+    combatUpdateCache.enemyId = currentLevel.enemyOrganism.id
 
     // Feedback to combat session
     const postUpdateCombatStatus = {
