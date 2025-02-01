@@ -10,7 +10,8 @@ import { newDnaNodeFromImport } from "./game.v0.2.dna"
 import { cloneObject } from "./game.v0.2.utils"
 import { stageEdges3D } from "./game.v0.2.3d"
 
-import importedEnemyDNA from "./preset_dna/default_enemies/1.json"
+import defaultEnemyDNA from "./preset_dna/default_enemies/1.json"
+import defaultEnemy2DNA from "./preset_dna/default_enemies/2.json"
 
 const foodRingRadius = 50
 const foodRingNumOfItems = 6
@@ -20,7 +21,19 @@ class Level {
         // Features
         this.plants = []
         this.food = []
-        this.temperature = 0
+
+        // Leaderboard system
+        this.leaderboard = [
+            defaultEnemy2DNA,
+            defaultEnemyDNA
+        ]
+        // The stage (enemy) to feature
+        // when this level is next init
+        // (reset every combat series)
+        this.leaderboardCurrentStage = 0
+        // The progress of the player in
+        // this level's leaderboard
+        this.leaderboardProgress = 0
 
         // Player (defined centrally)
         this.playerOrganism = null
@@ -29,11 +42,24 @@ class Level {
         this.enemyDna = null
         this.enemyOrganism = null
 
-        this.init()
+        // Initialise
+        this.reset()
     }
-    init() {
+    reset() {
+        console.log("level reset")
+
+        // Clear any old things
+        if (this.enemyOrganism) {
+            this.enemyOrganism.die()
+        }
+        if (this.food.length > 0) {
+            this.food.forEach((fO) => { fO.die() })
+        }
+
         // Enemy
-        this.enemyDna = newDnaNodeFromImport(importedEnemyDNA)
+        this.enemyDna = newDnaNodeFromImport(
+            this.leaderboard[this.leaderboardCurrentStage]
+        )
         this.enemyOrganism = Organisms.addOrganism(
             cloneObject(this.enemyDna),
             {
