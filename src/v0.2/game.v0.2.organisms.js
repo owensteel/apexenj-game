@@ -522,7 +522,7 @@ function animate() {
     if (activeAnimation) cancelAnimationFrame(activeAnimation);
 
     function renderFrame() {
-        organisms.forEach((organism) => {
+        for (const organism of organisms) {
             // Skip if no mesh yet
             if (organism.mesh == null) {
                 return
@@ -534,7 +534,7 @@ function animate() {
             }
 
             organism.updateMovement()
-        });
+        }
         ThreeElements.renderScene();
         activeAnimation = requestAnimationFrame(renderFrame);
     }
