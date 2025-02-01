@@ -6,11 +6,10 @@
 
 */
 
-import { ThreeCanvas } from "./game.v0.2.3d";
 import * as Organisms from "./game.v0.2.organisms"
-import * as CombatUpdates from "./game.v0.2.combat.updates"
 import * as OrganismBuilderUI from "./game.v0.2.builder.ui"
-import { nutritionPerFoodBlock } from "./game.v0.2.food";
+import * as CombatUpdates from "./game.v0.2.combat.updates"
+import * as CombatUI from "./game.v0.2.combat.ui"
 
 /*
 
@@ -35,55 +34,6 @@ const combatCache = {
     level: null,
     result: null
 }
-
-// Healthbars
-
-const newHealthbar = () => {
-    const hbWrapper = document.createElement("healthbar-wrapper")
-
-    const hb = document.createElement("progress")
-    hb.setAttribute("min", 0)
-    hb.setAttribute("max", 100)
-    hbWrapper.appendChild(hb)
-
-    hbWrapper.updateWithEnergyValue = (energy) => {
-        hb.value = Math.round((energy * 100) / 5) * 5
-        if (hb.value <= 25) {
-            hb.className = "alert"
-        } else {
-            hb.className = ""
-        }
-        hbWrapper.currentEnergyValue = energy
-    }
-    hbWrapper.updateWithEnergyValue(0)
-
-    const fS = document.createElement("p")
-    fS.className = "food-score"
-    hbWrapper.appendChild(fS)
-
-    hbWrapper.updateWithFoodScore = (score) => {
-        if (hbWrapper.currentFoodScore !== score) {
-            fS.innerHTML = score
-            hbWrapper.currentFoodScore = score
-        }
-    }
-    hbWrapper.updateWithFoodScore(0)
-
-    return hbWrapper
-}
-
-// Temp solution for debugging
-const healthbarContainer = document.createElement("healthbar-container")
-healthbarContainer.style.display = "none"
-document.getElementById("game-wrapper").appendChild(healthbarContainer)
-
-const playerHealthbar = newHealthbar()
-playerHealthbar.classList.add("player")
-healthbarContainer.appendChild(playerHealthbar)
-
-const enemyHealthbar = newHealthbar()
-enemyHealthbar.classList.add("enemy")
-healthbarContainer.appendChild(enemyHealthbar)
 
 /*
 
@@ -116,10 +66,6 @@ function startCombat() {
         -enemyOrganism.combatStartPos.y
     )
 
-    // Show UI
-
-    healthbarContainer.style.display = "block"
-
     // Start tick updates
 
     combatTick()
@@ -142,19 +88,11 @@ function endCombat() {
 
     combatRunning = false
 
-    // Reset canvas
-
-    ThreeCanvas.style.backgroundColor = ""
-
     // Cancel any timeouts
 
     combatSessionTimeouts.forEach((timeout) => {
         clearTimeout(timeout)
     })
-
-    // Hide UI
-
-    healthbarContainer.style.display = "none"
 }
 
 function toggleCombat() {
@@ -162,20 +100,25 @@ function toggleCombat() {
 
     combatToggled = !combatToggled
 
-    // Set session
+    // Get current level and player
 
     const currentLevel = combatCache.level
-
     playerOrganism = currentLevel.playerOrganism
-    enemyOrganism = currentLevel.enemyOrganism
 
     // Start/stop movement
 
-    Organisms.setMovementToggle(combatToggled, playerOrganism)
+    Organisms.setMovementToggle(
+        combatToggled,
+        playerOrganism
+    )
 
     // Reset level stage
 
-    combatCache.level.reset()
+    currentLevel.reset()
+
+    // Enemy organism changes every time a
+    // level is reset
+    enemyOrganism = currentLevel.enemyOrganism
 
     // Begin/end combat session
 
@@ -256,6 +199,9 @@ function toggleCombatSeries(combatLevel, toggleCombatSession = true) {
     if (toggleCombatSession) {
         toggleCombat()
     }
+
+    // Show/hide UI
+    CombatUI.toggleVisibility()
 }
 
 /*
@@ -292,27 +238,8 @@ function combatTick() {
         }
     }
 
-    // Set healthbars
-
-    // Energy
-    if (combatCache.result == playerOrganism.id) {
-        playerHealthbar.updateWithEnergyValue(0)
-    } else {
-        playerHealthbar.updateWithEnergyValue(playerOrganism.energy)
-    }
-    if (combatCache.result == enemyOrganism.id) {
-        enemyHealthbar.updateWithEnergyValue(0)
-    } else {
-        enemyHealthbar.updateWithEnergyValue(enemyOrganism.energy)
-    }
-
-    // Food score
-    playerHealthbar.updateWithFoodScore(
-        Math.round(playerOrganism.totalEnergyAbsorbed / nutritionPerFoodBlock)
-    )
-    enemyHealthbar.updateWithFoodScore(
-        Math.round(enemyOrganism.totalEnergyAbsorbed / nutritionPerFoodBlock)
-    )
+    // Update UI
+    CombatUI.updateElements(combatCache)
 }
 
 export { toggleCombatSeries }
