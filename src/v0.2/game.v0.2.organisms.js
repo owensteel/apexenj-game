@@ -67,6 +67,7 @@ class Organism {
 
         // Energy / "healthbar"
         this.energy = 1
+        this.totalEnergyAbsorbed = 0
 
         // Three.Js mesh
         this.mesh = null;
