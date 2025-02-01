@@ -17,17 +17,7 @@ import { cloneObject } from "./game.v0.2.utils";
 // TODO: remove, debugging only
 
 const combatToggleButton = document.createElement("button");
-combatToggleButton.innerHTML = "Start combat"
-combatToggleButton.toggleState = false
-combatToggleButton.onclick = () => {
-    if (!combatToggleButton.toggleState) {
-        combatToggleButton.toggleState = true
-        combatToggleButton.innerHTML = "Stop combat"
-    } else {
-        combatToggleButton.toggleState = false
-        combatToggleButton.innerHTML = "Start combat"
-    }
-}
+combatToggleButton.innerHTML = "Toggle combat series"
 
 // Init all
 
@@ -65,8 +55,7 @@ function init() {
     // Init combat button
 
     combatToggleButton.addEventListener("click", () => {
-        OrganismBuilderUI.toggleVisibility()
-        Combat.toggleCombat(currentLevel)
+        Combat.toggleCombatSeries(currentLevel)
     })
     document.body.appendChild(combatToggleButton)
 
