@@ -76,10 +76,6 @@ function createFood(foodStartPos = null, typeId = null) {
     // Default velocity
     foodInstance.velocity.x = foodVelocity
     foodInstance.velocity.y = -foodVelocity
-    foodInstance.mesh.rotation.z = Math.atan2(
-        0 - foodInstance.mesh.position.x,
-        0 - foodInstance.mesh.position.y
-    )
 
     // Set food nutrition value depending on
     // amount of food blocks instance has
