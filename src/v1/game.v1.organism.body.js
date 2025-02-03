@@ -8,6 +8,7 @@
 */
 
 import * as THREE from 'three';
+import * as ThreeElements from './game.v1.3d'
 import DNA from './game.v1.dna';
 
 const NODESIZE_DEFAULT = 6

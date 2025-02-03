@@ -7,12 +7,19 @@
 import * as ThreeElements from "./game.v1.3d"
 import Organism from "./game.v1.organism"
 
+// Syncing
+
+function syncOrganisms(org1, org2) {
+
+}
+
+// Pool model
+
 class Pool {
     constructor(id) {
         if (!id) {
             throw new Error("Pool ID must be specified")
         }
-
         this.id = id
         this.organisms = []
     }
@@ -27,7 +34,16 @@ class Pool {
         // Update all organism motion
         // And sync organisms for interactions
         for (const organism of this.organisms) {
+            // Update organism energy/state
+            organism.updateLivingState()
+            // Update organism motion
             organism.updateMovement()
+            // Sync organism with others in Pool
+            for (const opponent of this.organisms) {
+                if (opponent.id !== organism.id) {
+                    syncOrganisms(organism, opponent)
+                }
+            }
         }
     }
 }

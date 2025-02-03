@@ -8,7 +8,7 @@ import { Vector3 } from 'three';
 import { BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import OrganismBody from "./game.v1.organism.body"
-import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_NUM_OF_NODES, MOTOR_MAX_POWER } from "./game.v1.references"
+import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT } from "./game.v1.references"
 
 class Organism {
     constructor(dnaModel) {
@@ -23,6 +23,7 @@ class Organism {
 
         // Life
         this.energy = 1
+        this.alive = true
 
         // Movement
         this.velocity = { x: 0, y: 0 }
@@ -37,10 +38,49 @@ class Organism {
         // Rebuild body/mesh with new DNA
         this.body.updateDna(this.dnaModel)
     }
-    updateMovement() {
-        // Essentially apply velocity to the organism, factoring
-        // in motors and current rotation
+    updateLivingState() {
+        // Calc world positions of nodes, to use in this update
 
+        this.body.updateNodePosWorldPositions()
+
+        // Deplete energy
+        let energyDepletion = NATURAL_ENERGY_DEPLETION_AMOUNT
+
+        // More nodes = more energy consumed
+        energyDepletion /= (
+            MIN_NODES_WITHOUT_ENERGY_CON /
+            this.body.nodePositions.length
+        )
+
+        // Motor nodes consume more energy
+        if (BLOCK_TYPENAME_MOTOR in this.body.nodePosByBlockTypeCache) {
+            // Num of motor blocks = sum of all the *applied power* from
+            // motor blocks. I.e, a motor block only applying half the
+            // power technically only counts as half a motor block. This
+            // means less energy is consumed if motor blocks are going
+            // slower, e.g due to low energy.
+            const motorBlocksActualNum = this.body.nodePosByBlockTypeCache[BLOCK_TYPENAME_MOTOR]
+                .reduce(
+                    (accumulator, nodePos) => accumulator + nodePos.node.block.appliedPowerPerc,
+                    0
+                );
+            energyDepletion /= (
+                MIN_MOTOR_NODES_WITHOUT_ENERGY_CON
+                / motorBlocksActualNum
+            )
+        }
+
+        // Deplete 'energy'
+        this.energy -= energyDepletion
+
+        // Death check
+        this.alive = (
+            Math.round((this.energy * 100) / 10) * 10
+        ) > 0
+    }
+    // Essentially apply velocity to the organism, factoring
+    // in motors and current rotation
+    updateMovement() {
         if (this.body.mesh == null) {
             return
         }
