@@ -5,28 +5,39 @@
 */
 
 import * as Blocks from './game.v1.blocks'
-
-const DNA_NODE_ROLE_APPENDAGE = "DNA_NODE_ROLE_APPENDAGE"
+import { DNA_NODE_ROLE_APPENDAGE } from './game.v1.references'
 
 class DNA {
-    constructor(presetNode) {
+    constructor(
         // Default values
-        this.role = DNA_NODE_ROLE_APPENDAGE
-        this.block = new Blocks.DefaultBlock()
-        this.children = new Array(6)
-        this.detach = false
+        role = DNA_NODE_ROLE_APPENDAGE,
+        blockTypeName = Blocks.BLOCK_TYPENAME_DEFAULT,
+        children = [],
+        detach = false
+    ) {
+        this.role = role
 
-        // Update to any preset if needed
-        if (presetNode) {
-            this.role = presetNode.role
-            this.block = Blocks.getBlockInstanceFromTypeName(
-                presetNode.block.typeName
+        // Make sure all blocks are in sync with the
+        // current instances — only reference the block
+        // specified type name
+        this.block = Blocks.getBlockInstanceFromTypeName(
+            blockTypeName
+        )
+
+        // Convert any object children into DNA instances
+        this.children = new Array(6)
+        children.forEach((childNode, cI) => {
+            this.children[cI] = new DNA(
+                childNode.role,
+                childNode.block.typeName,
+                childNode.children,
+                childNode.detach
             )
-            presetNode.children.forEach((presetChildNode, cI) => {
-                this.children[cI] = new DNANode(presetChildNode)
-            })
-            this.detach = presetNode.detach
-        }
+        })
+        this.detach = detach
+    }
+    exportToJson() {
+        return JSON.stringify(this)
     }
 }
 

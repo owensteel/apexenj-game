@@ -23,6 +23,13 @@ class Pool {
         this.organisms.push(organism)
         ThreeElements.scene.add(organism.body.mesh)
     }
+    updateLife() {
+        // Update all organism motion
+        // And sync organisms for interactions
+        for (const organism of this.organisms) {
+            organism.updateMovement()
+        }
+    }
 }
 
 export default Pool

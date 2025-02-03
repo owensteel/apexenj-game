@@ -232,6 +232,7 @@ class OrganismBody {
         // Will be initialised on first build
         this.mesh = null
         this.nodePositions = []
+        this.nodePosByBlockTypeCache = {}
 
         // Build options
         this.buildDetachingParts = true
@@ -247,6 +248,23 @@ class OrganismBody {
 
         // Rebuild new body with new DNA
         this.rebuild()
+    }
+    updateNodePosByBlockTypeCache() {
+        // Update cache of blocks by type, e.g motor blocks
+
+        // Clear old cache
+        this.nodePosByBlockTypeCache = {}
+
+        // Populate new cache
+        for (const nodePos of this.nodePositions) {
+            const typeName = nodePos.node.block.typeName
+            if (!(typeName in this.nodePosByBlockTypeCache)) {
+                this.nodePosByBlockTypeCache[typeName] = []
+            }
+            this.nodePosByBlockTypeCache[typeName].push(nodePos)
+        }
+
+        return this.nodePosByBlockTypeCache
     }
     rebuild() {
         // Update node positions
@@ -278,6 +296,23 @@ class OrganismBody {
                 this.mesh.add(newChild)
             })
         }
+
+        // Update cached info about body
+        this.updateNodePosByBlockTypeCache()
+    }
+    updateNodePosWorldPositions() {
+        if (!this.mesh || this.nodePositions.length < 1) {
+            return false
+        }
+
+        this.mesh.updateMatrixWorld(true);
+        for (const nodePos of this.nodePositions) {
+            nodePos.worldPos = ThreeElements.convertNodePosIntoWorldPos(
+                nodePos, this.mesh
+            )
+        }
+
+        return this.nodePositions
     }
 }
 

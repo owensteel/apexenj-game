@@ -42,6 +42,7 @@ PlayerAccessibleBlockTypeNamesList.push("default")
 const BLOCK_TYPENAME_PLANT = "plant"
 class PlantBlock extends DefaultBlock {
     constructor() {
+        super()
         this.setTypeName(BLOCK_TYPENAME_PLANT)
         this.setColor("DarkViolet")
     }
@@ -56,9 +57,9 @@ class PlantBlock extends DefaultBlock {
 const BLOCK_TYPENAME_MOTOR = "motor"
 class MotorBlock extends DefaultBlock {
     constructor() {
+        super()
         this.isMotor = true
         this.appliedPowerPerc = 1 /* Perc of max power, 0 - 1 */
-
         this.setTypeName(BLOCK_TYPENAME_MOTOR)
         this.setColor("hotpink")
     }
@@ -74,8 +75,8 @@ PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_MOTOR)
 const BLOCK_TYPENAME_HEART = "heart"
 class HeartBlock extends DefaultBlock {
     constructor() {
+        super()
         this.isHeart = true
-
         this.setTypeName(BLOCK_TYPENAME_HEART)
         this.setColor("black")
     }
@@ -90,6 +91,7 @@ class HeartBlock extends DefaultBlock {
 const BLOCK_TYPENAME_DETACHING = "detaching"
 class DetachingBlock extends DefaultBlock {
     constructor() {
+        super()
         this.setTypeName(BLOCK_TYPENAME_DETACHING)
         this.setColor("blue")
     }
@@ -105,6 +107,7 @@ PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
 const BLOCK_TYPENAME_FOOD = "food"
 class FoodBlock extends DefaultBlock {
     constructor() {
+        super()
         this.setTypeName(BLOCK_TYPENAME_FOOD)
         this.setColor("Lavender")
     }
@@ -119,6 +122,7 @@ class FoodBlock extends DefaultBlock {
 const BLOCK_TYPENAME_ABSORBER = "absorber"
 class AbsorberBlock extends DefaultBlock {
     constructor() {
+        super()
         this.setTypeName(BLOCK_TYPENAME_ABSORBER)
         this.setColor("lightgreen")
     }
