@@ -9,6 +9,6 @@
 
 */
 
-import { init } from "./v0.2/game.v0.2.main";
+import { init } from "./v1/game.v1.main";
 
 init();
