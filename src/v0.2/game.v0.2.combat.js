@@ -137,16 +137,9 @@ function toggleCombat() {
 
 function combatResult() {
     const currentLevel = combatCache.level
-    // Game over screen
-    if (combatCache.result == playerOrganism.id) {
-        // Player lost
-        console.log("player lost!")
-    } else {
-        // Player won
-        console.log("opponent lost! next stage...")
-    }
-    // Delay so the player can see game over screen
+    // Delay so the player can see visible result
     setTimeout(() => {
+        // Show "game over screens" and next action
         if (combatCache.result == playerOrganism.id) {
             // Player lost so streak is over, end combat series
             toggleCombatSeries(currentLevel)
