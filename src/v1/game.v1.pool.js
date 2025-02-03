@@ -4,6 +4,7 @@
 
 */
 
+import * as ThreeElements from "./game.v1.3d"
 import Organism from "./game.v1.organism"
 
 class Pool {
@@ -19,8 +20,8 @@ class Pool {
         if (organism instanceof Organism == false) {
             throw new Error("Organism must be instance of Organism class")
         }
-
         this.organisms.push(organism)
+        ThreeElements.scene.add(organism.body.mesh)
     }
 }
 

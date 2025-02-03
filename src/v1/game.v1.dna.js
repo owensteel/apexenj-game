@@ -6,22 +6,17 @@
 
 import * as Blocks from './game.v1.blocks'
 
-class DNA {
-    constructor(presetSequence) {
-        // A sequence is always one DNA node, which
-        // may or may not have children
-        this.sequence = new DNANode(presetSequence)
-    }
-}
-
 const DNA_NODE_ROLE_APPENDAGE = "DNA_NODE_ROLE_APPENDAGE"
 
-class DNANode {
+class DNA {
     constructor(presetNode) {
+        // Default values
         this.role = DNA_NODE_ROLE_APPENDAGE
         this.block = new Blocks.DefaultBlock()
         this.children = new Array(6)
+        this.detach = false
 
+        // Update to any preset if needed
         if (presetNode) {
             this.role = presetNode.role
             this.block = Blocks.getBlockInstanceFromTypeName(
@@ -30,6 +25,7 @@ class DNANode {
             presetNode.children.forEach((presetChildNode, cI) => {
                 this.children[cI] = new DNANode(presetChildNode)
             })
+            this.detach = presetNode.detach
         }
     }
 }
