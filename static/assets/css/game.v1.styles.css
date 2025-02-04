@@ -82,7 +82,7 @@ game-wrapper game-stage-wrapper {
     user-select: none;
     position: relative;
 
-    background-color: rgb(255, 193, 118);
+    background-color: #5ad585;
     background-image: url("../img/bg-white.png");
     background-size: 200px;
     user-select: none;
