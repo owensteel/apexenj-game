@@ -85,6 +85,7 @@ game-wrapper game-stage-wrapper {
     background-color: rgb(255, 193, 118);
     background-image: url("../img/bg-white.png");
     background-size: 200px;
+    user-select: none;
 }
 
 game-wrapper game-builder-wrapper {

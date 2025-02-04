@@ -28,7 +28,7 @@ class DNABuilderUI {
         // Instance state
         this.renderedVisualNodePositions = null;
         this.selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT;
-        this.isMouseDrawingNodes = false;
+        this.isMouseDown = false;
         this.nodeDragging = {
             currentNode: null,
             fakeTreeMesh: null
@@ -355,14 +355,14 @@ class DNABuilderUI {
                 this.nodeBin.style.transform = "scale(1)";
             }
         } else {
-            if (this.isMouseDrawingNodes) {
+            if (this.isMouseDown) {
                 this._nodeClickHandler(e);
             }
         }
     }
 
     _nodeDraggingMouseUpHandler(e) {
-        this.isMouseDrawingNodes = false;
+        this.isMouseDown = false;
 
         const deleteNodeFromSequence = (node) => {
             node.parentNode.deleteChild(node);
@@ -385,8 +385,8 @@ class DNABuilderUI {
 
     _nodeDraggingMouseDownHandler(e) {
         e.preventDefault();
-        if (this.isMouseDrawingNodes) return;
-        this.isMouseDrawingNodes = true;
+        if (this.isMouseDown) return;
+        this.isMouseDown = true;
 
         const clickPos = this._getClickPosFromScreenPos({ x: e.pageX, y: e.pageY });
         const clickedNode = this._getVisNodeAtClickPos(clickPos);
@@ -395,8 +395,12 @@ class DNABuilderUI {
         let mouseDownOnNode = true;
         const mouseUpListener = () => {
             mouseDownOnNode = false;
+
+            // User has lost focus when mouse is up and/or moved
             this.builderWrapper.removeEventListener("mouseup", mouseUpListener);
             this.builderWrapper.removeEventListener("touchend", mouseUpListener);
+            this.builderWrapper.removeEventListener("mousemove", mouseUpListener);
+            this.builderWrapper.removeEventListener("touchmove", mouseUpListener);
         };
 
         // For nodes other than the root, allow dragging of sub-trees.
@@ -409,17 +413,23 @@ class DNABuilderUI {
 
             this.builderClickField.addEventListener("mouseup", mouseUpListener);
             this.builderClickField.addEventListener("touchend", mouseUpListener);
+            this.builderClickField.addEventListener("mousemove", mouseUpListener);
+            this.builderClickField.addEventListener("touchmove", mouseUpListener);
         }
     }
 
     _startDraggingNode(node, e) {
-        this.isMouseDrawingNodes = false;
+        this.isMouseDown = false;
         this.nodeBinBoundingBox = getGlobalBoundingBoxOfHTMLElement(this.nodeBin);
         this.builderHexGrid.remove();
         this.nodeDragging.currentNode = node;
 
         // Create a shallow clone of the node (for visual dragging)
-        const clonedNode = new DNA(node.role, node.block.typeName, node.children);
+        this.nodeDragging.fakeTreeMesh = new DNA(
+            node.role,
+            node.block.typeName,
+            node.children
+        );
 
         // Mark node as being dragged and update visuals.
         node.builderUIBeingDragged = true;
