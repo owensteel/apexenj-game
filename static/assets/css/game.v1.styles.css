@@ -127,7 +127,7 @@ game-wrapper game-builder-wrapper .builder-ui-hide-button {
 }
 
 game-wrapper .builder-ui-hide-button:after {
-    background-image: url("../icons/eye-outline.svg")
+    background-image: url("../icons/eye-off-outline.svg")
 }
 
 game-wrapper .builder-ui-show-button,
