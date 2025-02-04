@@ -127,14 +127,16 @@ game-wrapper .builder-ui-hide-button:after {
 }
 
 game-wrapper .builder-ui-show-button,
-game-wrapper game-builder-wrapper .builder-ui-hide-button {
+game-wrapper game-builder-wrapper .builder-ui-hide-button,
+game-wrapper game-builder-wrapper .node-bin {
     position: absolute;
     height: 50px;
     width: 50px;
 }
 
 game-wrapper .builder-ui-show-button:after,
-game-wrapper game-builder-wrapper .builder-ui-hide-button:after {
+game-wrapper game-builder-wrapper .builder-ui-hide-button:after,
+game-wrapper game-builder-wrapper .node-bin:after {
     content: "";
     display: block;
     position: absolute;
@@ -204,26 +206,23 @@ game-wrapper game-builder-wrapper node-toolbar input {
     display: inline-block;
 }
 
-game-wrapper game-builder-wrapper node-bin {
+game-wrapper game-builder-wrapper .node-bin {
     pointer-events: none;
     position: absolute;
     display: block;
     z-index: 5;
-    height: 25px;
-    width: 25px;
+    height: 50px;
+    width: 50px;
     bottom: 25px;
     right: 25px;
+
+    background-color: #eee;
+    border-bottom: 1px solid rgba(0, 0, 0, .25);
+    border-style: dashed;
 }
 
-game-wrapper game-builder-wrapper node-bin:after {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 25px;
-    text-align: center;
-    content: "🗑️";
-    font-size: 25px;
-    line-height: 25px;
+game-wrapper game-builder-wrapper .node-bin:after {
+    background-image: url("../icons/trash-bin-outline.svg")
 }
 
 game-wrapper game-builder-wrapper show-hide-button {

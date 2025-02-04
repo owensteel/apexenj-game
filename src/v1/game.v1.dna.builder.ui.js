@@ -55,7 +55,8 @@ class DNABuilderUI {
         this.builderToolbar = document.createElement("node-toolbar");
         this.builderWrapper.appendChild(this.builderToolbar);
 
-        this.nodeBin = document.createElement("node-bin");
+        this.nodeBin = document.createElement("button");
+        this.nodeBin.className = "node-bin"
         this.builderWrapper.appendChild(this.nodeBin);
 
         // Setup Builder Toolbar (instance-specific UI elements)
@@ -350,9 +351,9 @@ class DNABuilderUI {
             e.preventDefault();
             const binRect = getGlobalBoundingBoxOfHTMLElement(this.nodeBin);
             if (e.pageX > binRect.left && e.pageY > binRect.top) {
-                this.nodeBin.style.transform = "scale(2)";
+                this.nodeBin.style.backgroundColor = "#fff";
             } else {
-                this.nodeBin.style.transform = "scale(1)";
+                this.nodeBin.style.backgroundColor = "";
             }
         } else {
             if (this.isMouseDown) {
@@ -374,7 +375,7 @@ class DNABuilderUI {
             if (e.pageX > binRect.left && e.pageY > binRect.top) {
                 deleteNodeFromSequence(this.nodeDragging.currentNode);
             }
-            this.nodeBin.style.transform = "scale(1)";
+            this.nodeBin.style.backgroundColor = "";
             this.builderWrapper.appendChild(this.builderHexGrid);
 
             delete this.nodeDragging.currentNode.builderUIBeingDragged;
