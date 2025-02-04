@@ -78,10 +78,10 @@ function renderScene() {
     composer.render();
 }
 
-const FPS = 12
+const RENDERS_PER_SEC = 12
 function renderLoop() {
     renderScene()
-    setTimeout(renderLoop, 1000 / FPS)
+    setTimeout(renderLoop, 1000 / RENDERS_PER_SEC)
 }
 renderLoop()
 

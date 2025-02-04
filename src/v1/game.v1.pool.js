@@ -6,12 +6,7 @@
 
 import * as ThreeElements from "./game.v1.3d"
 import Organism from "./game.v1.organism"
-
-// Syncing
-
-function syncOrganisms(org1, org2) {
-
-}
+import syncOrganisms from "./game.v1.organism.sync"
 
 // Pool model
 
@@ -31,14 +26,17 @@ class Pool {
         ThreeElements.scene.add(organism.body.mesh)
     }
     updateLife() {
-        // Update all organism motion
-        // And sync organisms for interactions
+        // Update all organism motion and living states
         for (const organism of this.organisms) {
             // Update organism energy/state
             organism.updateLivingState()
             // Update organism motion
             organism.updateMovement()
-            // Sync organism with others in Pool
+        }
+        // Sync organisms with each other for interactions
+        // (must be separate loop, ALL organisms must be
+        // updated before any syncing can occur)
+        for (const organism of this.organisms) {
             for (const opponent of this.organisms) {
                 if (opponent.id !== organism.id) {
                     syncOrganisms(organism, opponent)

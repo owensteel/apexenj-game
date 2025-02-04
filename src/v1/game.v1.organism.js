@@ -9,6 +9,69 @@ import { BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import OrganismBody from "./game.v1.organism.body"
 import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT } from "./game.v1.references"
+import { stageEdges3D } from './game.v1.3d';
+
+// "Bump" organism off of canvas edges
+
+function bumpCanvasEdges(organism) {
+    // If there are no nodes, skip
+    if (organism.body.nodePositions.length < 1) return;
+
+    const organismNodesWorld = organism.body.nodePositions.map((nodePos) => {
+        return nodePos.worldPos
+    })
+
+    // Grab stage edges
+    const canvasRightX = stageEdges3D.top.right.x;
+    const canvasLeftX = stageEdges3D.bottom.left.x;
+    const canvasTopY = stageEdges3D.top.right.y;
+    const canvasBottomY = stageEdges3D.bottom.right.y;
+
+    // Find the bounding box of the organism
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+
+    for (const pos of organismNodesWorld) {
+        if (pos.x < minX) minX = pos.x;
+        if (pos.x > maxX) maxX = pos.x;
+        if (pos.y < minY) minY = pos.y;
+        if (pos.y > maxY) maxY = pos.y;
+    }
+
+    // Determine how much we need to shift to keep the bounding box in-bounds
+    let shiftX = 0;
+    let shiftY = 0;
+
+    // If the right edge is out of bounds, shift left
+    if (maxX > canvasRightX) {
+        shiftX = canvasRightX - maxX;
+    }
+    // If the left edge is out of bounds, shift right
+    if (minX < canvasLeftX) {
+        // Note: if minX is out of bounds in the other direction,
+        // you might need to compare which shift is larger, or just apply them in separate steps
+        shiftX = canvasLeftX - minX;
+    }
+
+    // If the top edge is out of bounds, shift down
+    if (maxY > canvasTopY) {
+        shiftY = canvasTopY - maxY;
+    }
+    // If the bottom edge is out of bounds, shift up
+    if (minY < canvasBottomY) {
+        shiftY = canvasBottomY - minY;
+    }
+
+    // Apply one shift to bring the bounding box inside the stage
+    organism.body.mesh.position.x += shiftX;
+    organism.body.mesh.position.y += shiftY;
+
+    if (Math.abs(shiftX) > 0 || Math.abs(shiftY) > 0) {
+        organism.body.mesh.rotation.z += (Math.PI * 2) * (0.0125 * organism.energy)
+    }
+}
+
+// Organism model
 
 class Organism {
     constructor(dnaModel) {
@@ -78,8 +141,10 @@ class Organism {
             Math.round((this.energy * 100) / 10) * 10
         ) > 0
     }
-    // Essentially apply velocity to the organism, factoring
-    // in motors and current rotation
+    // Essentially apply motion to the organism
+    // Apply velocity factoring in motors and current
+    // rotation
+    // And bump canvas edges
     updateMovement() {
         if (this.body.mesh == null) {
             return
@@ -158,6 +223,10 @@ class Organism {
 
         this.body.mesh.position.x += this.appliedVelocity.finalX
         this.body.mesh.position.y += this.appliedVelocity.finalY
+
+        // Bump edges
+
+        bumpCanvasEdges(this)
     }
 }
 
