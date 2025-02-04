@@ -24,5 +24,131 @@ game-wrapper {
     position: relative;
     display: block;
     overflow: hidden;
+    max-width: 500px;
     margin: 0px auto;
+}
+
+game-wrapper,
+game-wrapper canvas {
+    /* For canvas rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+game-wrapper canvas {
+    border-top: solid 1px #000;
+    border-bottom: solid 1px #000;
+    user-select: none;
+    filter: saturate(1.5);
+}
+
+game-wrapper game-stage-wrapper {
+    display: block;
+    user-select: none;
+    position: relative;
+}
+
+game-wrapper game-builder-wrapper {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 50%;
+    border-top: solid 2.5px #000;
+    background-color: #fff;
+
+    transition: bottom 0.5s;
+}
+
+game-wrapper click-field {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+game-wrapper hex-grid {
+    pointer-events: none;
+    position: absolute;
+    z-index: -1;
+    display: block;
+    opacity: 0.125;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+}
+
+game-wrapper game-node-dragging-overlay {
+    display: block;
+    background-color: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    z-index: 3;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: hidden;
+}
+
+game-wrapper game-builder-wrapper node-toolbar {
+    position: absolute;
+    display: block;
+    z-index: 5;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 25px;
+    text-align: left;
+}
+
+game-wrapper game-builder-wrapper node-toolbar button,
+game-wrapper game-builder-wrapper node-toolbar input {
+    display: inline-block;
+}
+
+game-wrapper game-builder-wrapper node-bin {
+    pointer-events: none;
+    position: absolute;
+    display: block;
+    z-index: 5;
+    height: 25px;
+    width: 25px;
+    bottom: 25px;
+    right: 25px;
+}
+
+game-wrapper game-builder-wrapper node-bin:after {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 25px;
+    text-align: center;
+    content: "🗑️";
+    font-size: 25px;
+    line-height: 25px;
+}
+
+game-wrapper game-builder-wrapper show-hide-button {
+    position: absolute;
+    display: block;
+    right: 0px;
+    top: -51px;
+    height: 50px;
+    width: 100px;
+    background-color: black;
+    color: #fff;
+    cursor: pointer;
 }

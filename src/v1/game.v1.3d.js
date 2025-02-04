@@ -11,6 +11,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
+import { NODESIZE_DEFAULT } from './game.v1.references'
 
 const gameWrapper = document.getElementById('game-wrapper')
 const gameStageWrapper = document.createElement("game-stage-wrapper");
@@ -217,6 +218,92 @@ function hit3DFromCanvasClickPos(clickPos) {
     return false
 }
 
+// Generate positions of all appendage/root nodes for a DNA sequence
+// So converting the node tree into a 2D array of positions
+function generateAbsoluteNodePositions(
+    nodeSize = NODESIZE_DEFAULT,
+    currentNode,
+    allowDetachingParts = false,
+    x = 0,
+    y = 0,
+    level = 0,
+    positionsArray = [],
+    parentNodePos = null,
+    currentNodeAngle = 0
+) {
+    // Prevent null crash
+    if (!currentNode) {
+        console.warn("Null node encountered while generating positions")
+        return;
+    }
+
+    if (currentNode.detach === true && !allowDetachingParts) {
+        // Do not add entirety of detaching node
+        return;
+    }
+
+    if (currentNode.builderUIBeingDragged) {
+        // Support UI effect by not drawing the node in
+        // its real place while it is being "dragged"
+        return;
+    }
+
+    const currentNodePosIndex = positionsArray.length;
+    const currentNodePosFinal = {
+        x,
+        y,
+        z: 0,
+        detach: currentNode.detach === true,
+        node: currentNode,
+        level,
+        index: currentNodePosIndex,
+        parentNodePos,
+        mesh: null,
+        angle: currentNodeAngle,
+        nodeSize: nodeSize
+    };
+    positionsArray.push(currentNodePosFinal);
+
+    // The distance from parent to child (can tweak for better spacing)
+    const radius = nodeSize * 1.7;
+
+    // For a flat-topped hex, children are spaced at 0°, 60°, 120°, 180°, 240°, 300°
+
+    for (let edgeIndex = 0; edgeIndex < 6; edgeIndex++) {
+        const child = currentNode.children[edgeIndex]
+        if (!child) {
+            continue
+        }
+
+        // Add parentNode and edgeOfParent to child as these are
+        // references the Builder UI uses that must be refreshed
+        child.parentNode = currentNode
+        child.edgeOfParent = parseInt(edgeIndex)
+
+        // Each of the 6 directions for a flat-top hex
+        const childAngle = (edgeIndex * (Math.PI / 3)) + 1.575;
+
+        // Convert polar to cartesian
+        const childX = x + radius * Math.cos(childAngle);
+        const childY = y + radius * Math.sin(childAngle);
+
+        // Recurse
+        generateAbsoluteNodePositions(
+            nodeSize,
+            child,
+            allowDetachingParts,
+            childX,
+            childY,
+            level + 1,
+            positionsArray,
+            currentNodePosFinal,
+            childAngle
+        );
+    }
+
+    return positionsArray;
+}
+
 // Get 3D stage edges
 
 const stageEdges3D = {
@@ -259,5 +346,6 @@ export {
     convertNodePosIntoWorldPos,
     rotateMeshToTarget,
     hit3DFromCanvasClickPos,
-    mousePosTo3DPos
+    mousePosTo3DPos,
+    generateAbsoluteNodePositions
 }

@@ -11,6 +11,10 @@ import { stageEdges3D } from "./game.v1.3d";
 const DNA_NODE_ROLE_APPENDAGE = "DNA_NODE_ROLE_APPENDAGE"
 const DNA_NODE_ROLE_ROOT = "DNA_NODE_ROLE_ROOT"
 
+// Organism body
+
+const NODESIZE_DEFAULT = 6
+
 // Motion
 
 const MOTOR_MAX_POWER = 0.1
@@ -31,6 +35,7 @@ const MIN_MOTOR_NODES_WITHOUT_ENERGY_CON = 0.5
 export {
     DNA_NODE_ROLE_APPENDAGE,
     DNA_NODE_ROLE_ROOT,
+    NODESIZE_DEFAULT,
     MOTOR_MAX_POWER,
     MAX_DIST_IN_TICK_X,
     MAX_DIST_IN_TICK_Y,

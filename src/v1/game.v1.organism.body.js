@@ -1,26 +1,25 @@
 /*
 
-    Organism builder
-
-    Constructs a Three JS mesh for an organism by converting
-    its DNA sequence into nodes.
+    Organism Body
 
 */
 
 import * as THREE from 'three';
 import * as ThreeElements from './game.v1.3d'
 import DNA from './game.v1.dna';
-
-const NODESIZE_DEFAULT = 6
+import { NODESIZE_DEFAULT } from './game.v1.references'
 
 // Hexagon (for builder)
 
-function generateHexagonGeometry(zAngle = 0) {
+function generateHexagonGeometry(
+    nodeSize = NODESIZE_DEFAULT,
+    zAngle = 0
+) {
     // Create a new shape for the hexagon
     const hexShape = new THREE.Shape();
 
     // Define a radius for the hexagon
-    const radius = NODESIZE_DEFAULT;
+    const radius = nodeSize;
 
     // Move to the starting point
     hexShape.moveTo(
@@ -69,82 +68,6 @@ function generateHexagonGeometry(zAngle = 0) {
     return geom
 }
 
-// Generate positions of all appendage/root nodes in world space
-// So converting the node tree into a 2D array of positions
-
-function generateAbsoluteNodePositions(
-    currentNode,
-    allowDetachingParts = false,
-    x = 0,
-    y = 0,
-    level = 0,
-    positionsArray = [],
-    parentNodePos = null,
-    currentNodeAngle = 0
-) {
-    // Prevent null crash
-    if (!currentNode) {
-        console.warn("Null node encountered while generating positions")
-        return;
-    }
-
-    if (currentNode.detach === true && !allowDetachingParts) {
-        // Do not add entirety of detaching node
-        return;
-    }
-
-    const currentNodePosIndex = positionsArray.length;
-    const currentNodePosFinal = {
-        x,
-        y,
-        z: 0,
-        detach: currentNode.detach === true,
-        node: currentNode,
-        level,
-        index: currentNodePosIndex,
-        parentNodePos,
-        mesh: null,
-        angle: currentNodeAngle
-    };
-    positionsArray.push(currentNodePosFinal);
-
-    // The distance from parent to child (can tweak for better spacing)
-    const radius = NODESIZE_DEFAULT * 1.7;
-
-    // For a flat-topped hex, children are spaced at 0°, 60°, 120°, 180°, 240°, 300°
-
-    for (const edgeIndex in Object.keys(currentNode.children)) {
-        const child = currentNode.children[edgeIndex]
-        if (!child) continue;
-
-        // Add parentNode and edgeOfParent to child as these are
-        // references the Builder UI uses that must be refreshed
-        child.parentNode = currentNode
-        child.edgeOfParent = edgeIndex
-
-        // Each of the 6 directions for a flat-top hex
-        const childAngle = (edgeIndex * (Math.PI / 3)) + 1.575;
-
-        // Convert polar to cartesian
-        const childX = x + radius * Math.cos(childAngle);
-        const childY = y + radius * Math.sin(childAngle);
-
-        // Recurse
-        generateAbsoluteNodePositions(
-            child,
-            allowDetachingParts,
-            childX,
-            childY,
-            level + 1,
-            positionsArray,
-            currentNodePosFinal,
-            childAngle
-        );
-    }
-
-    return positionsArray;
-}
-
 // Build either a union mesh or tree of parent and child meshes
 // from nodes or node positions
 
@@ -170,7 +93,7 @@ function buildBodyFromNodePositions(
 
         // Hexagon node
         const nodeGeom = generateHexagonGeometry(
-            pos.node.block.cut,
+            pos.nodeSize,
             pos.angle
         )
         const nodeMaterial = new THREE.MeshBasicMaterial(
@@ -269,7 +192,8 @@ class OrganismBody {
     }
     rebuild() {
         // Update node positions
-        this.nodePositions = generateAbsoluteNodePositions(
+        this.nodePositions = ThreeElements.generateAbsoluteNodePositions(
+            NODESIZE_DEFAULT,
             this.dnaModel,
             this.buildDetachingParts
         )

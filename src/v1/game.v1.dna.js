@@ -46,6 +46,45 @@ class DNA {
         this.parentNode = parentNode
         this.edgeOfParent = edgeOfParent
     }
+    addChild(blockTypeName, edge) {
+        // Motor blocks cannot have other motor blocks attached
+
+        if (
+            this.block.typeName == Blocks.BLOCK_TYPENAME_MOTOR &&
+            blockTypeName == Blocks.BLOCK_TYPENAME_MOTOR
+        ) {
+            return false
+        }
+
+        // Create node
+
+        const node = new DNA(
+            /* role: */ "appendage",
+            /* blockTypeName: */ blockTypeName,
+            /* children: */[],
+            /* detach: */ blockTypeName == Blocks.BLOCK_TYPENAME_DETACHING
+        )
+
+        // Add to parent
+
+        if (!isNaN(edge)) {
+            const edgeAsIndex = parseInt(edge)
+            this.children[edgeAsIndex] = node
+
+            // These values will be added in the building process
+            // anyway, but until then
+            node.parentNode = this
+            node.edgeOfParent = edgeAsIndex
+        } else {
+            throw new Error("Specified edge of parent was invalid")
+        }
+
+        return node
+    }
+    deleteChild(node) {
+        // Null method
+        this.children[node.edgeOfParent] = null
+    }
     getStaticClone() {
         // Clone self without non-static references
         // As these are both useless to store

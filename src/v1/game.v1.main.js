@@ -9,6 +9,7 @@ import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import Pool from "./game.v1.pool"
 import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT } from "./game.v1.references"
+import DNABuilderUI from "./game.v1.dna.builder.ui"
 
 class Main {
     constructor(presetPoolData) {
@@ -32,39 +33,6 @@ class Main {
     init() {
         const currentPool = this.currentPool
 
-        // Demo DNA
-
-        const demoDna = new DNA(
-            DNA_NODE_ROLE_ROOT,
-            BLOCK_TYPENAME_HEART,
-            [
-                new DNA(),
-                new DNA(),
-                new DNA(),
-                new DNA(
-                    DNA_NODE_ROLE_APPENDAGE,
-                    BLOCK_TYPENAME_MOTOR
-                ),
-                new DNA(),
-                new DNA(
-                    DNA_NODE_ROLE_APPENDAGE,
-                    BLOCK_TYPENAME_MOTOR
-                )
-            ]
-        )
-
-        // Create demo organisms
-
-        const organism1 = new Organism(
-            // Clone demo
-            new DNA(
-                demoDna.role,
-                demoDna.block.typeName,
-                demoDna.children
-            )
-        )
-        currentPool.addOrganism(organism1)
-
         // Update loop
 
         const UPDATES_PER_SEC = 24
@@ -78,6 +46,29 @@ class Main {
 
         console.log(currentPool)
         window.cL = currentPool
+
+        // Set player organism
+
+        // Create demo organisms
+
+        const demoDna = new DNA(
+            DNA_NODE_ROLE_ROOT,
+            BLOCK_TYPENAME_HEART,
+            [
+                new DNA(),
+                new DNA(),
+                new DNA(),
+                new DNA(),
+                new DNA(),
+                new DNA()
+            ]
+        )
+
+        // Set up UI
+
+        const builderUi = new DNABuilderUI(demoDna)
+        this.gameWrapper.appendChild(builderUi.builderWrapper)
+        builderUi.initDOM()
     }
 }
 
