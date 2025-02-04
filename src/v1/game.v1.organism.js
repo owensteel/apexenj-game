@@ -10,6 +10,7 @@ import DNA from "./game.v1.dna"
 import OrganismBody from "./game.v1.organism.body"
 import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT } from "./game.v1.references"
 import { stageEdges3D } from './game.v1.3d';
+import { generateID } from './game.v1.utils';
 
 // "Bump" organism off of canvas edges
 
@@ -79,7 +80,7 @@ class Organism {
             throw new Error("Organism must be initialised with a DNA model")
         }
         this.dnaModel = dnaModel
-        this.id = String(Math.random())
+        this.id = generateID()
 
         // To be generated
         this.body = new OrganismBody(this.dnaModel)

@@ -36,6 +36,16 @@ class Pool {
         this.organisms.push(organism)
         ThreeElements.scene.add(organism.body.mesh)
     }
+    removeOrganism(organism) {
+        if (organism instanceof Organism == false) {
+            throw new Error("Organism must be instance of Organism class")
+        }
+        const oIndex = this.organisms.findIndex((oS) => {
+            return oS.id == organism.id
+        })
+        this.organisms.splice(oIndex, 1)
+        ThreeElements.scene.remove(organism.body.mesh)
+    }
     updateLife() {
         // Update all organism motion and living states
         for (const organism of this.organisms) {
@@ -43,6 +53,11 @@ class Pool {
             organism.updateLivingState()
             // Update organism motion
             organism.updateMovement()
+            // Death check
+            if (!organism.alive) {
+                console.log("Death", organism.id)
+                this.removeOrganism(organism)
+            }
         }
         // Sync organisms with each other for interactions
         // (must be separate loop, ALL organisms must be
