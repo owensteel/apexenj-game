@@ -14,6 +14,9 @@ class Main {
     constructor(presetPoolData) {
         this.presetPoolData = presetPoolData
 
+        // Grab canvas
+        this.gameWrapper = document.getElementById("game-wrapper")
+
         // Create or open Pool
         if (this.presetPoolData) {
             this.currentPool = new Pool(
@@ -23,6 +26,8 @@ class Main {
         } else {
             this.currentPool = new Pool()
         }
+
+        this.init()
     }
     init() {
         const currentPool = this.currentPool
@@ -60,20 +65,14 @@ class Main {
         )
         currentPool.addOrganism(organism1)
 
-        const organism2Dna = new DNA(
-            demoDna.role,
-            demoDna.block.typeName,
-            demoDna.children
-        )
-        const organism2 = new Organism(organism2Dna)
-        currentPool.addOrganism(organism2)
-
         // Update loop
 
         const UPDATES_PER_SEC = 24
-        setInterval(() => {
+        function updateLoop() {
             currentPool.updateLife()
-        }, 1000 / UPDATES_PER_SEC)
+            setTimeout(updateLoop, 1000 / UPDATES_PER_SEC)
+        }
+        updateLoop()
 
         // Debug log
 
