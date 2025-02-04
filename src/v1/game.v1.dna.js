@@ -14,6 +14,7 @@ class DNA {
         blockTypeName = Blocks.BLOCK_TYPENAME_DEFAULT,
         children = [],
         detach = false,
+        // Non-static values (references only)
         parentNode = null,
         edgeOfParent = null
     ) {
@@ -29,6 +30,9 @@ class DNA {
         // Convert any object children into DNA instances
         this.children = new Array(6)
         children.forEach((childNode, cI) => {
+            if (!childNode) {
+                return
+            }
             this.children[cI] = new DNA(
                 childNode.role,
                 childNode.block.typeName,
@@ -48,7 +52,9 @@ class DNA {
         // And cause fatal circular references
         return {
             role: this.role,
-            blockTypeName: this.block.typeName,
+            block: {
+                typeName: this.block.typeName
+            },
             children: this.children.map((child) => {
                 if (!child) {
                     return null

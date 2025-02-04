@@ -5,6 +5,7 @@
 */
 
 import * as ThreeElements from "./game.v1.3d"
+import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
 import { generateID } from "./game.v1.utils"
@@ -12,12 +13,19 @@ import { generateID } from "./game.v1.utils"
 // Pool model
 
 class Pool {
-    constructor(id = generateID(), organisms = []) {
+    constructor(id = generateID(), presetOrganisms = []) {
         this.id = id
-        this.organisms = organisms
+        this.organisms = []
 
         // Pre-add any preset organisms
-        this.organisms.forEach((organism) => {
+        presetOrganisms.forEach((presetOrganismDNAJson) => {
+            const presetOrganismDNA = new DNA(
+                presetOrganismDNAJson.role,
+                presetOrganismDNAJson.block.typeName,
+                presetOrganismDNAJson.children,
+                presetOrganismDNAJson.detach
+            )
+            const organism = new Organism(presetOrganismDNA)
             this.addOrganism(organism)
         })
     }

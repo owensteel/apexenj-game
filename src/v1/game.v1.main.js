@@ -11,7 +11,7 @@ import Pool from "./game.v1.pool"
 import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT } from "./game.v1.references"
 
 class Main {
-    constructor(presetPoolData = {}) {
+    constructor(presetPoolData) {
         this.presetPoolData = presetPoolData
 
         // Create or open Pool
