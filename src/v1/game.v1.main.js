@@ -7,7 +7,7 @@
 import { BLOCK_TYPENAME_HEART } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import Pool from "./game.v1.pool"
-import { DNA_NODE_ROLE_ROOT } from "./game.v1.references"
+import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 
 const FLAG_ENABLE_POOL_TIME_SYNC = false
@@ -24,7 +24,7 @@ class Main {
             this.currentPool = new Pool(
                 this.presetPoolData.id,
                 this.presetPoolData.organisms,
-                this.presetPoolData.creationTime
+                this.presetPoolData.timeSync
             )
         } else {
             this.currentPool = new Pool()
@@ -35,27 +35,13 @@ class Main {
     init() {
         const currentPool = this.currentPool
 
-        // Updates
-
-        const UPDATES_PER_SEC = 24
-
         // Update Pool to current time
 
         if (FLAG_ENABLE_POOL_TIME_SYNC) {
-            let timeDeltaSecs = Math.round(
-                (Date.now() - currentPool.creationTime) / 1000
-            )
-            console.log("Updates to catch-up on:", timeDeltaSecs * UPDATES_PER_SEC)
-            while (timeDeltaSecs > 0) {
-                // Update UPS for each second since starting
-                for (let uI = 0; uI < UPDATES_PER_SEC; uI++) {
-                    currentPool.updateLife()
-                }
-                timeDeltaSecs--
-            }
+            currentPool.syncLifeToTime(Date.now())
         }
 
-        // Update loop
+        // Pool update loop
 
         function updateLoop() {
             currentPool.updateLife()

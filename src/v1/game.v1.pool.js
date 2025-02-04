@@ -9,6 +9,7 @@ import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
 import { generateID } from "./game.v1.utils"
+import { UPDATES_PER_SEC } from "./game.v1.references"
 
 // Pool model
 
@@ -62,9 +63,16 @@ class Pool {
         this.organisms.splice(oIndex, 1)
         ThreeElements.scene.remove(organism.body.mesh)
     }
-    updateLife() {
+    updateLife(timeOfUpdate = Date.now()) {
+        // Only get organisms that have been created by the time
+        // of this update
+        const existingOrganisms = this.organisms.filter((organism) => {
+            const orgCreationTime = this.timeSync.organisms[organism.id]
+            return (orgCreationTime < timeOfUpdate)
+        })
+
         // Update all organism motion and living states
-        for (const organism of this.organisms) {
+        for (const organism of existingOrganisms) {
             // Update organism energy/state
             organism.updateLivingState()
             // Update organism motion
@@ -78,12 +86,30 @@ class Pool {
         // Sync organisms with each other for interactions
         // (must be separate loop, ALL organisms must be
         // updated before any syncing can occur)
-        for (const organism of this.organisms) {
-            for (const opponent of this.organisms) {
+        for (const organism of existingOrganisms) {
+            for (const opponent of existingOrganisms) {
                 if (opponent.id !== organism.id) {
                     syncOrganisms(organism, opponent)
                 }
             }
+        }
+    }
+    syncLifeToTime(timeToUpdateTo = Date.now()) {
+        if (timeToUpdateTo < this.timeSync.pool) {
+            throw new Error("Impossible time specified")
+        }
+
+        let timeDeltaSecs = Math.round(
+            (timeToUpdateTo - this.timeSync.pool) / 1000
+        )
+        console.log("Updates to catch-up on:", timeDeltaSecs * UPDATES_PER_SEC)
+        while (timeDeltaSecs > 0) {
+            const timeOfThisUpdate = timeToUpdateTo - timeDeltaSecs
+            // Update UPS for each second since starting
+            for (let uI = 0; uI < UPDATES_PER_SEC; uI++) {
+                this.updateLife(timeOfThisUpdate)
+            }
+            timeDeltaSecs--
         }
     }
     exportToJson() {

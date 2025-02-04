@@ -2,7 +2,7 @@
     "id": "7964389788946777",
     "organisms": [
         {
-            "id": "6663219152980788",
+            "id": "8173669128375143",
             "dna": {
                 "role": "DNA_NODE_ROLE_ROOT",
                 "block": {
@@ -77,7 +77,21 @@
                             null,
                             null,
                             null,
-                            null,
+                            {
+                                "role": "appendage",
+                                "block": {
+                                    "typeName": "motor"
+                                },
+                                "children": [
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                                ],
+                                "detach": false
+                            },
                             null,
                             null
                         ],
@@ -135,7 +149,8 @@
     "timeSync": {
         "pool": 1738696266991,
         "organisms": {
-            "6663219152980788": 1738696271029
+            "6663219152980788": 1738696271029,
+            "8173669128375143": 1738697506717
         }
     }
 }

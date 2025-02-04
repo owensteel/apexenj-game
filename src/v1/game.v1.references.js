@@ -6,6 +6,10 @@
 
 import { stageEdges3D } from "./game.v1.3d";
 
+// Rendering
+
+const UPDATES_PER_SEC = 24
+
 // DNA nodes
 
 const DNA_NODE_ROLE_APPENDAGE = "DNA_NODE_ROLE_APPENDAGE"
@@ -33,6 +37,7 @@ const MIN_NODES_WITHOUT_ENERGY_CON = 6
 const MIN_MOTOR_NODES_WITHOUT_ENERGY_CON = 0.5
 
 export {
+    UPDATES_PER_SEC,
     DNA_NODE_ROLE_APPENDAGE,
     DNA_NODE_ROLE_ROOT,
     NODESIZE_DEFAULT,
