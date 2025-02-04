@@ -161,10 +161,16 @@ game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button {
     z-index: 3;
     top: 100px;
     right: 25px;
+    background-color: var(--main-blue);
 }
 
 game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button:after {
-    background-image: url("../icons/checkmark-done-outline.svg")
+    background-image: url("../icons/checkmark-done-outline.svg");
+    filter: invert();
+}
+
+game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button:active {
+    background-color: #000;
 }
 
 game-wrapper click-field {
