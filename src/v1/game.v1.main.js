@@ -4,11 +4,10 @@
 
 */
 
-import { BLOCK_TYPENAME_HEART, BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
+import { BLOCK_TYPENAME_HEART } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
-import Organism from "./game.v1.organism"
 import Pool from "./game.v1.pool"
-import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT } from "./game.v1.references"
+import { DNA_NODE_ROLE_ROOT } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 
 class Main {
@@ -47,9 +46,7 @@ class Main {
         console.log(currentPool)
         window.cL = currentPool
 
-        // Set player organism
-
-        // Create demo organisms
+        // Create player DNA
 
         const demoDna = new DNA(
             DNA_NODE_ROLE_ROOT,
@@ -66,7 +63,10 @@ class Main {
 
         // Set up UI
 
-        const builderUi = new DNABuilderUI(demoDna)
+        const builderUi = new DNABuilderUI(
+            demoDna,
+            currentPool
+        )
         this.gameWrapper.appendChild(builderUi.builderWrapper)
         builderUi.initDOM()
     }

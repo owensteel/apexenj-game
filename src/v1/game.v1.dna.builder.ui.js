@@ -9,13 +9,23 @@ import * as Blocks from "./game.v1.blocks";
 import { getGlobalBoundingBoxOfHTMLElement } from "./game.v1.utils";
 import { NODESIZE_DEFAULT } from "./game.v1.references";
 import { generateAbsoluteNodePositions } from "./game.v1.3d";
+import Pool from "./game.v1.pool";
+import Organism from "./game.v1.organism";
 
 class DNABuilderUI {
-    constructor(dnaModel) {
+    constructor(
+        dnaModel,
+        currentPool
+    ) {
         if (!(dnaModel instanceof DNA)) {
             throw new Error("Builder UI must have DNA model");
         }
         this.focusedDnaModel = dnaModel;
+
+        if (!(currentPool instanceof Pool)) {
+            throw new Error("Builder UI must have reference to current Pool");
+        }
+        this.currentPool = currentPool;
 
         // Hex grid configuration
         this.hexGrid = {
@@ -231,6 +241,7 @@ class DNABuilderUI {
     // Configures the toolbar UI.
     _setBuilderControls() {
         // TODO: Proper node selection library/carousel
+
         const nodeBlockSelector = document.createElement("select");
         this.builderToolbar.appendChild(nodeBlockSelector);
 
@@ -245,6 +256,7 @@ class DNABuilderUI {
         };
 
         // Show/hide buttons
+
         const hideButton = document.createElement("button")
         hideButton.className = "builder-ui-hide-button"
         hideButton.onclick = () => {
@@ -258,6 +270,17 @@ class DNABuilderUI {
             this.showUI()
         }
         document.getElementById("game-wrapper").appendChild(showButton)
+
+        // Deploy organism
+
+        const deployOrganismButton = document.createElement("button")
+        deployOrganismButton.className = "builder-ui-deploy-organism-button"
+        deployOrganismButton.onclick = () => {
+            this.hideUI()
+            const newOrganism = new Organism(this.focusedDnaModel)
+            this.currentPool.addOrganism(newOrganism)
+        }
+        this.builderWrapper.appendChild(deployOrganismButton)
     }
 
     // Mouse & Touch Event Handlers

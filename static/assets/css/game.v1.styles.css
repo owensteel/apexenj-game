@@ -110,6 +110,33 @@ game-wrapper game-builder-wrapper {
     transition: bottom 0.5s;
 }
 
+game-wrapper .builder-ui-show-button,
+game-wrapper game-builder-wrapper .builder-ui-hide-button,
+game-wrapper game-builder-wrapper .node-bin,
+game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button {
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+
+game-wrapper .builder-ui-show-button:after,
+game-wrapper game-builder-wrapper .builder-ui-hide-button:after,
+game-wrapper game-builder-wrapper .node-bin:after,
+game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 100%;
+    width: 100%;
+    background-size: 25px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
 game-wrapper .builder-ui-show-button {
     z-index: 1;
     bottom: 25px;
@@ -130,29 +157,14 @@ game-wrapper .builder-ui-hide-button:after {
     background-image: url("../icons/eye-off-outline.svg")
 }
 
-game-wrapper .builder-ui-show-button,
-game-wrapper game-builder-wrapper .builder-ui-hide-button,
-game-wrapper game-builder-wrapper .node-bin {
-    position: absolute;
-    height: 50px;
-    width: 50px;
+game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button {
+    z-index: 3;
+    top: 100px;
+    right: 25px;
 }
 
-game-wrapper .builder-ui-show-button:after,
-game-wrapper game-builder-wrapper .builder-ui-hide-button:after,
-game-wrapper game-builder-wrapper .node-bin:after {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    height: 100%;
-    width: 100%;
-    background-size: 25px;
-    background-position: center center;
-    background-repeat: no-repeat;
+game-wrapper game-builder-wrapper .builder-ui-deploy-organism-button:after {
+    background-image: url("../icons/checkmark-done-outline.svg")
 }
 
 game-wrapper click-field {
