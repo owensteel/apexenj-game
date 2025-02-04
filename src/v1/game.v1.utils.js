@@ -6,6 +6,10 @@
 
 */
 
+function generateID() {
+    return String(Math.random()).split(".")[1]
+}
+
 function cloneObject(obj = {}, shallow = true) {
     if (shallow) {
         const clone = {}
@@ -46,4 +50,4 @@ function getGlobalBoundingBoxOfHTMLElement(element) {
     return globalRect;
 }
 
-export { cloneObject, cloneArray, getGlobalBoundingBoxOfHTMLElement }
+export { generateID, cloneObject, cloneArray, getGlobalBoundingBoxOfHTMLElement }

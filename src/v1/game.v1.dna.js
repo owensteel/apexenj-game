@@ -13,7 +13,9 @@ class DNA {
         role = DNA_NODE_ROLE_APPENDAGE,
         blockTypeName = Blocks.BLOCK_TYPENAME_DEFAULT,
         children = [],
-        detach = false
+        detach = false,
+        parentNode = null,
+        edgeOfParent = null
     ) {
         this.role = role
 
@@ -35,9 +37,32 @@ class DNA {
             )
         })
         this.detach = detach
+
+        // Hierarchal references (non-static)
+        this.parentNode = parentNode
+        this.edgeOfParent = edgeOfParent
+    }
+    getStaticClone() {
+        // Clone self without non-static references
+        // As these are both useless to store
+        // And cause fatal circular references
+        return {
+            role: this.role,
+            blockTypeName: this.block.typeName,
+            children: this.children.map((child) => {
+                if (!child) {
+                    return null
+                }
+                // Make sure all children are also
+                // static clones
+                return child.getStaticClone()
+            }),
+            detach: this.detach
+        }
     }
     exportToJson() {
-        return JSON.stringify(this)
+        // Export static clone
+        return JSON.stringify(this.getStaticClone())
     }
 }
 

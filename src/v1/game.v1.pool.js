@@ -7,16 +7,19 @@
 import * as ThreeElements from "./game.v1.3d"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
+import { generateID } from "./game.v1.utils"
 
 // Pool model
 
 class Pool {
-    constructor(id) {
-        if (!id) {
-            throw new Error("Pool ID must be specified")
-        }
+    constructor(id = generateID(), organisms = []) {
         this.id = id
-        this.organisms = []
+        this.organisms = organisms
+
+        // Pre-add any preset organisms
+        this.organisms.forEach((organism) => {
+            this.addOrganism(organism)
+        })
     }
     addOrganism(organism) {
         if (organism instanceof Organism == false) {
@@ -43,6 +46,15 @@ class Pool {
                 }
             }
         }
+    }
+    exportToJson() {
+        return JSON.stringify({
+            id: this.id,
+            // Get static clone of every organism
+            organisms: this.organisms.map((organism) => {
+                return organism.dnaModel.getStaticClone()
+            })
+        })
     }
 }
 

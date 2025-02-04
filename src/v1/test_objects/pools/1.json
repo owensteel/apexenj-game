@@ -1,0 +1,175 @@
+{
+    "id": "05818711027536971",
+    "organisms": [
+        {
+            "role": "DNA_NODE_ROLE_ROOT",
+            "blockTypeName": "heart",
+            "children": [
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "motor",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "motor",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                }
+            ],
+            "detach": false
+        },
+        {
+            "role": "DNA_NODE_ROLE_ROOT",
+            "blockTypeName": "heart",
+            "children": [
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "motor",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "default",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                },
+                {
+                    "role": "DNA_NODE_ROLE_APPENDAGE",
+                    "blockTypeName": "motor",
+                    "children": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "detach": false
+                }
+            ],
+            "detach": false
+        }
+    ]
+}

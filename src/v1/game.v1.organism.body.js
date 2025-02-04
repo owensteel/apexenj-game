@@ -117,8 +117,8 @@ function generateAbsoluteNodePositions(
         const child = currentNode.children[edgeIndex]
         if (!child) continue;
 
-        // Add parentNode and edgeOfParent to child as these
-        // are references that must be refreshed
+        // Add parentNode and edgeOfParent to child as these are
+        // references the Builder UI uses that must be refreshed
         child.parentNode = currentNode
         child.edgeOfParent = edgeIndex
 
