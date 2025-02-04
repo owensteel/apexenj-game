@@ -27,9 +27,6 @@ class DefaultBlock {
     setColor(color) {
         this.color = color
     }
-    setCut(cutType) {
-        this.cut = cutType
-    }
 }
 PlayerAccessibleBlockTypeNamesList.push("default")
 
