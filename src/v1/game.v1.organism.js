@@ -75,12 +75,12 @@ function bumpCanvasEdges(organism) {
 // Organism model
 
 class Organism {
-    constructor(dnaModel) {
+    constructor(dnaModel, id = generateID()) {
         if (dnaModel instanceof DNA == false) {
             throw new Error("Organism must be initialised with a DNA model")
         }
         this.dnaModel = dnaModel
-        this.id = generateID()
+        this.id = id
 
         // To be generated
         this.body = new OrganismBody(this.dnaModel)

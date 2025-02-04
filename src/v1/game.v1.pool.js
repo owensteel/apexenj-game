@@ -13,19 +13,30 @@ import { generateID } from "./game.v1.utils"
 // Pool model
 
 class Pool {
-    constructor(id = generateID(), presetOrganisms = []) {
+    constructor(id = generateID(), presetOrganisms = [], timeSync) {
         this.id = id
         this.organisms = []
 
+        if (timeSync) {
+            this.timeSync = timeSync
+        } else {
+            this.timeSync = {
+                pool: Date.now(),
+                organisms: {}
+            }
+        }
+
         // Pre-add any preset organisms
-        presetOrganisms.forEach((presetOrganismDNAJson) => {
-            const presetOrganismDNA = new DNA(
-                presetOrganismDNAJson.role,
-                presetOrganismDNAJson.block.typeName,
-                presetOrganismDNAJson.children,
-                presetOrganismDNAJson.detach
+        presetOrganisms.forEach((presetOrganismJson) => {
+            const organism = new Organism(
+                new DNA(
+                    presetOrganismJson.dna.role,
+                    presetOrganismJson.dna.block.typeName,
+                    presetOrganismJson.dna.children,
+                    presetOrganismJson.dna.detach
+                ),
+                presetOrganismJson.id
             )
-            const organism = new Organism(presetOrganismDNA)
             this.addOrganism(organism)
         })
     }
@@ -35,6 +46,11 @@ class Pool {
         }
         this.organisms.push(organism)
         ThreeElements.scene.add(organism.body.mesh)
+
+        // Save creation time for syncing
+        if (organism.id in this.timeSync.organisms == false) {
+            this.timeSync.organisms[organism.id] = Date.now()
+        }
     }
     removeOrganism(organism) {
         if (organism instanceof Organism == false) {
@@ -73,10 +89,14 @@ class Pool {
     exportToJson() {
         return JSON.stringify({
             id: this.id,
-            // Get static clone of every organism
+            // Save only basic static data about organism
             organisms: this.organisms.map((organism) => {
-                return organism.dnaModel.getStaticClone()
-            })
+                return {
+                    id: organism.id,
+                    dna: organism.dnaModel.getStaticClone()
+                }
+            }),
+            timeSync: this.timeSync
         })
     }
 }
