@@ -36,6 +36,7 @@ class DNABuilderUI {
 
         // Init root DOM element
         this.builderWrapper = document.createElement("game-builder-wrapper");
+        this.UIisHidden = false;
     }
 
     initDOM() {
@@ -58,7 +59,7 @@ class DNABuilderUI {
         this.builderWrapper.appendChild(this.nodeBin);
 
         // Setup Builder Toolbar (instance-specific UI elements)
-        this._setBuilderToolbar();
+        this._setBuilderControls();
 
         // Bind event listeners (using arrow functions to preserve context)
         this.builderClickField.addEventListener("click", (e) => this._nodeClickHandler(e));
@@ -80,6 +81,20 @@ class DNABuilderUI {
         this._generateHexagonGrid();
         this.builderHexGrid.style.backgroundImage = `url(${this.hexGrid.image})`;
         this._renderBuilderUIVisual();
+    }
+
+    showUI() {
+        if (this.UIisHidden) {
+            this.builderWrapper.style.bottom = "";
+            this.UIisHidden = false
+        }
+    }
+
+    hideUI() {
+        if (!this.UIisHidden) {
+            this.builderWrapper.style.bottom = -this.builderWrapper.clientHeight;
+            this.UIisHidden = true
+        }
     }
 
     // Internal Utility Methods (Instance-Specific)
@@ -213,7 +228,8 @@ class DNABuilderUI {
     }
 
     // Configures the toolbar UI.
-    _setBuilderToolbar() {
+    _setBuilderControls() {
+        // TODO: Proper node selection library/carousel
         const nodeBlockSelector = document.createElement("select");
         this.builderToolbar.appendChild(nodeBlockSelector);
 
@@ -227,22 +243,20 @@ class DNABuilderUI {
             this.selectedBlockType = nodeBlockSelector.value;
         };
 
-        // Add a show/hide button for the builder UI.
-        const showHideButton = document.createElement("show-hide-button");
-        showHideButton.innerHTML = "See level";
-        this.builderWrapper.appendChild(showHideButton);
+        // Show/hide buttons
+        const hideButton = document.createElement("button")
+        hideButton.className = "builder-ui-hide-button"
+        hideButton.onclick = () => {
+            this.hideUI()
+        }
+        this.builderWrapper.appendChild(hideButton)
 
-        let shbHidden = false;
-        showHideButton.onclick = () => {
-            if (shbHidden) {
-                showHideButton.innerHTML = "See level";
-                this.builderWrapper.style.bottom = "";
-            } else {
-                showHideButton.innerHTML = "Open builder";
-                this.builderWrapper.style.bottom = -this.builderWrapper.clientHeight;
-            }
-            shbHidden = !shbHidden;
-        };
+        const showButton = document.createElement("button")
+        showButton.className = "builder-ui-show-button"
+        showButton.onclick = () => {
+            this.showUI()
+        }
+        document.getElementById("game-wrapper").appendChild(showButton)
     }
 
     // Mouse & Touch Event Handlers
@@ -429,6 +443,7 @@ class DNABuilderUI {
         const cH = this.builderCanvas.clientHeight;
 
         ctx.clearRect(0, 0, cW, cH);
+        ctx.filter = "saturate(1.5)"
 
         // Prepares a hexagon path for reuse in drawing.
         const prepareHexagonPath = (cx, cy, side) => {
