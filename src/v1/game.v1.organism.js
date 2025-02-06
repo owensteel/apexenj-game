@@ -146,17 +146,14 @@ class Organism {
     // Apply velocity factoring in motors and current
     // rotation
     // And bump canvas edges
-    updateMovement() {
+    updateMovement(animationEffectsOnly = false) {
         if (this.body.mesh == null) {
             return
         }
 
-        // Start with the organism's base velocity:
+        // Animations/effects
 
-        this.appliedVelocity.x = this.velocity.x;
-        this.appliedVelocity.y = this.velocity.y;
-
-        // Gather motor effects in some combined vector:
+        // Motor nodes
 
         let totalMotorX = 0;
         let totalMotorY = 0;
@@ -192,6 +189,18 @@ class Organism {
                 motorNodePos.mesh.rotateOnAxis(axis, spinAmount);
             }
         }
+
+        // Finish here if we are only updating the
+        // animations/effects for this organism
+        // (e.g if movement is controlled by a server)
+        if (animationEffectsOnly) {
+            return
+        }
+
+        // Start with the organism's base velocity:
+
+        this.appliedVelocity.x = this.velocity.x;
+        this.appliedVelocity.y = this.velocity.y;
 
         // Add the total motor effect to the applied velocity
 

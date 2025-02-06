@@ -7,13 +7,29 @@
 import { BLOCK_TYPENAME_HEART } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import Pool from "./game.v1.pool"
-import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
+import { DNA_NODE_ROLE_ROOT } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 
-const FLAG_ENABLE_POOL_TIME_SYNC = false
-
 class Main {
-    constructor(presetPoolData) {
+    constructor(
+        presetPoolData,
+        multiplayerSocket,
+        multiplayerRole
+    ) {
+        // Multiplayer (if provided)
+        this.multiplayerSocket = multiplayerSocket
+        if (multiplayerRole) {
+            if (multiplayerRole !== "client" && multiplayerRole !== "host") {
+                throw new Error("Invalid multiplayer role")
+            }
+        } else {
+            if (this.multiplayerSocket) {
+                throw new Error("Multiplayer role must be specified when in multiplayer mode")
+            }
+        }
+        this.multiplayerRole = multiplayerRole
+
+        // Setup pool
         this.presetPoolData = presetPoolData
 
         // Grab canvas
@@ -34,20 +50,6 @@ class Main {
     }
     init() {
         const currentPool = this.currentPool
-
-        // Update Pool to current time
-
-        if (FLAG_ENABLE_POOL_TIME_SYNC) {
-            currentPool.syncLifeToTime(Date.now())
-        }
-
-        // Pool update loop
-
-        function updateLoop() {
-            currentPool.updateLife()
-            setTimeout(updateLoop, 1000 / UPDATES_PER_SEC)
-        }
-        updateLoop()
 
         // Debug log
 
@@ -73,7 +75,9 @@ class Main {
 
         const builderUi = new DNABuilderUI(
             demoDna,
-            currentPool
+            currentPool,
+            // Host doesn't need to update through a socket
+            (this.multiplayerRole == "client") ? this.multiplayerSocket : null
         )
         this.gameWrapper.appendChild(builderUi.builderWrapper)
         builderUi.initDOM()

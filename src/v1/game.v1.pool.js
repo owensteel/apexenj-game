@@ -28,17 +28,8 @@ class Pool {
         }
 
         // Pre-add any preset organisms
-        presetOrganisms.forEach((presetOrganismJson) => {
-            const organism = new Organism(
-                new DNA(
-                    presetOrganismJson.dna.role,
-                    presetOrganismJson.dna.block.typeName,
-                    presetOrganismJson.dna.children,
-                    presetOrganismJson.dna.detach
-                ),
-                presetOrganismJson.id
-            )
-            this.addOrganism(organism)
+        presetOrganisms.forEach((presetOrg) => {
+            this.importOrganism(presetOrg)
         })
     }
     addOrganism(organism) {
@@ -52,6 +43,19 @@ class Pool {
         if (organism.id in this.timeSync.organisms == false) {
             this.timeSync.organisms[organism.id] = Date.now()
         }
+    }
+    importOrganism(presetOrganismJson) {
+        console.log("Importing...", presetOrganismJson)
+        const organism = new Organism(
+            new DNA(
+                presetOrganismJson.dna.role,
+                presetOrganismJson.dna.block.typeName,
+                presetOrganismJson.dna.children,
+                presetOrganismJson.dna.detach
+            ),
+            presetOrganismJson.id
+        )
+        this.addOrganism(organism)
     }
     removeOrganism(organism) {
         if (organism instanceof Organism == false) {
@@ -112,17 +116,67 @@ class Pool {
             timeDeltaSecs--
         }
     }
-    exportToJson() {
-        return JSON.stringify({
+    exportToObj() {
+        return {
             id: this.id,
-            // Save only basic static data about organism
+            // Static data about organism
             organisms: this.organisms.map((organism) => {
-                return {
+                const servOrg = {
                     id: organism.id,
-                    dna: organism.dnaModel.getStaticClone()
+                    dna: organism.dnaModel.getStaticClone(),
+                    state: {
+                        energy: organism.energy
+                    },
+                    body: {
+                        position: organism.body.mesh.position,
+                        rotation: organism.body.mesh.rotation
+                    }
                 }
+                return servOrg
             }),
             timeSync: this.timeSync
+        }
+    }
+    exportToJson() {
+        return JSON.stringify(this.exportToObj())
+    }
+    // Multiplayer
+    syncWithServer(poolData) {
+        // Import any new organisms from server
+        poolData.organisms.forEach((servOrg) => {
+            const realOrg = this.organisms.find((oS) => {
+                return oS.id == servOrg.id
+            })
+            if (!realOrg && "dna" in servOrg) {
+                console.log(`Importing ${servOrg.id}`)
+                this.addOrganism(new Organism(
+                    new DNA(
+                        servOrg.dna.role,
+                        servOrg.dna.block.typeName,
+                        servOrg.dna.children,
+                        servOrg.dna.detach
+                    ),
+                    servOrg.id
+                ))
+            }
+        })
+        // Update all organisms
+        this.organisms.forEach((cliOrg) => {
+            const servOrg = poolData.organisms.find((oS) => {
+                return oS.id == cliOrg.id
+            })
+            if (servOrg) {
+                // Update to server state
+                cliOrg.energy = servOrg.state.energy
+                // Update to server position
+                cliOrg.body.mesh.position.copy(servOrg.body.position)
+                cliOrg.body.mesh.rotation.copy(servOrg.body.rotation)
+                // Update animations
+                cliOrg.updateMovement(true)
+            } else {
+                // No longer exists on server, so remove here
+                this.removeOrganism(cliOrg)
+            }
         })
     }
 }

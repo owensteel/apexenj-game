@@ -15,8 +15,11 @@ import Organism from "./game.v1.organism";
 class DNABuilderUI {
     constructor(
         dnaModel,
-        currentPool
+        currentPool,
+        multiplayerSocket
     ) {
+        this.multiplayerSocket = multiplayerSocket
+
         if (!(dnaModel instanceof DNA)) {
             throw new Error("Builder UI must have DNA model");
         }
@@ -277,8 +280,26 @@ class DNABuilderUI {
         deployOrganismButton.className = "builder-ui-deploy-organism-button"
         deployOrganismButton.onclick = () => {
             this.hideUI()
+
             const newOrganism = new Organism(this.focusedDnaModel)
-            this.currentPool.addOrganism(newOrganism)
+
+            // Send to server if specified
+            if (this.multiplayerSocket) {
+                // Client, needs to be sent to server
+                this.multiplayerSocket.emit(
+                    "pool_new_organism",
+                    {
+                        poolId: this.currentPool.id,
+                        organismData: {
+                            id: newOrganism.id,
+                            dna: newOrganism.dnaModel.getStaticClone()
+                        }
+                    }
+                );
+            } else {
+                // Host, can be added instantly
+                this.currentPool.addOrganism(newOrganism)
+            }
         }
         this.builderWrapper.appendChild(deployOrganismButton)
     }
