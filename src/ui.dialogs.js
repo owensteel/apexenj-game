@@ -34,8 +34,8 @@ function createUiDialog(msg, type = "message") {
 
 function uiConnectionError() {
     return createUiDialog(
-        "Communications with the multiplayer service were disrupted.",
-        "none"
+        "Communications with the multiplayer service were disrupted.<br>Trying to reconnect...",
+        "spinner"
     )
 }
 
