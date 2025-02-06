@@ -8,6 +8,8 @@
 
 import { io } from "socket.io-client";
 
+import * as uiDialogs from "./ui.dialogs"
+
 import Main from "./v1/game.v1.main";
 import { UPDATES_PER_SEC } from "./v1/game.v1.references";
 
@@ -46,6 +48,9 @@ if (!multiplayerMode) {
     }
     const socket = io(serverAddress);
 
+    // Dialog handling
+    let currentOpenDialog = uiDialogs.uiConnectingToService()
+
     // Error handling
     let isConnectedToServer = false
     let hasDisplayedConnectionError = false
@@ -55,14 +60,18 @@ if (!multiplayerMode) {
         console.log("Connected to server with ID:", socket.id);
         socket.emit("pool_connect", { poolId: selectedPoolId });
         isConnectedToServer = true
+        // Reset dialogs
+        currentOpenDialog.close()
         hasDisplayedConnectionError = false
     });
 
     // Handle connection error
     socket.on('connect_error', (err) => {
         console.error('Connection error:', err);
+        // Connection error dialog
         if (!hasDisplayedConnectionError) {
-            alert("Could not connect to server. Please try again later.")
+            currentOpenDialog.close()
+            currentOpenDialog = uiDialogs.uiCouldNotConnect()
             hasDisplayedConnectionError = true
         }
     });
@@ -129,6 +138,13 @@ if (!multiplayerMode) {
     socket.on("disconnect", () => {
         isConnectedToServer = false
         console.log("Disconnected from server");
+
+        // Connection error dialog
+        if (!hasDisplayedConnectionError) {
+            currentOpenDialog.close()
+            currentOpenDialog = uiDialogs.uiConnectionError()
+            hasDisplayedConnectionError = true
+        }
     });
 
 }
