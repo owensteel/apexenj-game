@@ -37,7 +37,7 @@ if (!multiplayerMode) {
     let currentGame;
 
     // Connect to the multiplayer sync server
-    let serverAddress = "https://multiplayer-server.apexenj.com"
+    let serverAddress = "https://multiplayer-service.apexenj.com"
     if (
         window.location.hostname == "localhost" ||
         window.location.hostname == "10.0.0.34"
