@@ -11,6 +11,7 @@
 # production
 /build
 /static/bundle.js
+/static/bundle.js.LICENSE.txt
 
 # misc
 ._*
