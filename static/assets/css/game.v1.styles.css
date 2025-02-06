@@ -1,61 +1,14 @@
 /*
 
-    Styles
-
+    Game styles
+    
 */
 
-/* Common ApexEnj styles */
-
 :root {
+    /* Common ApexEnj colors */
     --main-blue: #04b1fd;
-    --main-green: #01f817
+    --main-green: #5ad585
 }
-
-html,
-body,
-h1,
-h2,
-h3,
-ul,
-li {
-    margin: 0px;
-    padding: 0px;
-}
-
-html,
-body {
-    text-align: center;
-}
-
-button {
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, .15);
-    border-bottom: 4px solid rgba(0, 0, 0, .125);
-    border-radius: 5px;
-    color: #000;
-    cursor: pointer;
-    display: inline-block;
-    font: inherit;
-    font-weight: 700;
-    position: relative;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-user-select: none;
-    white-space: nowrap
-}
-
-button:hover {
-    border-color: rgba(0, 0, 0, .25)
-}
-
-button:active {
-    background-color: #eee;
-    border: 1px solid rgba(0, 0, 0, .15);
-    border-bottom: 4px solid rgba(0, 0, 0, .25);
-    color: #fff !important
-}
-
-/* Game styles */
 
 game-wrapper {
     position: relative;
