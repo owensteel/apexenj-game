@@ -54,15 +54,22 @@ if (!multiplayerMode) {
     // Error handling
     let isConnectedToServer = false
     let hasDisplayedConnectionError = false
+    let hasReceivedFirstUpdate = false
 
     // Listen for connection events
     socket.on("connect", () => {
         console.log("Connected to server with ID:", socket.id);
         socket.emit("pool_connect", { poolId: selectedPoolId });
         isConnectedToServer = true
-        // Reset dialogs
-        currentOpenDialog.close()
-        hasDisplayedConnectionError = false
+
+        // Don't remove "connecting" dialog until first
+        // update has actually been received
+        if (hasReceivedFirstUpdate) {
+            // Remove any connection error dialogs
+            // as we've now connected
+            currentOpenDialog.close()
+            hasDisplayedConnectionError = false
+        }
     });
 
     // Handle connection error
@@ -76,62 +83,70 @@ if (!multiplayerMode) {
         }
     });
 
-    // Listen for server events
-    socket.on("pool_client_update", (poolData) => {
+    // Syncing
+    function syncGameWithServer(stateData, multiplayerRole) {
+        // Update or initialise game
         if (!currentGame) {
             currentGame = new Main(
-                poolData,
+                stateData,
                 socket,
-                "client"
+                multiplayerRole
             )
         }
-        currentGame.currentPool.syncWithServer(poolData)
+        currentGame.currentPool.syncWithServer(stateData)
+
+        // Only remove "connecting" dialog now we've
+        // had first update
+        if (!hasReceivedFirstUpdate) {
+            hasReceivedFirstUpdate = true
+            currentOpenDialog.close()
+        }
+    }
+
+    // Listen for server events
+    socket.on("pool_client_update", (poolData) => {
+        // Sync Pool with server state
+        syncGameWithServer(poolData, "client")
     });
     socket.on("pool_host_init", (poolInitState) => {
-        if (poolInitState) {
-            console.log("This client is the host")
+        if (!poolInitState) {
+            return
+        }
+        console.log("This client is the host")
 
-            if (!currentGame) {
-                currentGame = new Main(
-                    poolInitState,
-                    socket,
-                    "host"
+        // Sync with server's cached state before
+        // serving own state!
+        syncGameWithServer(poolInitState, "host")
+
+        // Start hosting this game
+        const hostUpdateLoop = () => {
+            // Only update if server can receive updates
+            if (isConnectedToServer) {
+                // Update
+                currentGame.currentPool.updateLife()
+                // Send updated state to server
+                // for syncing
+                socket.emit(
+                    "pool_host_sync",
+                    currentGame.currentPool.exportToObj()
+                );
+            }
+            setTimeout(() => {
+                hostUpdateLoop()
+            }, 1000 / UPDATES_PER_SEC)
+        }
+        hostUpdateLoop()
+
+        // Receive any data from other players
+        socket.on("pool_host_update", (data) => {
+            // Import new organism
+            if (data.updateType == "new_organism") {
+                console.log("Adding new organism...")
+                currentGame.currentPool.importOrganism(
+                    data.newOrganismData
                 )
             }
-            // Sync with server's cached state before
-            // serving own state!
-            currentGame.currentPool.syncWithServer(poolInitState)
-
-            // Start hosting this game
-            const hostUpdateLoop = () => {
-                // Only update if server can receive updates
-                if (isConnectedToServer) {
-                    // Update
-                    currentGame.currentPool.updateLife()
-                    // Send updated state to server
-                    // for syncing
-                    socket.emit(
-                        "pool_host_sync",
-                        currentGame.currentPool.exportToObj()
-                    );
-                }
-                setTimeout(() => {
-                    hostUpdateLoop()
-                }, 1000 / UPDATES_PER_SEC)
-            }
-            hostUpdateLoop()
-
-            // Receive any data from other players
-            socket.on("pool_host_update", (data) => {
-                // Import new organism
-                if (data.updateType == "new_organism") {
-                    console.log("Adding new organism...")
-                    currentGame.currentPool.importOrganism(
-                        data.newOrganismData
-                    )
-                }
-            })
-        }
+        })
     })
 
     // Handle disconnection
