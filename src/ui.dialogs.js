@@ -8,7 +8,12 @@ function createUiDialog(msg, type = "message") {
     const dialogOverlay = document.createElement("dialog-overlay")
     document.body.appendChild(dialogOverlay)
 
+    let isOpen = true
+    const getOpenState = () => {
+        return isOpen
+    }
     const close = () => {
+        isOpen = false
         dialogOverlay.remove()
     }
 
@@ -29,7 +34,7 @@ function createUiDialog(msg, type = "message") {
         dialogContentWrapper.innerHTML += "<spinner></spinner>"
     }
 
-    return { close }
+    return { getOpenState, close }
 }
 
 function uiConnectionError() {

@@ -53,7 +53,6 @@ if (!multiplayerMode) {
 
     // Error handling
     let isConnectedToServer = false
-    let hasDisplayedConnectionError = false
     let hasReceivedFirstUpdate = false
 
     // Listen for connection events
@@ -68,7 +67,6 @@ if (!multiplayerMode) {
             // Remove any connection error dialogs
             // as we've now connected
             currentOpenDialog.close()
-            hasDisplayedConnectionError = false
         }
     });
 
@@ -76,10 +74,8 @@ if (!multiplayerMode) {
     socket.on('connect_error', (err) => {
         console.error('Connection error:', err);
         // Connection error dialog
-        if (!hasDisplayedConnectionError) {
-            currentOpenDialog.close()
+        if (!currentOpenDialog.getOpenState()) {
             currentOpenDialog = uiDialogs.uiCouldNotConnect()
-            hasDisplayedConnectionError = true
         }
     });
 
@@ -97,30 +93,27 @@ if (!multiplayerMode) {
 
         // Only remove "connecting" dialog now we've
         // had first update
-        if (!hasReceivedFirstUpdate || hasDisplayedConnectionError) {
+        if (!hasReceivedFirstUpdate || currentOpenDialog.getOpenState()) {
             hasReceivedFirstUpdate = true
-            hasDisplayedConnectionError = false
             currentOpenDialog.close()
         }
     }
 
     // Listen for server events
-    let timeOfLastClientUpdate = 0
+    let timeOfLastClientUpdate = null
     let clientUpdateDelayCheck = null
     socket.on("pool_client_update", (poolData) => {
         // Sync Pool with server state
         syncGameWithServer(poolData, "client")
         // Check for delays
-        const timeNow = Date.now()
-        timeOfLastClientUpdate = timeNow
+        timeOfLastClientUpdate = Date.now()
         clientUpdateDelayCheck = setTimeout(() => {
-            if (timeOfLastClientUpdate == timeNow) {
+            if (Date.now() >= timeOfLastClientUpdate + 1000) {
                 // No updates for a second, so freeze
                 hasReceivedFirstUpdate = false
                 // "Reconnecting" dialog
-                if (!hasDisplayedConnectionError) {
+                if (!currentOpenDialog.getOpenState()) {
                     currentOpenDialog = uiDialogs.uiConnectionError()
-                    hasDisplayedConnectionError = true
                 }
             }
         }, 1000)
@@ -184,10 +177,8 @@ if (!multiplayerMode) {
         console.log("Disconnected from server");
 
         // Connection error dialog
-        if (!hasDisplayedConnectionError) {
-            currentOpenDialog.close()
+        if (!currentOpenDialog.getOpenState()) {
             currentOpenDialog = uiDialogs.uiConnectionError()
-            hasDisplayedConnectionError = true
         }
     });
 
