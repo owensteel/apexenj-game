@@ -15,7 +15,7 @@ import { UPDATES_PER_SEC } from "./v1/game.v1.references";
 
 const UriParams = window.location.pathname.split("/")
 const selectedPoolId = UriParams[1]
-const multiplayerMode = UriParams[2] == "offline"
+const multiplayerMode = UriParams[2] !== "offline"
 
 if (!multiplayerMode || !selectedPoolId) {
     // Private/sandbox Pool
@@ -170,6 +170,21 @@ if (!multiplayerMode || !selectedPoolId) {
         // As user has already "disconnected" anyway
         // This is an edge case for JS timeouts or frozen tabs
         window.location.reload()
+    })
+    socket.on("server_error", (errorMsg) => {
+        console.log("Server error", errorMsg)
+
+        if (currentOpenDialog) {
+            currentOpenDialog.close()
+        }
+
+        switch (errorMsg) {
+            case "pool_noexist":
+                currentOpenDialog = uiDialogs.uiPoolNoExistError()
+                break;
+            default:
+                currentOpenDialog = uiDialogs.uiGenericServerError()
+        }
     })
 
     // Handle disconnection

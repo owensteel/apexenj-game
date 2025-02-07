@@ -10,6 +10,7 @@ module.exports = {
     devServer: {
         static: './static',
         port: 8080, // Default port for the dev server
+        historyApiFallback: true // Redirects 404 to index, allows for URI params
     },
     module: {
         rules: [

@@ -4,7 +4,7 @@
 
 */
 
-function createUiDialog(msg, type = "message") {
+function createUiDialog(msg, controlType = "ok", buttonAction = () => { }) {
     const dialogOverlay = document.createElement("dialog-overlay")
     document.body.appendChild(dialogOverlay)
 
@@ -24,13 +24,16 @@ function createUiDialog(msg, type = "message") {
     dialogContentWrapper.innerHTML = `<p>${msg}</p>`
     dialogBox.appendChild(dialogContentWrapper)
 
-    if (type == "message") {
+    if (controlType == "ok") {
         const dialogButton = document.createElement("button")
         dialogButton.innerHTML = "OK"
-        dialogButton.addEventListener("click", close)
+        dialogButton.addEventListener("click", () => {
+            buttonAction()
+            close()
+        })
         dialogContentWrapper.appendChild(dialogButton)
     }
-    if (type == "spinner") {
+    if (controlType == "spinner") {
         dialogContentWrapper.innerHTML += "<spinner></spinner>"
     }
 
@@ -58,9 +61,29 @@ function uiConnectingToService() {
     )
 }
 
+function uiPoolNoExistError() {
+    return createUiDialog(
+        "Could not connect to this Pool. It does not exist.",
+        "ok",
+        () => {
+            // Send player to default sandbox
+            window.location.href = "/"
+        }
+    )
+}
+
+function uiGenericServerError() {
+    return createUiDialog(
+        "A server error occurred.",
+        "none"
+    )
+}
+
 export {
     createUiDialog,
     uiConnectionError,
     uiCouldNotConnect,
-    uiConnectingToService
+    uiConnectingToService,
+    uiPoolNoExistError,
+    uiGenericServerError
 }
