@@ -97,22 +97,43 @@ if (!multiplayerMode) {
 
         // Only remove "connecting" dialog now we've
         // had first update
-        if (!hasReceivedFirstUpdate) {
+        if (!hasReceivedFirstUpdate || hasDisplayedConnectionError) {
             hasReceivedFirstUpdate = true
             currentOpenDialog.close()
         }
     }
 
     // Listen for server events
+    let timeOfLastClientUpdate = 0
+    let clientUpdateDelayCheck = null
     socket.on("pool_client_update", (poolData) => {
         // Sync Pool with server state
         syncGameWithServer(poolData, "client")
+        // Check for delays
+        const timeNow = Date.now()
+        timeOfLastClientUpdate = timeNow
+        clientUpdateDelayCheck = setTimeout(() => {
+            if (timeOfLastClientUpdate == timeNow) {
+                // No updates for a second, so freeze
+                hasReceivedFirstUpdate = false
+                // "Reconnecting" dialog
+                if (!hasDisplayedConnectionError) {
+                    currentOpenDialog = uiDialogs.uiConnectionError()
+                    hasDisplayedConnectionError = true
+                }
+            }
+        }, 1000)
     });
     socket.on("pool_host_init", (poolInitState) => {
         if (!poolInitState) {
             return
         }
         console.log("This client is the host")
+
+        // We are no longer a client
+        if (clientUpdateDelayCheck) {
+            clearTimeout(clientUpdateDelayCheck)
+        }
 
         // Sync with server's cached state before
         // serving own state!
