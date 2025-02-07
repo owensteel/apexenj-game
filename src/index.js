@@ -99,6 +99,7 @@ if (!multiplayerMode) {
         // had first update
         if (!hasReceivedFirstUpdate || hasDisplayedConnectionError) {
             hasReceivedFirstUpdate = true
+            hasDisplayedConnectionError = false
             currentOpenDialog.close()
         }
     }
