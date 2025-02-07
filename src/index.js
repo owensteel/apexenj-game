@@ -169,6 +169,13 @@ if (!multiplayerMode) {
             }
         })
     })
+    socket.on("pool_host_reset_to_client", () => {
+        console.log("This client is no longer the host")
+        // Reload application
+        // As user has already "disconnected" anyway
+        // This is an edge case for JS timeouts or frozen tabs
+        window.location.reload()
+    })
 
     // Handle disconnection
     socket.on("disconnect", () => {
