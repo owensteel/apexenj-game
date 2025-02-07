@@ -13,10 +13,11 @@ import * as uiDialogs from "./ui.dialogs"
 import Main from "./v1/game.v1.main";
 import { UPDATES_PER_SEC } from "./v1/game.v1.references";
 
-const selectedPoolId = "40940586095569786"
-const multiplayerMode = true
+const UriParams = window.location.pathname.split("/")
+const selectedPoolId = UriParams[1]
+const multiplayerMode = UriParams[2] == "offline"
 
-if (!multiplayerMode) {
+if (!multiplayerMode || !selectedPoolId) {
     // Private/sandbox Pool
     // Play offline
 
