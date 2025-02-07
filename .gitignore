@@ -13,6 +13,9 @@
 /static/bundle.js
 /static/bundle.js.LICENSE.txt
 
+# deployment
+/deploy.sh
+
 # misc
 ._*
 .DS_Store

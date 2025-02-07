@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --host 0.0.0.0 --port 80",
     "build": "webpack --mode production",
-    "deploy": "rsync -avz --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r ./static/ root@191.101.81.26:/var/www/html/apexenj/game",
+    "deploy": "./deploy.sh",
     "release": "npm run build && npm run deploy"
   },
   "repository": {
