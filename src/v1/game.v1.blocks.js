@@ -93,7 +93,7 @@ class DetachingBlock extends DefaultBlock {
         this.setColor("blue")
     }
 }
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DETACHING)
+// NOTE: block is disabled
 
 /*
 
