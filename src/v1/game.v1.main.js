@@ -11,6 +11,19 @@ import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 import MultiplayerClient from "./game.v1.multiplayerClient"
 
+const defaultDNA = new DNA(
+    DNA_NODE_ROLE_ROOT,
+    BLOCK_TYPENAME_HEART,
+    [
+        new DNA(),
+        new DNA(),
+        new DNA(),
+        new DNA(),
+        new DNA(),
+        new DNA()
+    ]
+)
+
 class Main {
     constructor(
         presetPoolData,
@@ -40,39 +53,15 @@ class Main {
         }
 
         this.init()
+        this.displayUI()
     }
     init() {
         const currentPool = this.currentPool
 
-        // Debug log
+        // TODO: REMOVE, debugging only
 
         console.log(currentPool)
         window.cL = currentPool
-
-        // Create player DNA
-
-        const demoDna = new DNA(
-            DNA_NODE_ROLE_ROOT,
-            BLOCK_TYPENAME_HEART,
-            [
-                new DNA(),
-                new DNA(),
-                new DNA(),
-                new DNA(),
-                new DNA(),
-                new DNA()
-            ]
-        )
-
-        // Set up UI
-
-        const builderUi = new DNABuilderUI(
-            demoDna,
-            currentPool,
-            this.multiplayerClient
-        )
-        this.gameWrapper.appendChild(builderUi.builderWrapper)
-        builderUi.initDOM()
 
         // Rendering
         // Offline only; in multiplayer mode, only the host
@@ -88,6 +77,28 @@ class Main {
             }
             renderUpdateLoop()
         }
+    }
+    displayUI() {
+        // Set up Builder UI
+
+        const builderUi = new DNABuilderUI(
+            defaultDNA,
+            this.currentPool,
+            this.multiplayerClient
+        )
+        this.gameWrapper.appendChild(builderUi.builderWrapper)
+        builderUi.initDOM()
+
+        // Display game status
+
+        const statusBar = document.createElement("game-status-bar")
+        // TODO: Provide string constants
+        if (!this.multiplayerClient) {
+            statusBar.innerHTML = "<strong>OFFLINE</strong>: Sandbox"
+        } else {
+            statusBar.innerHTML = `<strong>ONLINE</strong>: ${this.currentPool.id}`
+        }
+        this.gameWrapper.appendChild(statusBar)
     }
 }
 

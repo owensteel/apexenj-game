@@ -30,6 +30,16 @@ game-wrapper canvas {
     user-select: none;
 }
 
+game-wrapper game-status-bar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 15px;
+    color: #fff;
+    font-size: 15px;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.75);
+}
+
 game-wrapper game-stage-wrapper {
     display: block;
     user-select: none;
