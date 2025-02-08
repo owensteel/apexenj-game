@@ -34,10 +34,14 @@ game-wrapper game-status-bar {
     position: absolute;
     top: 0px;
     left: 0px;
-    padding: 15px;
+    padding: 30px;
     color: #fff;
     font-size: 15px;
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.75);
+    filter: drop-shadow(0 1.25px 2.5px rgba(0, 0, 0, 1));
+}
+
+game-wrapper game-status-bar status-mode {
+    font-weight: bold;
 }
 
 game-wrapper game-stage-wrapper {

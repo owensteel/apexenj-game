@@ -94,9 +94,9 @@ class Main {
         const statusBar = document.createElement("game-status-bar")
         // TODO: Provide string constants
         if (!this.multiplayerClient) {
-            statusBar.innerHTML = "<strong>OFFLINE</strong>: Sandbox"
+            statusBar.innerHTML = "<status-mode>OFFLINE</status-mode>: Sandbox"
         } else {
-            statusBar.innerHTML = `<strong>ONLINE</strong>: ${this.currentPool.id}`
+            statusBar.innerHTML = `<status-mode>ONLINE</status-mode>: ${this.currentPool.id}`
         }
         this.gameWrapper.appendChild(statusBar)
     }
