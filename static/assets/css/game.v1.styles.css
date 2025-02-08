@@ -30,6 +30,14 @@ game-wrapper canvas {
     user-select: none;
 }
 
+game-wrapper hexagon {
+    display: block;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    width: 34px;
+    height: 30px;
+    background-color: #fff;
+}
+
 game-wrapper game-status-bar {
     position: absolute;
     top: 0px;
@@ -193,6 +201,58 @@ game-wrapper game-builder-wrapper node-toolbar {
 game-wrapper game-builder-wrapper node-toolbar button,
 game-wrapper game-builder-wrapper node-toolbar input {
     display: inline-block;
+}
+
+game-wrapper game-builder-wrapper node-block-palette {
+    display: block;
+    position: absolute;
+    z-index: 5;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    width: 75px;
+    height: 100%;
+    overflow-y: scroll;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.25));
+}
+
+game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob:first-of-type {
+    margin-top: 30px;
+}
+
+game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob {
+    position: relative;
+    display: block;
+    margin: 15px;
+    width: 34px;
+    height: 30px;
+    text-align: center;
+    background-color: transparent;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.75);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob hexagon {
+    position: relative;
+    background-color: #fff;
+    /* default */
+    transform: scale(0.85);
+}
+
+game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob.selected {
+    transform: scale(1.25);
+    background-color: rgba(0, 0, 0, 1);
+}
+
+game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar,
+game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar-track,
+game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar-button {
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 game-wrapper game-builder-wrapper .node-bin {

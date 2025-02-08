@@ -254,18 +254,34 @@ class DNABuilderUI {
     _setBuilderControls() {
         // TODO: Proper node selection library/carousel
 
-        const nodeBlockSelector = document.createElement("select");
-        this.builderToolbar.appendChild(nodeBlockSelector);
+        const nodeBlockPalette = document.createElement("node-block-palette");
+        this.builderWrapper.appendChild(nodeBlockPalette);
 
+        const blockTypeBlobs = []
+        const renderBlockTypeBlobs = () => {
+            for (const blockTypeBlob of blockTypeBlobs) {
+                if (blockTypeBlob.blockTypeName == this.selectedBlockType) {
+                    blockTypeBlob.classList.add("selected")
+                } else {
+                    blockTypeBlob.classList.remove("selected")
+                }
+            }
+        }
         Blocks.PlayerAccessibleBlockTypeNamesList.forEach((blockTypeName) => {
-            const option = document.createElement("option");
-            option.innerText = blockTypeName;
-            nodeBlockSelector.appendChild(option);
-        });
+            const blockTypeBlob = document.createElement("node-block-palette-blob");
+            const blockTypeColor = Blocks.getBlockInstanceFromTypeName(blockTypeName).color
+            blockTypeBlob.innerHTML = `<hexagon style='background-color:${blockTypeColor}'></hexagon>`
+            nodeBlockPalette.appendChild(blockTypeBlob);
 
-        nodeBlockSelector.onchange = () => {
-            this.selectedBlockType = nodeBlockSelector.value;
-        };
+            blockTypeBlob.blockTypeName = blockTypeName
+            blockTypeBlob.onclick = () => {
+                this.selectedBlockType = blockTypeName
+                renderBlockTypeBlobs()
+            }
+
+            blockTypeBlobs.push(blockTypeBlob)
+        });
+        renderBlockTypeBlobs()
 
         // Show/hide buttons
 
@@ -506,7 +522,6 @@ class DNABuilderUI {
         const cH = this.builderCanvas.clientHeight;
 
         ctx.clearRect(0, 0, cW, cH);
-        ctx.filter = "saturate(1.5)"
 
         // Prepares a hexagon path for reuse in drawing.
         const prepareHexagonPath = (cx, cy, side) => {
