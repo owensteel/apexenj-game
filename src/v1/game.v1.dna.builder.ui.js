@@ -13,6 +13,10 @@ import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
 
+// Size of nodes in designer render
+
+const NODE_SIZE_BUILDER = NODESIZE_DEFAULT * 2
+
 // Static tables for hexagon operations
 
 const neighbourOffsetsEven = [
@@ -102,7 +106,7 @@ class DNABuilderUI {
 
         // Hex grid configuration
         this.hexGrid = {
-            side: NODESIZE_DEFAULT * 2,
+            side: NODE_SIZE_BUILDER,
             hexPositions: [],
             hexTable: {},
             image: null
@@ -511,7 +515,7 @@ class DNABuilderUI {
     _renderBuilderUIVisual() {
         // Obtain node positions based on current DNA model and node size.
         const nodePositions = generateAbsoluteNodePositions(
-            NODESIZE_DEFAULT * 2,
+            NODE_SIZE_BUILDER,
             this.focusedDnaModel,
             true
         );
