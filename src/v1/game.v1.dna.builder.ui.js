@@ -252,7 +252,7 @@ class DNABuilderUI {
 
     // Configures the toolbar UI.
     _setBuilderControls() {
-        // TODO: Proper node selection library/carousel
+        // Node selection palette
 
         const nodeBlockPalette = document.createElement("node-block-palette");
         this.builderWrapper.appendChild(nodeBlockPalette);
