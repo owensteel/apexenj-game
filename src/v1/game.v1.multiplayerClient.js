@@ -72,8 +72,8 @@ class MultiplayerClient {
                     // No updates for a second, so freeze
                     this.hasReceivedFirstUpdate = false
                     // "Reconnecting" dialog
-                    if (!currentOpenDialog.getOpenState()) {
-                        currentOpenDialog = uiDialogs.uiConnectionError()
+                    if (!this.currentOpenDialog.getOpenState()) {
+                        this.currentOpenDialog = uiDialogs.uiConnectionError()
                     }
                 }
             }, 1000)
