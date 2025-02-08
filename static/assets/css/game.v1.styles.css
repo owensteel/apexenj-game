@@ -119,7 +119,7 @@ game-wrapper .builder-ui-show-button {
 }
 
 game-wrapper .builder-ui-show-button:after {
-    background-image: url("../icons/build-outline.svg")
+    background-image: url("../icons/create-outline.svg")
 }
 
 game-wrapper game-builder-wrapper .builder-ui-hide-button {
