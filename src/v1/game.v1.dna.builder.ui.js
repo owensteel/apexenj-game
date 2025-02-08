@@ -288,7 +288,7 @@ class DNABuilderUI {
             const newOrganism = new Organism(this.focusedDnaModel)
 
             // Send to server if needed
-            if (this.multiplayerClient.role == "client") {
+            if (this.multiplayerClient && this.multiplayerClient.role == "client") {
                 // Not host, needs to be sent to sync service
                 this.multiplayerClient.connectionSocket.emit(
                     "pool_new_organism",

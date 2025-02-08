@@ -7,7 +7,7 @@
 import { BLOCK_TYPENAME_HEART } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import Pool from "./game.v1.pool"
-import { DNA_NODE_ROLE_ROOT } from "./game.v1.references"
+import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 import MultiplayerClient from "./game.v1.multiplayerClient"
 
@@ -81,7 +81,7 @@ class Main {
         if (!this.multiplayerClient) {
             const renderUpdateLoop = () => {
                 // Update
-                currentGame.currentPool.updateLife()
+                currentPool.updateLife()
                 setTimeout(() => {
                     renderUpdateLoop()
                 }, 1000 / UPDATES_PER_SEC)
