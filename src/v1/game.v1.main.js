@@ -9,25 +9,18 @@ import DNA from "./game.v1.dna"
 import Pool from "./game.v1.pool"
 import { DNA_NODE_ROLE_ROOT } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
+import MultiplayerClient from "./game.v1.multiplayerClient"
 
 class Main {
     constructor(
         presetPoolData,
-        multiplayerSocket,
-        multiplayerRole
+        multiplayerClient
     ) {
         // Multiplayer (if provided)
-        this.multiplayerSocket = multiplayerSocket
-        if (multiplayerRole) {
-            if (multiplayerRole !== "client" && multiplayerRole !== "host") {
-                throw new Error("Invalid multiplayer role")
-            }
-        } else {
-            if (this.multiplayerSocket) {
-                throw new Error("Multiplayer role must be specified when in multiplayer mode")
-            }
+        this.multiplayerClient = multiplayerClient
+        if (multiplayerClient && !(multiplayerClient instanceof MultiplayerClient)) {
+            throw new Error("If in multiplayer mode, the Multiplayer Client must be provided")
         }
-        this.multiplayerRole = multiplayerRole
 
         // Setup pool
         this.presetPoolData = presetPoolData
@@ -76,11 +69,25 @@ class Main {
         const builderUi = new DNABuilderUI(
             demoDna,
             currentPool,
-            // Host doesn't need to update through a socket
-            (this.multiplayerRole == "client") ? this.multiplayerSocket : null
+            this.multiplayerClient
         )
         this.gameWrapper.appendChild(builderUi.builderWrapper)
         builderUi.initDOM()
+
+        // Rendering
+        // Offline only; in multiplayer mode, only the host
+        // renders and the clients are updated to its state
+
+        if (!this.multiplayerClient) {
+            const renderUpdateLoop = () => {
+                // Update
+                currentGame.currentPool.updateLife()
+                setTimeout(() => {
+                    renderUpdateLoop()
+                }, 1000 / UPDATES_PER_SEC)
+            }
+            renderUpdateLoop()
+        }
     }
 }
 
