@@ -13,6 +13,25 @@ import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
 
+// Static tables for hexagon operations
+const neighbourOffsetsEven = [
+    { dc: 0, dr: -1 },
+    { dc: -1, dr: -1 },
+    { dc: -1, dr: 0 },
+    { dc: 0, dr: 1 },
+    { dc: +1, dr: 0 },
+    { dc: +1, dr: -1 }
+];
+const neighbourOffsetsOdd = [
+    { dc: 0, dr: -1 },
+    { dc: -1, dr: 0 },
+    { dc: -1, dr: +1 },
+    { dc: 0, dr: +1 },
+    { dc: +1, dr: +1 },
+    { dc: +1, dr: 0 }
+];
+const hexConnectingEdgeMap = { 1: 4, 2: 5, 3: 6, 4: 1, 5: 2, 6: 3 };
+
 class DNABuilderUI {
     constructor(
         dnaModel,
@@ -147,23 +166,6 @@ class DNABuilderUI {
 
     // Computes the neighbours of a hex given its col/row and grid dimensions.
     _getHexNeighbours(col, row, columns, rows) {
-        const neighbourOffsetsEven = [
-            { dc: 0, dr: -1 },
-            { dc: -1, dr: -1 },
-            { dc: -1, dr: 0 },
-            { dc: 0, dr: 1 },
-            { dc: +1, dr: 0 },
-            { dc: +1, dr: -1 }
-        ];
-        const neighbourOffsetsOdd = [
-            { dc: 0, dr: -1 },
-            { dc: -1, dr: 0 },
-            { dc: -1, dr: +1 },
-            { dc: 0, dr: +1 },
-            { dc: +1, dr: +1 },
-            { dc: +1, dr: 0 }
-        ];
-
         const offsets = (col % 2 === 1) ? neighbourOffsetsOdd : neighbourOffsetsEven;
         const neighbours = [];
 
@@ -366,7 +368,6 @@ class DNABuilderUI {
         // Determine connecting node based on neighbouring hexes.
         let connectingNode = null;
         let connectingEdge = 0;
-        const hexConnectingEdgeMap = { 1: 4, 2: 5, 3: 6, 4: 1, 5: 2, 6: 3 };
 
         for (let hexEdgeIndex = 0; hexEdgeIndex < 6; hexEdgeIndex++) {
             const neighbourKey = clickedHex.neighbours[hexEdgeIndex];
