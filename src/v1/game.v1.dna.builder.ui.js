@@ -14,6 +14,7 @@ import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
 
 // Static tables for hexagon operations
+
 const neighbourOffsetsEven = [
     { dc: 0, dr: -1 },
     { dc: -1, dr: -1 },
@@ -31,6 +32,52 @@ const neighbourOffsetsOdd = [
     { dc: +1, dr: 0 }
 ];
 const hexConnectingEdgeMap = { 1: 4, 2: 5, 3: 6, 4: 1, 5: 2, 6: 3 };
+
+// Static functions
+
+// Computes the neighbours of a hex given its col/row and grid dimensions.
+function getHexNeighbours(col, row, columns, rows) {
+    const offsets = (col % 2 === 1) ? neighbourOffsetsOdd : neighbourOffsetsEven;
+    const neighbours = [];
+
+    offsets.forEach(({ dc, dr }) => {
+        const nCol = col + dc;
+        const nRow = row + dr;
+        if (nCol >= 0 && nCol < columns && nRow >= 0 && nRow < rows) {
+            neighbours.push({ col: nCol, row: nRow });
+        }
+    });
+
+    return neighbours;
+}
+
+// Draws a single flat-topped hexagon at (cx, cy) on the provided canvas context.
+function drawHexagon(cx, cy, ctx, side, fillColor = "transparent", strokeWidth = 1) {
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = strokeWidth;
+    ctx.beginPath();
+
+    // For flat-topped hex: angles 0°, 60°, 120°, … 300°
+    for (let i = 0; i < 6; i++) {
+        const angleDeg = 60 * i;
+        const angleRad = (Math.PI / 180) * angleDeg;
+        const x = cx + side * Math.cos(angleRad);
+        const y = cy + side * Math.sin(angleRad);
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    return { x: cx, y: cy };
+}
+
+// Builder UI class
 
 class DNABuilderUI {
     constructor(
@@ -134,51 +181,7 @@ class DNABuilderUI {
         }
     }
 
-    // Internal Utility Methods (Instance-Specific)
-
-    // Draws a single flat-topped hexagon at (cx, cy) on the provided canvas context.
-    _drawHexagon(cx, cy, ctx, fillColor = "transparent", strokeWidth = 1) {
-        ctx.fillStyle = fillColor;
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = strokeWidth;
-        ctx.beginPath();
-
-        const side = this.hexGrid.side;
-
-        // For flat-topped hex: angles 0°, 60°, 120°, … 300°
-        for (let i = 0; i < 6; i++) {
-            const angleDeg = 60 * i;
-            const angleRad = (Math.PI / 180) * angleDeg;
-            const x = cx + side * Math.cos(angleRad);
-            const y = cy + side * Math.sin(angleRad);
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        return { x: cx, y: cy };
-    }
-
-    // Computes the neighbours of a hex given its col/row and grid dimensions.
-    _getHexNeighbours(col, row, columns, rows) {
-        const offsets = (col % 2 === 1) ? neighbourOffsetsOdd : neighbourOffsetsEven;
-        const neighbours = [];
-
-        offsets.forEach(({ dc, dr }) => {
-            const nCol = col + dc;
-            const nRow = row + dr;
-            if (nCol >= 0 && nCol < columns && nRow >= 0 && nRow < rows) {
-                neighbours.push({ col: nCol, row: nRow });
-            }
-        });
-
-        return neighbours;
-    }
+    // Internal Utility Methods
 
     // Generates the hexagon grid used for visualising the Builder UI.
     _generateHexagonGrid() {
@@ -221,7 +224,7 @@ class DNABuilderUI {
                 const [localX, localY] = getLocalCoords(col, row);
                 const finalX = localX - centreLocalX + halfWidth;
                 const finalY = localY - centreLocalY + halfHeight;
-                const hexPos = this._drawHexagon(finalX, finalY, ctx);
+                const hexPos = drawHexagon(finalX, finalY, ctx, this.hexGrid.side);
                 hexPos.col = col;
                 hexPos.row = row;
                 this.hexGrid.hexPositions.push(hexPos);
@@ -237,7 +240,7 @@ class DNABuilderUI {
                 const hexKey = `${col},${row}`;
                 const hex = this.hexGrid.hexTable[hexKey];
                 if (hex) {
-                    const neighbours = this._getHexNeighbours(col, row, columns, rows);
+                    const neighbours = getHexNeighbours(col, row, columns, rows);
                     hex.neighbours = neighbours.map(({ col: nCol, row: nRow }) => `${nCol},${nRow}`);
                 }
             }
