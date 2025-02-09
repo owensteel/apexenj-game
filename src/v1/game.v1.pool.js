@@ -81,11 +81,6 @@ class Pool {
             organism.updateLivingState()
             // Update organism motion
             organism.updateMovement()
-            // Death check
-            if (!organism.alive) {
-                console.log("Death", organism.id)
-                this.removeOrganism(organism)
-            }
         }
         // Sync organisms with each other for interactions
         // (must be separate loop, ALL organisms must be
