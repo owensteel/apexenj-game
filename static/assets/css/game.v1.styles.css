@@ -222,6 +222,13 @@ game-wrapper game-builder-wrapper node-block-palette {
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.25));
 }
 
+game-wrapper game-builder-wrapper node-block-palette[collapsed] {
+    height: 100px;
+    bottom: auto;
+
+    transition-delay: 0.25s;
+}
+
 game-wrapper game-builder-wrapper node-block-palette[collapsed] node-block-palette-blob {
     position: absolute;
     top: 25px !important;
