@@ -258,7 +258,9 @@ class DNABuilderUI {
         nodeBin.onclick = () => {
             if (this.selectedNode) {
                 const nodeToDelete = this.selectedNode
-                nodeToDelete.parentNode.deleteChild(nodeToDelete);
+                if (nodeToDelete.parentNode) {
+                    nodeToDelete.parentNode.deleteChild(nodeToDelete);
+                }
 
                 this.selectedNode = null
                 this._renderBuilderUIVisual();
@@ -412,9 +414,9 @@ class DNABuilderUI {
     }
 
     _nodeClickHandler(e, isDragging = false) {
+        // Select node
+
         const clickPos = this._getClickPosFromScreenPos({ x: e.pageX, y: e.pageY });
-        const clickedHex = this._getHexAtClickPos(clickPos);
-        if (!clickedHex) return;
 
         // Deselect any selected node
         if (this.selectedNode) {
@@ -424,15 +426,15 @@ class DNABuilderUI {
             this.nodeBin.hide()
         }
 
-        const nodeAtClickPoint = this._getVisNodeAtClickPos(clickPos);
-        if (nodeAtClickPoint) {
+        const clickedNode = this._getVisNodeAtClickPos(clickPos);
+        if (clickedNode) {
             if (!isDragging) {
                 // Node click interactions
 
                 // Select node
-                if (!nodeAtClickPoint.builderUiSelectedNode) {
-                    this.selectedNode = nodeAtClickPoint
-                    nodeAtClickPoint.builderUiSelectedNode = true
+                if (!clickedNode.builderUiSelectedNode && clickedNode.role !== DNA_NODE_ROLE_ROOT) {
+                    this.selectedNode = clickedNode
+                    clickedNode.builderUiSelectedNode = true
 
                     this._renderBuilderUIVisual()
                     this.nodeBin.show()
@@ -444,7 +446,13 @@ class DNABuilderUI {
             return;
         }
 
-        // Determine connecting node based on neighbouring hexes.
+        // Create node
+
+        const clickedHex = this._getHexAtClickPos(clickPos);
+        if (!clickedHex) return;
+
+        // Determine connecting node based on neighbouring hexes
+
         let connectingNode = null;
         let connectingEdge = 0;
 
@@ -462,9 +470,10 @@ class DNABuilderUI {
         }
 
         if (!connectingNode) {
-            console.warn("No connecting edge found for new node");
             return;
         }
+
+        // Create node as a child of closest node (connecting node)
 
         const createNode = (parentNode, edge) => {
             const createdNode = parentNode.addChild(this.selectedBlockType, edge);
