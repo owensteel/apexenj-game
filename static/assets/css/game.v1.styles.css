@@ -116,6 +116,12 @@ game-wrapper .builder-ui-show-button {
     z-index: 1;
     bottom: 25px;
     right: 25px;
+
+    transition: right 0.5s;
+}
+
+game-wrapper .builder-ui-show-button.hidden {
+    right: -75px;
 }
 
 game-wrapper .builder-ui-show-button:after {

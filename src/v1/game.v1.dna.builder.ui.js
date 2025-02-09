@@ -329,13 +329,19 @@ class DNABuilderUI {
         hideButton.className = "builder-ui-hide-button"
         hideButton.onclick = () => {
             this.hideUI()
+
+            showButton.classList.remove("hidden")
         }
         this.builderWrapper.appendChild(hideButton)
 
         const showButton = document.createElement("button")
         showButton.className = "builder-ui-show-button"
+        // Hide by default, as UI is shown by default
+        showButton.classList.add("hidden")
         showButton.onclick = () => {
             this.showUI()
+
+            showButton.classList.add("hidden")
         }
         document.getElementById("game-wrapper").appendChild(showButton)
 
