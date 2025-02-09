@@ -210,20 +210,23 @@ game-wrapper game-builder-wrapper node-block-palette {
     top: 0px;
     left: 0px;
     bottom: 0px;
-    width: 75px;
+    width: 100px;
     height: 100%;
     overflow-y: scroll;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.25));
 }
 
-game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob:first-of-type {
-    margin-top: 30px;
+game-wrapper game-builder-wrapper node-block-palette[collapsed] node-block-palette-blob {
+    position: absolute;
+    top: 25px !important;
 }
 
 game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob {
-    position: relative;
+    position: absolute;
+    z-index: 1;
+    top: inherit;
+    left: 30px;
     display: block;
-    margin: 15px;
     width: 34px;
     height: 30px;
     text-align: center;
@@ -231,6 +234,8 @@ game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob {
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.75);
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+
+    transition: top 0.25s;
 }
 
 game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob hexagon {
@@ -241,8 +246,9 @@ game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob hex
 }
 
 game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob.selected {
+    z-index: 2;
+    background-color: var(--main-blue);
     transform: scale(1.25);
-    background-color: rgba(0, 0, 0, 1);
 }
 
 game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar,

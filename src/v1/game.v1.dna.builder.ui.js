@@ -275,6 +275,8 @@ class DNABuilderUI {
 
         // Node selection palette
 
+        let nodeBlockPaletteCollapsed = false
+
         const nodeBlockPalette = document.createElement("node-block-palette");
         this.builderWrapper.appendChild(nodeBlockPalette);
 
@@ -288,16 +290,31 @@ class DNABuilderUI {
                 }
             }
         }
-        Blocks.PlayerAccessibleBlockTypeNamesList.forEach((blockTypeName) => {
+        Blocks.PlayerAccessibleBlockTypeNamesList.forEach((blockTypeName, blockTypeInd) => {
             const blockTypeBlob = document.createElement("node-block-palette-blob");
             const blockTypeColor = Blocks.getBlockInstanceFromTypeName(blockTypeName).color
+
+            // Element styles
             blockTypeBlob.innerHTML = `<hexagon style='background-color:${blockTypeColor}'></hexagon>`
+            // Make positions absolute for collapsing animation
+            blockTypeBlob.style.top = 25 + (60 * blockTypeInd) + "px"
+
             nodeBlockPalette.appendChild(blockTypeBlob);
 
             blockTypeBlob.blockTypeName = blockTypeName
             blockTypeBlob.onclick = () => {
-                this.selectedBlockType = blockTypeName
-                renderBlockTypeBlobs()
+                if (blockTypeName == this.selectedBlockType) {
+                    // Toggle show/hide
+                    if (!nodeBlockPaletteCollapsed) {
+                        nodeBlockPalette.setAttribute("collapsed", true)
+                    } else {
+                        nodeBlockPalette.removeAttribute("collapsed")
+                    }
+                    nodeBlockPaletteCollapsed = !nodeBlockPaletteCollapsed
+                } else {
+                    this.selectedBlockType = blockTypeName
+                    renderBlockTypeBlobs()
+                }
             }
 
             blockTypeBlobs.push(blockTypeBlob)
