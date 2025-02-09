@@ -170,6 +170,8 @@ class DNABuilderUI {
         if (this.UIisHidden) {
             this.builderWrapper.style.bottom = "";
             this.UIisHidden = false
+
+            document.querySelector(".builder-ui-show-button").classList.add("hidden")
         }
     }
 
@@ -177,6 +179,8 @@ class DNABuilderUI {
         if (!this.UIisHidden) {
             this.builderWrapper.style.bottom = -this.builderWrapper.clientHeight;
             this.UIisHidden = true
+
+            document.querySelector(".builder-ui-show-button").classList.remove("hidden")
         }
     }
 
@@ -329,8 +333,6 @@ class DNABuilderUI {
         hideButton.className = "builder-ui-hide-button"
         hideButton.onclick = () => {
             this.hideUI()
-
-            showButton.classList.remove("hidden")
         }
         this.builderWrapper.appendChild(hideButton)
 
@@ -340,8 +342,6 @@ class DNABuilderUI {
         showButton.classList.add("hidden")
         showButton.onclick = () => {
             this.showUI()
-
-            showButton.classList.add("hidden")
         }
         document.getElementById("game-wrapper").appendChild(showButton)
 
