@@ -5,7 +5,7 @@
 */
 
 import * as Blocks from './game.v1.blocks'
-import { DNA_NODE_ROLE_APPENDAGE } from './game.v1.references'
+import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT } from './game.v1.references'
 
 class DNA {
     constructor(
@@ -82,7 +82,7 @@ class DNA {
         return node
     }
     deleteChild(node) {
-        // Null method
+        // Nulling method
         this.children[node.edgeOfParent] = null
     }
     getStaticClone() {
