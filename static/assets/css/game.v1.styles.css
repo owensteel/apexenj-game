@@ -235,7 +235,7 @@ game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob {
     background-color: rgba(0, 0, 0, 0.75);
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 
-    transition: top 0.25s;
+    transition: top 0.25s, transform 0.125s;
 }
 
 game-wrapper game-builder-wrapper node-block-palette node-block-palette-blob hexagon {
