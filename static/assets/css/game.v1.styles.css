@@ -256,32 +256,17 @@ game-wrapper game-builder-wrapper node-block-palette::-webkit-scrollbar-button {
 }
 
 game-wrapper game-builder-wrapper .node-bin {
-    pointer-events: none;
     position: absolute;
     display: block;
-    z-index: 5;
+    z-index: 3;
     height: 50px;
     width: 50px;
     bottom: 25px;
     right: 25px;
-
-    background-color: #eee;
-    border-bottom: 1px solid rgba(0, 0, 0, .25);
-    border-style: dashed;
+    background-color: red;
 }
 
 game-wrapper game-builder-wrapper .node-bin:after {
-    background-image: url("../icons/trash-bin-outline.svg")
-}
-
-game-wrapper game-builder-wrapper show-hide-button {
-    position: absolute;
-    display: block;
-    right: 0px;
-    top: -51px;
-    height: 50px;
-    width: 100px;
-    background-color: black;
-    color: #fff;
-    cursor: pointer;
+    background-image: url("../icons/trash-bin-outline.svg");
+    filter: invert();
 }

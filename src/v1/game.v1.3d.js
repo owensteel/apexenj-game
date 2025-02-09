@@ -242,12 +242,6 @@ function generateAbsoluteNodePositions(
         return;
     }
 
-    if (currentNode.builderUIBeingDragged) {
-        // Support UI effect by not drawing the node in
-        // its real place while it is being "dragged"
-        return;
-    }
-
     const currentNodePosIndex = positionsArray.length;
     const currentNodePosFinal = {
         x,
@@ -263,6 +257,9 @@ function generateAbsoluteNodePositions(
         nodeSize: nodeSize
     };
     positionsArray.push(currentNodePosFinal);
+
+    // For UI to reference
+    currentNode.nodePos = currentNodePosFinal
 
     // The distance from parent to child (can tweak for better spacing)
     const radius = nodeSize * 1.7;
@@ -298,7 +295,7 @@ function generateAbsoluteNodePositions(
             positionsArray,
             currentNodePosFinal,
             childAngle
-        );
+        )
     }
 
     return positionsArray;

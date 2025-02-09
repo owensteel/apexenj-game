@@ -7,7 +7,7 @@
 import DNA from "./game.v1.dna";
 import * as Blocks from "./game.v1.blocks";
 import { getGlobalBoundingBoxOfHTMLElement } from "./game.v1.utils";
-import { NODESIZE_DEFAULT } from "./game.v1.references";
+import { COMMON_PRIMARY_COLOR, DNA_NODE_ROLE_ROOT, NODESIZE_DEFAULT } from "./game.v1.references";
 import { generateAbsoluteNodePositions } from "./game.v1.3d";
 import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
@@ -116,14 +116,13 @@ class DNABuilderUI {
         this.renderedVisualNodePositions = null;
         this.selectedBlockType = Blocks.BLOCK_TYPENAME_DEFAULT;
         this.isMouseDown = false;
-        this.nodeDragging = {
-            currentNode: null,
-            fakeTreeMesh: null
-        };
 
         // Init root DOM element
         this.builderWrapper = document.createElement("game-builder-wrapper");
         this.UIisHidden = false;
+
+        // Node operation states
+        this.selectedNode = null
     }
 
     initDOM() {
@@ -142,26 +141,22 @@ class DNABuilderUI {
         this.builderToolbar = document.createElement("node-toolbar");
         this.builderWrapper.appendChild(this.builderToolbar);
 
-        this.nodeBin = document.createElement("button");
-        this.nodeBin.className = "node-bin"
-        this.builderWrapper.appendChild(this.nodeBin);
-
-        // Setup Builder Toolbar (instance-specific UI elements)
+        // Setup Builder Toolbar
         this._setBuilderControls();
 
         // Bind event listeners (using arrow functions to preserve context)
         this.builderClickField.addEventListener("click", (e) => this._nodeClickHandler(e));
         this.builderClickField.addEventListener("touchstart", (e) => this._nodeClickHandler(e));
 
-        this.builderClickField.addEventListener("mousemove", (e) => this._nodeDraggingMouseMoveHandler(e));
-        this.builderClickField.addEventListener("touchmove", (e) => this._nodeDraggingMouseMoveHandler(e));
+        this.builderClickField.addEventListener("mousemove", (e) => this._nodeCanvasMouseMoveHandler(e));
+        this.builderClickField.addEventListener("touchmove", (e) => this._nodeCanvasMouseMoveHandler(e));
 
-        this.builderClickField.addEventListener("mouseup", (e) => this._nodeDraggingMouseUpHandler(e));
-        this.builderClickField.addEventListener("touchend", (e) => this._nodeDraggingMouseUpHandler(e));
-        this.builderClickField.addEventListener("mouseout", (e) => this._nodeDraggingMouseUpHandler(e));
+        this.builderClickField.addEventListener("mouseup", (e) => this._nodeCanvasMouseUpHandler(e));
+        this.builderClickField.addEventListener("touchend", (e) => this._nodeCanvasMouseUpHandler(e));
+        this.builderClickField.addEventListener("mouseout", (e) => this._nodeCanvasMouseUpHandler(e));
 
-        this.builderClickField.addEventListener("mousedown", (e) => this._nodeDraggingMouseDownHandler(e));
-        this.builderClickField.addEventListener("touchstart", (e) => this._nodeDraggingMouseDownHandler(e));
+        this.builderClickField.addEventListener("mousedown", (e) => this._nodeCanvasMouseDownHandler(e));
+        this.builderClickField.addEventListener("touchstart", (e) => this._nodeCanvasMouseDownHandler(e));
 
         // Initialize canvas
         this.builderCanvas.width = this.builderWrapper.clientWidth;
@@ -256,6 +251,28 @@ class DNABuilderUI {
 
     // Configures the toolbar UI.
     _setBuilderControls() {
+        // Bin
+
+        const nodeBin = document.createElement("button");
+        nodeBin.className = "node-bin"
+        nodeBin.onclick = () => {
+            if (this.selectedNode) {
+                const nodeToDelete = this.selectedNode
+                nodeToDelete.parentNode.deleteChild(nodeToDelete);
+
+                this.selectedNode = null
+                this._renderBuilderUIVisual();
+                this.nodeBin.hide()
+            }
+        }
+        nodeBin.show = () => {
+            this.builderWrapper.appendChild(nodeBin);
+        }
+        nodeBin.hide = () => {
+            nodeBin.remove()
+        }
+        this.nodeBin = nodeBin;
+
         // Node selection palette
 
         const nodeBlockPalette = document.createElement("node-block-palette");
@@ -377,14 +394,36 @@ class DNABuilderUI {
         return clickedNode;
     }
 
-    _nodeClickHandler(e) {
+    _nodeClickHandler(e, isDragging = false) {
         const clickPos = this._getClickPosFromScreenPos({ x: e.pageX, y: e.pageY });
         const clickedHex = this._getHexAtClickPos(clickPos);
         if (!clickedHex) return;
 
+        // Deselect any selected node
+        if (this.selectedNode) {
+            this.selectedNode.builderUiSelectedNode = false
+            this.selectedNode = null
+            this._renderBuilderUIVisual()
+            this.nodeBin.hide()
+        }
+
         const nodeAtClickPoint = this._getVisNodeAtClickPos(clickPos);
         if (nodeAtClickPoint) {
-            // Node exists here, no interactions
+            if (!isDragging) {
+                // Node click interactions
+
+                // Select node
+                if (!nodeAtClickPoint.builderUiSelectedNode) {
+                    this.selectedNode = nodeAtClickPoint
+                    nodeAtClickPoint.builderUiSelectedNode = true
+
+                    this._renderBuilderUIVisual()
+                    this.nodeBin.show()
+                }
+            }
+            // Prevent any creation event at this point
+            // Otherwise it will cause a "replacement"
+            // and potentially destroy children
             return;
         }
 
@@ -418,96 +457,20 @@ class DNABuilderUI {
         createNode(connectingNode, connectingEdge);
     }
 
-    _nodeDraggingMouseMoveHandler(e) {
-        if (this.nodeDragging.currentNode) {
-            e.preventDefault();
-            const binRect = getGlobalBoundingBoxOfHTMLElement(this.nodeBin);
-            if (e.pageX > binRect.left && e.pageY > binRect.top) {
-                this.nodeBin.style.backgroundColor = "#fff";
-            } else {
-                this.nodeBin.style.backgroundColor = "";
-            }
-        } else {
-            if (this.isMouseDown) {
-                this._nodeClickHandler(e);
-            }
+    _nodeCanvasMouseMoveHandler(e) {
+        // Draw
+        if (this.isMouseDown) {
+            this._nodeClickHandler(e, true);
         }
     }
 
-    _nodeDraggingMouseUpHandler(e) {
+    _nodeCanvasMouseUpHandler(e) {
         this.isMouseDown = false;
-
-        const deleteNodeFromSequence = (node) => {
-            node.parentNode.deleteChild(node);
-            this._renderBuilderUIVisual();
-        }
-
-        if (this.nodeDragging.currentNode) {
-            const binRect = getGlobalBoundingBoxOfHTMLElement(this.nodeBin);
-            if (e.pageX > binRect.left && e.pageY > binRect.top) {
-                deleteNodeFromSequence(this.nodeDragging.currentNode);
-            }
-            this.nodeBin.style.backgroundColor = "";
-            this.builderWrapper.appendChild(this.builderHexGrid);
-
-            delete this.nodeDragging.currentNode.builderUIBeingDragged;
-            this.nodeDragging.currentNode = null;
-            this._renderBuilderUIVisual();
-        }
     }
 
-    _nodeDraggingMouseDownHandler(e) {
+    _nodeCanvasMouseDownHandler(e) {
         e.preventDefault();
-        if (this.isMouseDown) return;
         this.isMouseDown = true;
-
-        const clickPos = this._getClickPosFromScreenPos({ x: e.pageX, y: e.pageY });
-        const clickedNode = this._getVisNodeAtClickPos(clickPos);
-        if (!clickedNode) return;
-
-        let mouseDownOnNode = true;
-        const mouseUpListener = () => {
-            mouseDownOnNode = false;
-
-            // User has lost focus when mouse is up and/or moved
-            this.builderWrapper.removeEventListener("mouseup", mouseUpListener);
-            this.builderWrapper.removeEventListener("touchend", mouseUpListener);
-            this.builderWrapper.removeEventListener("mousemove", mouseUpListener);
-            this.builderWrapper.removeEventListener("touchmove", mouseUpListener);
-        };
-
-        // For nodes other than the root, allow dragging of sub-trees.
-        if (clickedNode.role !== "root") {
-            setTimeout(() => {
-                if (mouseDownOnNode) {
-                    this._startDraggingNode(clickedNode, e);
-                }
-            }, 250);
-
-            this.builderClickField.addEventListener("mouseup", mouseUpListener);
-            this.builderClickField.addEventListener("touchend", mouseUpListener);
-            this.builderClickField.addEventListener("mousemove", mouseUpListener);
-            this.builderClickField.addEventListener("touchmove", mouseUpListener);
-        }
-    }
-
-    _startDraggingNode(node, e) {
-        this.isMouseDown = false;
-        this.nodeBinBoundingBox = getGlobalBoundingBoxOfHTMLElement(this.nodeBin);
-        this.builderHexGrid.remove();
-        this.nodeDragging.currentNode = node;
-
-        // Create a shallow clone of the node (for visual dragging)
-        this.nodeDragging.fakeTreeMesh = new DNA(
-            node.role,
-            node.block.typeName,
-            node.children
-        );
-
-        // Mark node as being dragged and update visuals.
-        node.builderUIBeingDragged = true;
-        this._renderBuilderUIVisual();
-        this._nodeDraggingMouseMoveHandler(e);
     }
 
     // Render the Builder UI Visual Representation
@@ -520,6 +483,19 @@ class DNABuilderUI {
             true
         );
         this.renderedVisualNodePositions = nodePositions;
+
+        const selectedTreeNodePositions = []
+        const addNodeToSelection = (node) => {
+            selectedTreeNodePositions.push(node.nodePos)
+            for (const childNode of node.children) {
+                if (childNode) {
+                    addNodeToSelection(childNode)
+                }
+            }
+        }
+        if (this.selectedNode) {
+            addNodeToSelection(this.selectedNode)
+        }
 
         const ctx = this.builderCanvas.getContext("2d");
         const cW = this.builderCanvas.clientWidth;
@@ -545,17 +521,12 @@ class DNABuilderUI {
         };
 
         // Draw node outlines
-        const drawNodeOutline = (cx, cy) => {
+        const drawNodeOutline = (cx, cy, outlineColor = "#000") => {
             prepareHexagonPath(cx, cy, this.hexGrid.side * 1.1);
-            ctx.strokeStyle = "#000";
+            ctx.strokeStyle = outlineColor;
             ctx.lineWidth = 3.5;
             ctx.stroke();
         };
-
-        for (const nodePos of nodePositions) {
-            if (nodePos.node.builderUIBeingDragged) continue;
-            drawNodeOutline((cW / 2) + nodePos.x, (cH / 2) - nodePos.y);
-        }
 
         // Draw filled nodes
         const drawNode = (cx, cy, node) => {
@@ -564,11 +535,29 @@ class DNABuilderUI {
             ctx.fill();
         };
 
-        for (const nodePos of nodePositions) {
-            if (nodePos.node.builderUIBeingDragged) continue;
-            nodePos.uiClickX = (cW / 2) + nodePos.x;
-            nodePos.uiClickY = (cH / 2) - nodePos.y;
-            drawNode(nodePos.uiClickX, nodePos.uiClickY, nodePos.node);
+        const drawNodePositions = (nodePositions, outlineColor = "#000") => {
+            // Draw tree outline
+
+            for (const nodePos of nodePositions) {
+                drawNodeOutline(
+                    (cW / 2) + nodePos.x, (cH / 2) - nodePos.y,
+                    outlineColor
+                );
+            }
+
+            // Draw tree fills
+
+            for (const nodePos of nodePositions) {
+                nodePos.uiClickX = (cW / 2) + nodePos.x;
+                nodePos.uiClickY = (cH / 2) - nodePos.y;
+                drawNode(nodePos.uiClickX, nodePos.uiClickY, nodePos.node);
+            }
+        }
+        drawNodePositions(nodePositions)
+
+        // Draw selected node, if any
+        if (selectedTreeNodePositions.length > 0) {
+            drawNodePositions(selectedTreeNodePositions, COMMON_PRIMARY_COLOR)
         }
     }
 }

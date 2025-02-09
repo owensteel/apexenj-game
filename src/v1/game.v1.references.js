@@ -6,6 +6,10 @@
 
 import { stageEdges3D } from "./game.v1.3d";
 
+// Styles
+
+const COMMON_PRIMARY_COLOR = "#04b1fd"
+
 // Rendering
 
 const UPDATES_PER_SEC = 24
@@ -37,6 +41,7 @@ const MIN_NODES_WITHOUT_ENERGY_CON = 6
 const MIN_MOTOR_NODES_WITHOUT_ENERGY_CON = 0.5
 
 export {
+    COMMON_PRIMARY_COLOR,
     UPDATES_PER_SEC,
     DNA_NODE_ROLE_APPENDAGE,
     DNA_NODE_ROLE_ROOT,
