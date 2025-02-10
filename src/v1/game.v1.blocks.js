@@ -126,6 +126,22 @@ class AbsorberBlock extends DefaultBlock {
 }
 PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
 
+/*
+
+    Digester
+
+*/
+
+const BLOCK_TYPENAME_DIGESTER = "digester"
+class DigesterBlock extends DefaultBlock {
+    constructor() {
+        super()
+        this.setTypeName(BLOCK_TYPENAME_DIGESTER)
+        this.setColor("yellow")
+    }
+}
+PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DIGESTER)
+
 // Type name to instance
 function getBlockInstanceFromTypeName(typeName) {
     switch (typeName) {
@@ -135,6 +151,8 @@ function getBlockInstanceFromTypeName(typeName) {
             return new DetachingBlock()
         case BLOCK_TYPENAME_ABSORBER:
             return new AbsorberBlock()
+        case BLOCK_TYPENAME_DIGESTER:
+            return new DigesterBlock()
         case BLOCK_TYPENAME_HEART:
             return new HeartBlock()
         case BLOCK_TYPENAME_FOOD:
