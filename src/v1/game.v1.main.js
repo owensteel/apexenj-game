@@ -46,10 +46,16 @@ class Main {
             this.currentPool = new Pool(
                 this.presetPoolData.id,
                 this.presetPoolData.organisms,
-                this.presetPoolData.timeSync
+                this.presetPoolData.timeSync,
+                !(!this.multiplayerClient)
             )
         } else {
-            this.currentPool = new Pool()
+            this.currentPool = new Pool(
+                null,
+                [],
+                null,
+                !(!this.multiplayerClient)
+            )
         }
 
         this.init()

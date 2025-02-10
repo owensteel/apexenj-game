@@ -123,6 +123,8 @@ function syncOrganisms(organism, opponent) {
                         // Make the Food block "eaten"
                         oppNodePos.localNode.isEaten = true
                         oppNodePos.mesh.visible = false
+
+                        organism.ui.ateFood()
                     }
 
                     // Reset interval

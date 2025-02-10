@@ -12,6 +12,7 @@ import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_
 import { stageEdges3D } from './game.v1.3d';
 import { generateID } from './game.v1.utils';
 import Pool from './game.v1.pool';
+import OrganismUI from './game.v1.organism.ui';
 
 const FOOD_RESPAWN_INTERVAL_SECS = 15
 
@@ -94,6 +95,9 @@ class Organism {
         } else {
             this.id = generateID()
         }
+
+        // UI
+        this.ui = new OrganismUI(this)
 
         // To be generated
         this.body = new OrganismBody(this.dnaModel)

@@ -14,9 +14,20 @@ import { UPDATES_PER_SEC } from "./game.v1.references"
 // Pool model
 
 class Pool {
-    constructor(id = generateID(), presetOrganisms = [], timeSync) {
-        this.id = id
+    constructor(
+        id,
+        presetOrganisms = [],
+        timeSync,
+        isMultiplayerMode = false
+    ) {
+        if (id) {
+            this.id = id
+        } else {
+            this.id = generateID()
+        }
+
         this.organisms = []
+        this.isMultiplayerMode = isMultiplayerMode
 
         if (timeSync) {
             this.timeSync = timeSync
@@ -42,6 +53,13 @@ class Pool {
         // Save creation time for syncing
         if (organism.id in this.timeSync.organisms == false) {
             this.timeSync.organisms[organism.id] = Date.now()
+        }
+
+        // Add gamertag if in multiplayer
+        if (this.isMultiplayerMode) {
+            // Currently use Organism's ID until usernames
+            // are implemented
+            organism.ui.applyGamerTag(organism.id)
         }
 
         return organism
