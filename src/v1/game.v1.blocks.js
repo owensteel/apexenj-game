@@ -189,6 +189,7 @@ export {
     BLOCK_TYPENAME_DETACHING,
     BLOCK_TYPENAME_FOOD,
     BLOCK_TYPENAME_ABSORBER,
+    BLOCK_TYPENAME_DIGESTER,
 
     // For converting block type names to instances
 
