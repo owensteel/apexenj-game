@@ -352,7 +352,11 @@ class DNABuilderUI {
         deployOrganismButton.onclick = () => {
             this.hideUI()
 
-            const newOrganism = new Organism(this.focusedDnaModel)
+            const newOrganism = new Organism(
+                this.focusedDnaModel,
+                null,
+                this.currentPool
+            )
 
             // Send to server if needed
             if (this.multiplayerClient && this.multiplayerClient.role == "client") {

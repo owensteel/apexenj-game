@@ -43,6 +43,8 @@ class Pool {
         if (organism.id in this.timeSync.organisms == false) {
             this.timeSync.organisms[organism.id] = Date.now()
         }
+
+        return organism
     }
     importOrganism(presetOrganismJson) {
         console.log("Importing...", presetOrganismJson)
@@ -53,7 +55,8 @@ class Pool {
                 presetOrganismJson.dna.children,
                 presetOrganismJson.dna.detach
             ),
-            presetOrganismJson.id
+            presetOrganismJson.id,
+            this
         )
         this.addOrganism(organism)
     }
@@ -151,7 +154,8 @@ class Pool {
                         servOrg.dna.children,
                         servOrg.dna.detach
                     ),
-                    servOrg.id
+                    servOrg.id,
+                    this
                 ))
             }
         })
