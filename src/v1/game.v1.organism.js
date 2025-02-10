@@ -103,9 +103,17 @@ class Organism {
         this.body.updateDna(this.dnaModel)
     }
     updateLivingState() {
-        // Calc world positions of nodes, to use in this update
-
+        // Calc world positions of nodes, to use in entire update
         this.body.updateNodePosWorldPositions()
+
+        // Prevent "burning" non-existent energy
+        if (this.energy <= 0) {
+            // Prevents energy going into negatives and
+            // subsequently becoming "infinite"
+            this.energy = 0
+
+            return
+        }
 
         // Deplete energy
         let energyDepletion = NATURAL_ENERGY_DEPLETION_AMOUNT
