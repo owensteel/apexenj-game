@@ -59,6 +59,11 @@ class Pool {
             this
         )
         this.addOrganism(organism)
+
+        if ("body" in presetOrganismJson) {
+            organism.body.mesh.position.copy(presetOrganismJson.body.position)
+            organism.body.mesh.rotation.copy(presetOrganismJson.body.rotation)
+        }
     }
     removeOrganism(organism) {
         if (organism instanceof Organism == false) {
