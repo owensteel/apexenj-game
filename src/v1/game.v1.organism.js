@@ -13,6 +13,8 @@ import { stageEdges3D } from './game.v1.3d';
 import { generateID } from './game.v1.utils';
 import Pool from './game.v1.pool';
 
+const FOOD_RESPAWN_INTERVAL_SECS = 15
+
 // "Bump" organism off of canvas edges
 
 function bumpCanvasEdges(organism) {
@@ -119,22 +121,22 @@ class Organism {
 
         // Plant activity
         if (BLOCK_TYPENAME_FOOD in this.body.nodePosByBlockTypeCache) {
-            if (!this.plantFoodInterval) {
-                this.plantFoodInterval = {}
-            }
-
-            this.body.nodePosByBlockTypeCache[BLOCK_TYPENAME_FOOD].forEach((foodNodePos, foodNodePosIndex) => {
-                if (foodNodePos.isEaten || !foodNodePos.mesh.visible) {
+            for (const foodNodePos of this.body.nodePosByBlockTypeCache[BLOCK_TYPENAME_FOOD]) {
+                if (
+                    foodNodePos.isEaten &&
+                    (
+                        foodNodePos.eatenAt &&
+                        (
+                            (Date.now() - foodNodePos.eatenAt) >=
+                            (FOOD_RESPAWN_INTERVAL_SECS * 1000)
+                        )
+                    )
+                ) {
+                    // Interval expired
                     foodNodePos.mesh.visible = true
                     foodNodePos.isEaten = false
-
-                    // Reset interval
-                    this.plantFoodInterval[foodNodePosIndex] = true
-                    setTimeout(() => {
-                        this.plantFoodInterval[foodNodePosIndex] = false
-                    }, 30000)
                 }
-            })
+            }
         }
 
         // Prevent "burning" non-existent energy

@@ -4,6 +4,9 @@
 
 */
 
+import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_FOOD } from "./game.v1.blocks";
+import { ENERGY_PER_FOOD_BLOCK } from "./game.v1.references";
+
 // Mechanics utilities
 
 const overlapRadius = 15
@@ -98,6 +101,31 @@ function syncOrganisms(organism, opponent) {
     // Check overlapping nodes for bumping and any block functions
     const overlappingNodes = getOverlappingNodes(organismNodesWorld, opponentNodesWorld);
     if (overlappingNodes.length > 0) {
+        // Block functions
+        for (const nodePosPair of overlappingNodes) {
+            const orgNodePos = nodePosPair.orgNodeWorldPos
+            const oppNodePos = nodePosPair.oppNodeWorldPos
+
+            // Eat food
+            if (
+                orgNodePos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
+                (
+                    oppNodePos.node.block.typeName == BLOCK_TYPENAME_FOOD &&
+                    !oppNodePos.localNode.isEaten
+                )
+            ) {
+                if (organism.energy < 1) {
+                    // "Eat" it
+                    organism.energy += ENERGY_PER_FOOD_BLOCK
+                    oppNodePos.localNode.isEaten = true
+                    oppNodePos.mesh.visible = false
+
+                    // Reset interval
+                    oppNodePos.localNode.eatenAt = Date.now()
+                }
+            }
+        }
+
         // Bump them so that none of these overlapping node pairs remain overlapped
         bumpNodes(organism, opponent, overlappingNodes);
     }
