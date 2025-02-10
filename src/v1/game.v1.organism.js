@@ -5,12 +5,13 @@
 */
 
 import { Vector3 } from 'three';
-import { BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
+import { BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import OrganismBody from "./game.v1.organism.body"
-import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT } from "./game.v1.references"
+import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT, NODESIZE_DEFAULT } from "./game.v1.references"
 import { stageEdges3D } from './game.v1.3d';
 import { generateID } from './game.v1.utils';
+import Pool from './game.v1.pool';
 
 // "Bump" organism off of canvas edges
 
@@ -75,12 +76,22 @@ function bumpCanvasEdges(organism) {
 // Organism model
 
 class Organism {
-    constructor(dnaModel, id = generateID()) {
+    constructor(dnaModel, id, homePool) {
         if (dnaModel instanceof DNA == false) {
             throw new Error("Organism must be initialised with a DNA model")
         }
         this.dnaModel = dnaModel
-        this.id = id
+
+        if (homePool instanceof Pool == false) {
+            throw new Error("Organism must have a home Pool specified")
+        }
+        this.homePool = homePool
+
+        if (id) {
+            this.id = id
+        } else {
+            this.id = generateID()
+        }
 
         // To be generated
         this.body = new OrganismBody(this.dnaModel)
@@ -105,6 +116,26 @@ class Organism {
     updateLivingState() {
         // Calc world positions of nodes, to use in entire update
         this.body.updateNodePosWorldPositions()
+
+        // Plant activity
+        if (BLOCK_TYPENAME_FOOD in this.body.nodePosByBlockTypeCache) {
+            if (!this.plantFoodInterval) {
+                this.plantFoodInterval = {}
+            }
+
+            this.body.nodePosByBlockTypeCache[BLOCK_TYPENAME_FOOD].forEach((foodNodePos, foodNodePosIndex) => {
+                if (foodNodePos.isEaten || !foodNodePos.mesh.visible) {
+                    foodNodePos.mesh.visible = true
+                    foodNodePos.isEaten = false
+
+                    // Reset interval
+                    this.plantFoodInterval[foodNodePosIndex] = true
+                    setTimeout(() => {
+                        this.plantFoodInterval[foodNodePosIndex] = false
+                    }, 30000)
+                }
+            })
+        }
 
         // Prevent "burning" non-existent energy
         if (this.energy <= 0) {
