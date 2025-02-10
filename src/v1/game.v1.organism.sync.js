@@ -4,7 +4,7 @@
 
 */
 
-import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_FOOD } from "./game.v1.blocks";
+import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_DIGESTER, BLOCK_TYPENAME_FOOD } from "./game.v1.blocks";
 import { ENERGY_PER_FOOD_BLOCK } from "./game.v1.references";
 
 // Mechanics utilities
@@ -115,10 +115,15 @@ function syncOrganisms(organism, opponent) {
                 )
             ) {
                 if (organism.energy < 1) {
-                    // "Eat" it
-                    organism.energy += ENERGY_PER_FOOD_BLOCK
-                    oppNodePos.localNode.isEaten = true
-                    oppNodePos.mesh.visible = false
+                    // Eat the Food block
+                    if (orgNodePos.node.parentNode.block.typeName == BLOCK_TYPENAME_DIGESTER) {
+                        // Only gain nutrition if it's digested
+                        organism.energy += ENERGY_PER_FOOD_BLOCK
+
+                        // Make the Food block "eaten"
+                        oppNodePos.localNode.isEaten = true
+                        oppNodePos.mesh.visible = false
+                    }
 
                     // Reset interval
                     oppNodePos.localNode.eatenAt = Date.now()
