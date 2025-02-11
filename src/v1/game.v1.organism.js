@@ -203,7 +203,7 @@ class Organism {
     // Apply velocity factoring in motors and current
     // rotation
     // And bump canvas edges
-    updateMovement(animationEffectsOnly = false) {
+    updateEffects(animationEffectsOnly = false) {
         if (this.body.mesh == null) {
             return
         }

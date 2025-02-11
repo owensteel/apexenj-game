@@ -110,7 +110,7 @@ class Pool {
             // Update organism energy/state
             organism.updateLivingState()
             // Update organism motion
-            organism.updateMovement()
+            organism.updateEffects()
         }
         // Sync organisms with each other for interactions
         // (must be separate loop, ALL organisms must be
@@ -198,7 +198,7 @@ class Pool {
                 cliOrg.body.mesh.position.copy(servOrg.body.position)
                 cliOrg.body.mesh.rotation.copy(servOrg.body.rotation)
                 // Update animations
-                cliOrg.updateMovement(true)
+                cliOrg.updateEffects(true)
             } else {
                 // No longer exists on server, so remove here
                 this.removeOrganism(cliOrg)
