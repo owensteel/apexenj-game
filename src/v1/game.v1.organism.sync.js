@@ -183,7 +183,10 @@ function syncOrganisms(organism, opponent) {
                         // TODO: Improve void-locating
                         const nearestVoid = {
                             x: orgNodePos.x,
-                            y: orgNodePos.y - (NODESIZE_DEFAULT * 2)
+                            // Place "inwards"
+                            y: orgNodePos.y + (
+                                Math.sign(-orgNodePos.y) * (NODESIZE_DEFAULT * 2)
+                            )
                         }
                         if (nearestVoid) {
                             const foodBlock = new Organism(
