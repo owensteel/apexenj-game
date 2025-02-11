@@ -35,9 +35,9 @@ class OrganismUI {
         }
         updateOrganismUiPos()
     }
-    applyGamerTag(username) {
+    applyGamerTag() {
         const gTe = document.createElement("organism-ui-gamertag")
-        gTe.innerHTML = username
+        gTe.innerHTML = this.organism.author.username
         this.organismUiContainer.appendChild(gTe)
     }
     ateFood() {

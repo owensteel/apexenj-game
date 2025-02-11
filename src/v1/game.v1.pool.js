@@ -26,6 +26,12 @@ class Pool {
             this.id = generateID()
         }
 
+        // To be implemented
+        this.author = {
+            id: null,
+            username: null
+        }
+
         this.organisms = []
         this.isMultiplayerMode = isMultiplayerMode
 
@@ -56,10 +62,10 @@ class Pool {
         }
 
         // Add gamertag if in multiplayer
-        if (this.isMultiplayerMode) {
-            // Currently use Organism's ID until usernames
-            // are implemented
-            organism.ui.applyGamerTag(organism.id)
+        // Only add gamer tag to player-created organisms
+        // i.e ones with authors
+        if (this.isMultiplayerMode && this.author.username) {
+            organism.ui.applyGamerTag()
         }
 
         return organism
