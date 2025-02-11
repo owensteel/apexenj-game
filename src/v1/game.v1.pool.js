@@ -91,7 +91,11 @@ class Pool {
             return oS.id == organism.id
         })
         this.organisms.splice(oIndex, 1)
+        // Prevent "ghost"
+        organism.body.nodePositions = []
         ThreeElements.scene.remove(organism.body.mesh)
+        // Fallback in case remove fails
+        organism.body.mesh.visible = false
     }
     updateLife(timeOfUpdate = Date.now()) {
         // Only get organisms that have been created by the time
