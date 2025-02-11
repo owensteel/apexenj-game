@@ -67,8 +67,8 @@ function bumpNodes(organism, opponent, overlappingNodes) {
             const orgSpeedSq = organism.velocity.x ** 2 + organism.velocity.y ** 2;
             const oppSpeedSq = opponent.velocity.x ** 2 + opponent.velocity.y ** 2;
 
-            const orgSpeed = Math.sqrt(orgSpeedSq);
-            const oppSpeed = Math.sqrt(oppSpeedSq);
+            let orgSpeed = Math.sqrt(orgSpeedSq);
+            let oppSpeed = Math.sqrt(oppSpeedSq);
 
             const totalSpeed = orgSpeed + oppSpeed;
 
@@ -77,6 +77,17 @@ function bumpNodes(organism, opponent, overlappingNodes) {
                 // The faster object is affected more by the push
                 orgPushFactor = oppSpeed / totalSpeed;
                 oppPushFactor = orgSpeed / totalSpeed;
+            }
+
+            // Plants are immovable, so give it equal pushing power as anythin
+            // bumping into it to nullify any actual pushing
+            if (BLOCK_TYPENAME_PLANT in organism.body.nodePosByBlockTypeCache) {
+                oppPushFactor += orgPushFactor
+                orgPushFactor = 0
+            }
+            if (BLOCK_TYPENAME_PLANT in opponent.body.nodePosByBlockTypeCache) {
+                orgPushFactor += oppPushFactor
+                oppPushFactor = 0
             }
 
             // Apply movement adjustments
