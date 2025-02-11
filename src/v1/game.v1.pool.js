@@ -153,6 +153,7 @@ class Pool {
                 const servOrg = {
                     id: organism.id,
                     dna: organism.dnaModel.getStaticClone(),
+                    absorbedFood: organism.absorbedFood,
                     state: {
                         energy: organism.energy
                     },
