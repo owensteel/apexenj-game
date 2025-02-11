@@ -146,9 +146,12 @@ class Organism {
             }
         }
 
-        // Plants, being food sources, don't die for the sake of
+        // Plants and Food, being food sources, don't die for the sake of
         // the game
-        if (BLOCK_TYPENAME_PLANT in this.body.nodePosByBlockTypeCache) {
+        if (
+            BLOCK_TYPENAME_PLANT in this.body.nodePosByBlockTypeCache ||
+            BLOCK_TYPENAME_FOOD in this.body.nodePosByBlockTypeCache
+        ) {
             return
         }
 
