@@ -207,6 +207,12 @@ class Organism {
 
         // Animations/effects
 
+        // Energy "fade away" effect
+
+        for (const nodePos of this.body.nodePositions) {
+            nodePos.mesh.material.opacity = Math.min(1, this.energy)
+        }
+
         // Motor nodes
 
         let totalMotorX = 0;

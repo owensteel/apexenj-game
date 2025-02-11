@@ -99,7 +99,8 @@ function buildBodyFromNodePositions(
         const nodeMaterial = new THREE.MeshBasicMaterial(
             {
                 color: pos.node.block.color,
-                dithering: true
+                dithering: true,
+                transparent: true
             }
         )
         const nodeMesh = new THREE.Mesh(
