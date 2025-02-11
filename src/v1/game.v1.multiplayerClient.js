@@ -113,7 +113,10 @@ class MultiplayerClient {
                     hostUpdateLoop()
                 }, 1000 / UPDATES_PER_SEC)
             }
-            hostUpdateLoop()
+            setTimeout(() => {
+                console.log("host updates starting...")
+                hostUpdateLoop()
+            }, 1000)
 
             // Receive any data from other players
             socket.on("pool_host_update", (data) => {
