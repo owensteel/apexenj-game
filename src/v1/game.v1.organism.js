@@ -5,7 +5,7 @@
 */
 
 import { Vector3 } from 'three';
-import { BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_MOTOR } from "./game.v1.blocks"
+import { BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_MOTOR, BLOCK_TYPENAME_PLANT } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import OrganismBody from "./game.v1.organism.body"
 import { MAX_DIST_IN_TICK_X, MAX_DIST_IN_TICK_Y, MIN_MOTOR_NODES_WITHOUT_ENERGY_CON, MIN_NODES_WITHOUT_ENERGY_CON, MIN_NUM_OF_NODES, MOTOR_MAX_POWER, NATURAL_ENERGY_DEPLETION_AMOUNT, NODESIZE_DEFAULT } from "./game.v1.references"
@@ -146,6 +146,12 @@ class Organism {
             }
         }
 
+        // Plants, being food sources, don't die for the sake of
+        // the game
+        if (BLOCK_TYPENAME_PLANT in this.body.nodePosByBlockTypeCache) {
+            return
+        }
+
         // Prevent "burning" non-existent energy
         if (this.energy <= 0) {
             // Prevents energy going into negatives and
@@ -210,7 +216,7 @@ class Organism {
         // Energy "fade away" effect
 
         for (const nodePos of this.body.nodePositions) {
-            nodePos.mesh.material.opacity = Math.min(1, this.energy)
+            nodePos.mesh.material.opacity = Math.min(1, this.energy * 2)
         }
 
         // Motor nodes
