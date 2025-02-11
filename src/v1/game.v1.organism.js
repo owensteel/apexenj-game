@@ -199,6 +199,12 @@ class Organism {
             return
         }
 
+        // No energy, no movement
+
+        if (this.energy <= 0) {
+            return
+        }
+
         // Animations/effects
 
         // Motor nodes
