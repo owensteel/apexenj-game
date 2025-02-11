@@ -4,6 +4,7 @@
 
 */
 
+import { scene } from "./game.v1.3d";
 import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_DIGESTER, BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_PLANT } from "./game.v1.blocks";
 import DNA from "./game.v1.dna";
 import Organism from "./game.v1.organism";
@@ -133,11 +134,31 @@ function syncOrganisms(organism, opponent) {
                         // That should not respawn
                         // So destroy it forever
                         organism.homePool.removeOrganism(opponent)
+                        // Fallback
+                        oppNodePos.mesh.visible = false
+                        scene.remove(oppNodePos.mesh)
                     }
                 }
 
                 // Eat and digest the Food block, if there is a Digester
-                if (orgNodePos.node.parentNode.block.typeName == BLOCK_TYPENAME_DIGESTER) {
+                const hasConnectedDigester = (node) => {
+                    // Check if parent is Digester
+                    if (!node.parentNode) {
+                        return false
+                    }
+                    if (node.parentNode.block.typeName == BLOCK_TYPENAME_DIGESTER) {
+                        return true
+                    } else {
+                        // If still an Absorber, try the parent of the parent
+                        if (node.block.typeName == BLOCK_TYPENAME_ABSORBER) {
+                            return hasConnectedDigester(node.parentNode)
+                        } else {
+                            // End of chain
+                            return false
+                        }
+                    }
+                }
+                if (hasConnectedDigester(orgNodePos.node)) {
                     // Energy can overflow once, but anything more is not allowed
                     if (organism.energy < 1) {
                         // Make the Food block "eaten"
@@ -146,43 +167,43 @@ function syncOrganisms(organism, opponent) {
                         organism.energy += ENERGY_PER_FOOD_BLOCK
                         organism.ui.ateFood()
                     }
-                }
+                } else {
+                    // If no Digester, then just "pass" the Food through
+                    // to any void on the other side of the Absorber
 
-                // If no Digester, then just "pass" the Food through
-                // to any void on the other side of the Absorber
+                    // Prevent passing an already-passed floating Food block
+                    // We want to allow other organisms to potentially "steal"
+                    // Food that is stored in other organisms, so only disallow
+                    // this particular organism.
+                    // If not implemented, the Absorber will just keep passing
+                    // the Food back-and-forth infinitely, which is useless — the
+                    // Absorber must be "one-way" for things like "digestion" to
+                    // work.
+                    if (!organism.absorbedFood.includes(opponent.id)) {
+                        // TODO: Improve void-locating
+                        const nearestVoid = {
+                            x: orgNodePos.x,
+                            y: orgNodePos.y - (NODESIZE_DEFAULT * 2)
+                        }
+                        if (nearestVoid) {
+                            const foodBlock = new Organism(
+                                new DNA(
+                                    "appendage",
+                                    BLOCK_TYPENAME_FOOD
+                                ),
+                                null,
+                                organism.homePool
+                            )
+                            organism.homePool.addOrganism(foodBlock)
+                            // Prevent double absorption
+                            organism.absorbedFood.push(foodBlock.id)
+                            // Place in nearest void (e.g on the other side)
+                            foodBlock.body.mesh.position.x = nearestVoid.x
+                            foodBlock.body.mesh.position.y = nearestVoid.y
 
-                // Prevent passing an already-passed floating Food block
-                // We want to allow other organisms to potentially "steal"
-                // Food that is stored in other organisms, so only disallow
-                // this particular organism.
-                // If not implemented, the Absorber will just keep passing
-                // the Food back-and-forth infinitely, which is useless — the
-                // Absorber must be "one-way" for things like "digestion" to
-                // work.
-                if (!organism.absorbedFood.includes(opponent.id)) {
-                    // TODO: Improve void-locating
-                    const nearestVoid = {
-                        x: orgNodePos.x,
-                        y: orgNodePos.y - (NODESIZE_DEFAULT * 2)
-                    }
-                    if (nearestVoid) {
-                        const foodBlock = new Organism(
-                            new DNA(
-                                "appendage",
-                                BLOCK_TYPENAME_FOOD
-                            ),
-                            null,
-                            organism.homePool
-                        )
-                        organism.homePool.addOrganism(foodBlock)
-                        // Prevent double absorption
-                        organism.absorbedFood.push(foodBlock.id)
-                        // Place in nearest void (e.g on the other side)
-                        foodBlock.body.mesh.position.x = nearestVoid.x
-                        foodBlock.body.mesh.position.y = nearestVoid.y
-
-                        // Make the original Food block "eaten"
-                        makeFoodBlockEaten()
+                            // Make the original Food block "eaten"
+                            makeFoodBlockEaten()
+                        }
                     }
                 }
 
