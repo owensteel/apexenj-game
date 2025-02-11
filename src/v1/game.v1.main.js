@@ -58,6 +58,14 @@ class Main {
             )
         }
 
+        // Init Builder UI
+        this.builderUi = new DNABuilderUI(
+            defaultDNA,
+            this.currentPool,
+            this.multiplayerClient
+        )
+
+        // Init all
         this.init()
         this.displayUI()
     }
@@ -66,8 +74,8 @@ class Main {
 
         // TODO: REMOVE, debugging only
 
-        console.log(currentPool)
-        window.cL = currentPool
+        window.cL = this
+        console.log(window.cL)
 
         // Rendering
         // Offline only; in multiplayer mode, only the host
@@ -87,13 +95,8 @@ class Main {
     displayUI() {
         // Set up Builder UI
 
-        const builderUi = new DNABuilderUI(
-            defaultDNA,
-            this.currentPool,
-            this.multiplayerClient
-        )
-        this.gameWrapper.appendChild(builderUi.builderWrapper)
-        builderUi.initDOM()
+        this.gameWrapper.appendChild(this.builderUi.builderWrapper)
+        this.builderUi.initDOM()
 
         // Display game status
 
