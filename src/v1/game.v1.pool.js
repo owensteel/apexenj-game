@@ -111,6 +111,10 @@ class Pool {
             organism.updateLivingState()
             // Update organism motion
             organism.updateEffects()
+            // Remove dead organism
+            if (!organism.alive) {
+                this.removeOrganism(organism)
+            }
         }
         // Sync organisms with each other for interactions
         // (must be separate loop, ALL organisms must be
