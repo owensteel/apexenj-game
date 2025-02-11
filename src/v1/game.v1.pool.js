@@ -92,6 +92,7 @@ class Pool {
         })
         this.organisms.splice(oIndex, 1)
         // Prevent "ghost"
+        organism.ui.organismUiContainer.remove()
         organism.body.nodePositions = []
         ThreeElements.scene.remove(organism.body.mesh)
         // Fallback in case remove fails
