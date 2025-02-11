@@ -195,9 +195,7 @@ class Organism {
         this.energy -= energyDepletion
 
         // Death check
-        this.alive = (
-            Math.round((this.energy * 100) / 10) * 10
-        ) > 0
+        this.alive = (Math.round((this.energy * 1000) / 10) * 10) > 0
     }
     // Essentially apply motion to the organism
     // Apply velocity factoring in motors and current
