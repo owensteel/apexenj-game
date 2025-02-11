@@ -106,6 +106,9 @@ class Organism {
         this.energy = 1
         this.alive = true
 
+        // Caching
+        this.absorbedFood = []
+
         // Movement
         this.velocity = { x: 0, y: 0 }
         this.appliedVelocity = { x: 0, y: 0, finalX: 0, finalY: 0 }
