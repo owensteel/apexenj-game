@@ -7,6 +7,8 @@
 import Organism from "./game.v1.organism";
 import { UPDATES_PER_SEC } from "./game.v1.references";
 
+const UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD = "UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD"
+
 class OrganismUI {
     constructor(organism) {
         if (!(organism instanceof Organism)) {
@@ -34,6 +36,10 @@ class OrganismUI {
             setTimeout(updateOrganismUiPos, 1000 / UPDATES_PER_SEC)
         }
         updateOrganismUiPos()
+
+        // UI backlog (so clients can sync UI events with host during multiplayer)
+        // Should be cleared after every host sync
+        this.syncBacklog = []
     }
     applyGamerTag() {
         const gTe = document.createElement("organism-ui-gamertag")
@@ -48,6 +54,20 @@ class OrganismUI {
         setTimeout(() => {
             aFd.remove()
         }, 1250)
+
+        // Add to backlog to update any clients
+        this.syncBacklog.push({
+            type: UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD
+        })
+    }
+    processSyncBacklog(importedSyncBacklog) {
+        for (const uiEvent of importedSyncBacklog) {
+            switch (uiEvent.type) {
+                case UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD:
+                    this.ateFood()
+                    break;
+            }
+        }
     }
 }
 

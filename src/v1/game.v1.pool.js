@@ -190,7 +190,10 @@ class Pool {
                     absorbedFood: organism.absorbedFood,
                     state: {
                         energy: organism.energy,
-                        nodeStateSync: organism.nodeStateSync
+                        nodeStateSync: organism.nodeStateSync,
+                        ui: {
+                            syncBacklog: organism.ui.syncBacklog
+                        }
                     },
                     body: {
                         position: organism.body.mesh.position,
@@ -243,6 +246,10 @@ class Pool {
                 cliOrg.body.updateNodePosWorldPositions()
                 // Update living effects
                 cliOrg.updateEffects(true)
+                // Sync UI
+                if (servOrg.state.ui) {
+                    cliOrg.ui.processSyncBacklog(servOrg.state.ui.syncBacklog)
+                }
             } else {
                 // No longer exists on server, so remove here
                 this.removeOrganism(cliOrg)

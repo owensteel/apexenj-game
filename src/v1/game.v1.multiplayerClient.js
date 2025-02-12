@@ -137,6 +137,13 @@ class MultiplayerClient {
                         msgpack.encode(dataToSend)
                     );
 
+                    // Clear UI backlog now it has been sent to clients
+                    // Otherwise backlog will just grow exponentially
+                    // and cause infinitely duplicated UI events
+                    for (const organism of this.currentGame.currentPool.organisms) {
+                        organism.ui.syncBacklog = []
+                    }
+
                     // Only ensure next update if connected already
                     setTimeout(() => {
                         hostUpdateLoop()
