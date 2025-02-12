@@ -118,7 +118,7 @@ class Organism {
         }
 
         // UI
-        this.ui = new OrganismUI(this)
+        this.ui = new OrganismUI(this, this.homePool.isMultiplayerMode)
 
         // To be generated
         this.body = new OrganismBody(this.dnaModel)

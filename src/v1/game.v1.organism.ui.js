@@ -10,13 +10,14 @@ import { UPDATES_PER_SEC } from "./game.v1.references";
 const UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD = "UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD"
 
 class OrganismUI {
-    constructor(organism) {
+    constructor(organism, shouldBacklogEvents = false) {
         if (!(organism instanceof Organism)) {
             throw new Error("Organism UI must have Organism to reference")
         }
         this.organism = organism
         this.organismUiContainer = document.createElement("organism-ui-container")
 
+        // Use single element to contain UI for this Organism
         const gameStageWrapper = document.getElementsByTagName("game-stage-wrapper")[0]
         gameStageWrapper.appendChild(this.organismUiContainer)
 
@@ -37,8 +38,10 @@ class OrganismUI {
         }
         updateOrganismUiPos()
 
-        // UI backlog (so clients can sync UI events with host during multiplayer)
+        // UI backlog so clients can sync UI events with host
+        // during multiplayer
         // Should be cleared after every host sync
+        this.shouldBacklogEvents = shouldBacklogEvents
         this.syncBacklog = []
     }
     applyGamerTag() {
@@ -56,9 +59,12 @@ class OrganismUI {
         }, 1250)
 
         // Add to backlog to update any clients
-        this.syncBacklog.push({
-            type: UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD
-        })
+        if (this.shouldBacklogEvents) {
+            this.syncBacklog.push({
+                type: UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD
+            })
+            console.log(this.syncBacklog)
+        }
     }
     processSyncBacklog(importedSyncBacklog) {
         for (const uiEvent of importedSyncBacklog) {
