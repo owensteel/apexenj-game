@@ -97,6 +97,7 @@ class MultiplayerClient {
             this.syncGameWithServer(poolInitState)
 
             // Start hosting this game
+            let exportedOrganisms = []
             const hostUpdateLoop = () => {
                 // Only update if server can receive updates
                 if (this.isConnectedToServer) {
@@ -104,14 +105,36 @@ class MultiplayerClient {
                     this.currentGame.currentPool.updateLife()
                     // Send updated state to server
                     // for syncing
+
+                    // Clone so we can remove data without damaging
+                    // the original static cache
+                    const dataToSend = JSON.parse(JSON.stringify(
+                        this.currentGame.currentPool.staticExportCache
+                    ))
+
+                    // Don't send DNA twice, after initial update
+                    // server has it cached already
+                    for (const organism of dataToSend.organisms) {
+                        if (exportedOrganisms.includes(organism.id)) {
+                            delete organism["dna"]
+                        } else {
+                            // Send DNA this time, make sure it isn't
+                            // sent again
+                            exportedOrganisms.push(organism.id)
+                        }
+                    }
+
+                    // Send to server
                     socket.emit(
                         "pool_host_sync",
-                        this.currentGame.currentPool.exportToObj()
+                        dataToSend
                     );
+
+                    // Only ensure next update if connected already
+                    setTimeout(() => {
+                        hostUpdateLoop()
+                    }, 1000 / UPDATES_PER_SEC)
                 }
-                setTimeout(() => {
-                    hostUpdateLoop()
-                }, 1000 / UPDATES_PER_SEC)
             }
             setTimeout(() => {
                 console.log("host updates starting...")

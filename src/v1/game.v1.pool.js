@@ -26,15 +26,16 @@ class Pool {
             this.id = generateID()
         }
 
+        // Determines what features should be shown
+        this.isMultiplayerMode = isMultiplayerMode
+
         // To be implemented
         this.author = {
             id: null,
             username: null
         }
 
-        this.organisms = []
-        this.isMultiplayerMode = isMultiplayerMode
-
+        // Time sync data
         if (timeSync) {
             this.timeSync = timeSync
         } else {
@@ -42,6 +43,20 @@ class Pool {
                 pool: Date.now(),
                 organisms: {}
             }
+        }
+
+        // Pool state
+        this.organisms = []
+
+        // The static object-form export for this
+        // Pool, which should be cached as parts
+        // will not need updating
+        this.staticExportCache = {
+            id: this.id,
+            timeSync: this.timeSync,
+            // Organisms must be converted into
+            // static data
+            organisms: []
         }
 
         // Pre-add any preset organisms
@@ -68,10 +83,29 @@ class Pool {
             organism.ui.applyGamerTag()
         }
 
+        // Save static form in export
+        this.staticExportCache.organisms.push({
+            id: organism.id,
+            absorbedFood: organism.absorbedFood,
+            state: {
+                energy: organism.energy
+            },
+            dna: organism.dnaModel.getStaticClone(),
+            body: {
+                position: organism.body.mesh.position,
+                rotation: organism.body.mesh.rotation
+            }
+        })
+
         return organism
     }
     importOrganism(presetOrganismJson) {
         console.log("Importing...", presetOrganismJson)
+
+        if (!("dna" in presetOrganismJson)) {
+            throw new Error("Cannot import Organism without DNA")
+        }
+
         const organism = new Organism(
             new DNA(
                 presetOrganismJson.dna.role,
@@ -152,30 +186,8 @@ class Pool {
             timeDeltaSecs--
         }
     }
-    exportToObj() {
-        return {
-            id: this.id,
-            // Static data about organism
-            organisms: this.organisms.map((organism) => {
-                const servOrg = {
-                    id: organism.id,
-                    dna: organism.dnaModel.getStaticClone(),
-                    absorbedFood: organism.absorbedFood,
-                    state: {
-                        energy: organism.energy
-                    },
-                    body: {
-                        position: organism.body.mesh.position,
-                        rotation: organism.body.mesh.rotation
-                    }
-                }
-                return servOrg
-            }),
-            timeSync: this.timeSync
-        }
-    }
     exportToJson() {
-        return JSON.stringify(this.exportToObj())
+        return JSON.stringify(this.staticExportCache)
     }
     // Multiplayer
     syncWithServer(poolData) {
