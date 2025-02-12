@@ -109,7 +109,7 @@ class MultiplayerClient {
                     // Clone so we can remove data without damaging
                     // the original static cache
                     const dataToSend = JSON.parse(JSON.stringify(
-                        this.currentGame.currentPool.staticExportCache
+                        this.currentGame.currentPool.getStaticExport()
                     ))
 
                     // Don't send DNA twice, after initial update
@@ -136,10 +136,7 @@ class MultiplayerClient {
                     }, 1000 / UPDATES_PER_SEC)
                 }
             }
-            setTimeout(() => {
-                console.log("host updates starting...")
-                hostUpdateLoop()
-            }, 1000)
+            hostUpdateLoop()
 
             // Receive any data from other players
             socket.on("pool_host_update", (data) => {

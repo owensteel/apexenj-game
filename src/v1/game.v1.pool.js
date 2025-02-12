@@ -48,17 +48,6 @@ class Pool {
         // Pool state
         this.organisms = []
 
-        // The static object-form export for this
-        // Pool, which should be cached as parts
-        // will not need updating
-        this.staticExportCache = {
-            id: this.id,
-            timeSync: this.timeSync,
-            // Organisms must be converted into
-            // static data
-            organisms: []
-        }
-
         // Pre-add any preset organisms
         presetOrganisms.forEach((presetOrg) => {
             this.importOrganism(presetOrg)
@@ -83,20 +72,6 @@ class Pool {
             organism.ui.applyGamerTag()
         }
 
-        // Save static form in export
-        this.staticExportCache.organisms.push({
-            id: organism.id,
-            absorbedFood: organism.absorbedFood,
-            state: {
-                energy: organism.energy
-            },
-            dna: organism.dnaModel.getStaticClone(),
-            body: {
-                position: organism.body.mesh.position,
-                rotation: organism.body.mesh.rotation
-            }
-        })
-
         return organism
     }
     importOrganism(presetOrganismJson) {
@@ -106,6 +81,7 @@ class Pool {
             throw new Error("Cannot import Organism without DNA")
         }
 
+        // Create replica from DNA
         const organism = new Organism(
             new DNA(
                 presetOrganismJson.dna.role,
@@ -118,6 +94,10 @@ class Pool {
         )
         this.addOrganism(organism)
 
+        // Copy energy
+        organism.energy = presetOrganismJson.state.energy
+
+        // Copy position and rotation
         if ("body" in presetOrganismJson) {
             organism.body.mesh.position.copy(presetOrganismJson.body.position)
             organism.body.mesh.rotation.copy(presetOrganismJson.body.rotation)
@@ -185,6 +165,32 @@ class Pool {
             }
             timeDeltaSecs--
         }
+    }
+    getStaticExport() {
+        const staticExport = {
+            id: this.id,
+            timeSync: this.timeSync,
+            // Organisms must be converted into
+            // static data
+            organisms: []
+        }
+        this.organisms.map((organism) => {
+            staticExport.organisms.push(
+                {
+                    id: organism.id,
+                    absorbedFood: organism.absorbedFood,
+                    state: {
+                        energy: organism.energy
+                    },
+                    body: {
+                        position: organism.body.mesh.position,
+                        rotation: organism.body.mesh.rotation
+                    },
+                    dna: organism.dnaModel.getStaticClone()
+                }
+            )
+        })
+        return staticExport
     }
     exportToJson() {
         return JSON.stringify(this.staticExportCache)
