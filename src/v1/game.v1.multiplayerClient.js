@@ -63,7 +63,8 @@ class MultiplayerClient {
         // Listen for server events
         let timeOfLastClientUpdate = null
         let clientUpdateDelayCheck = null
-        socket.on("pool_client_update", (poolData) => {
+        socket.on("pool_client_update", (poolDataBuffer) => {
+            const poolData = msgpack.decode(poolDataBuffer)
             // Sync Pool with server state
             this.syncGameWithServer(poolData)
             // Check for delays
