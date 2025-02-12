@@ -64,7 +64,10 @@ class MultiplayerClient {
         let timeOfLastClientUpdate = null
         let clientUpdateDelayCheck = null
         socket.on("pool_client_update", (poolDataBuffer) => {
-            const poolData = msgpack.decode(poolDataBuffer)
+            if (!poolDataBuffer) {
+                return
+            }
+            const poolData = msgpack.decode(new Uint8Array(poolDataBuffer))
             // Sync Pool with server state
             this.syncGameWithServer(poolData)
             // Check for delays
@@ -80,10 +83,12 @@ class MultiplayerClient {
                 }
             }, 1000)
         });
-        socket.on("pool_host_init", (poolInitState) => {
-            if (!poolInitState) {
+        socket.on("pool_host_init", (poolInitStateBuffer) => {
+            if (!poolInitStateBuffer) {
                 return
             }
+            const poolInitState = msgpack.decode(new Uint8Array(poolInitStateBuffer))
+
             console.log("This client is the host")
 
             // Update role
