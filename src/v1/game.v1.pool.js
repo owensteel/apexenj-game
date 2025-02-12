@@ -121,7 +121,10 @@ class Pool {
         organism.ui.organismUiContainer.remove()
         organism.body.nodePositions = []
         ThreeElements.scene.remove(organism.body.mesh)
-        // Fallback in case remove fails
+        // Fallback in case remove from scene fails
+        // (since node positions are by now assuredly
+        // empty, all that will remain is the "ghost",
+        // so making that invisible is a genuine fallback)
         organism.body.mesh.visible = false
     }
     updateLife(timeOfUpdate = Date.now()) {
@@ -186,7 +189,8 @@ class Pool {
                     id: organism.id,
                     absorbedFood: organism.absorbedFood,
                     state: {
-                        energy: organism.energy
+                        energy: organism.energy,
+                        nodeStateSync: organism.nodeStateSync
                     },
                     body: {
                         position: organism.body.mesh.position,
@@ -202,9 +206,9 @@ class Pool {
         return JSON.stringify(this.staticExportCache)
     }
     // Multiplayer
-    syncWithServer(poolData) {
+    syncWithServer(serverGameState) {
         // Import any new organisms from server
-        poolData.organisms.forEach((servOrg) => {
+        serverGameState.organisms.forEach((servOrg) => {
             const realOrg = this.organisms.find((oS) => {
                 return oS.id == servOrg.id
             })
@@ -224,16 +228,20 @@ class Pool {
         })
         // Update all organisms
         this.organisms.forEach((cliOrg) => {
-            const servOrg = poolData.organisms.find((oS) => {
+            const servOrg = serverGameState.organisms.find((oS) => {
                 return oS.id == cliOrg.id
             })
             if (servOrg) {
                 // Update to server state
                 cliOrg.energy = servOrg.state.energy
+                if (servOrg.state.nodeStateSync) {
+                    cliOrg.nodeStateSync.states = servOrg.state.nodeStateSync.states
+                }
                 // Update to server position
                 cliOrg.body.mesh.position.copy(servOrg.body.position)
                 cliOrg.body.mesh.rotation.copy(servOrg.body.rotation)
-                // Update animations
+                cliOrg.body.updateNodePosWorldPositions()
+                // Update living effects
                 cliOrg.updateEffects(true)
             } else {
                 // No longer exists on server, so remove here

@@ -76,6 +76,27 @@ function bumpCanvasEdges(organism) {
     }
 }
 
+// Node position state sync model
+
+class NodePositionStateSync {
+    constructor() {
+        this.states = {}
+    }
+    setStateForNodePos(nodePosIndex, stateKey, stateValue) {
+        if (!(nodePosIndex in this.states)) {
+            this.states[nodePosIndex] = {}
+        }
+        this.states[nodePosIndex][stateKey] = stateValue
+    }
+    getStateOfNodePos(nodePosIndex) {
+        if (nodePosIndex in this.states) {
+            return this.states[nodePosIndex]
+        } else {
+            return {}
+        }
+    }
+}
+
 // Organism model
 
 class Organism {
@@ -106,6 +127,10 @@ class Organism {
         this.energy = 1
         this.alive = true
 
+        // Globally sync states of node positions
+        // Especially useful for syncing effects across multiplayer
+        this.nodeStateSync = new NodePositionStateSync()
+
         // Caching
         this.absorbedFood = []
 
@@ -126,22 +151,22 @@ class Organism {
         // Calc world positions of nodes, to use in entire update
         this.body.updateNodePosWorldPositions()
 
-        // Plant activity
+        // Plant respawn Food
         if (BLOCK_TYPENAME_FOOD in this.body.nodePosByBlockTypeCache) {
             for (const foodNodePos of this.body.nodePosByBlockTypeCache[BLOCK_TYPENAME_FOOD]) {
+                const foodNodePosState = this.nodeStateSync.getStateOfNodePos(foodNodePos.index)
                 if (
-                    foodNodePos.isEaten &&
+                    foodNodePosState &&
+                    ("isEaten" in foodNodePosState && "eatenAt" in foodNodePosState) &&
                     (
-                        foodNodePos.eatenAt &&
-                        (
-                            (Date.now() - foodNodePos.eatenAt) >=
-                            (FOOD_RESPAWN_INTERVAL_SECS * 1000)
-                        )
+                        (Date.now() - foodNodePosState.eatenAt) >=
+                        (FOOD_RESPAWN_INTERVAL_SECS * 1000)
                     )
                 ) {
                     // Interval expired
-                    foodNodePos.mesh.visible = true
-                    foodNodePos.isEaten = false
+                    this.nodeStateSync.setStateForNodePos(
+                        foodNodePos.index, "isEaten", false
+                    )
                 }
             }
         }
@@ -206,18 +231,27 @@ class Organism {
             return
         }
 
-        // No energy, no movement
+        // No energy, effects are useless
 
         if (this.energy <= 0) {
             return
         }
 
-        // Animations/effects
-
-        // Energy "fade away" effect
+        // Apply effects to node positions
 
         for (const nodePos of this.body.nodePositions) {
+            // Energy "fade away" effect
             nodePos.mesh.material.opacity = Math.min(1, this.energy * 2)
+
+            // Apply global effects
+            const nodePosState = this.nodeStateSync.getStateOfNodePos(nodePos.index)
+            for (const stateKey of Object.keys(nodePosState)) {
+                switch (stateKey) {
+                    case "isEaten":
+                        nodePos.mesh.visible = !nodePosState.isEaten
+                        break;
+                }
+            }
         }
 
         // Motor nodes

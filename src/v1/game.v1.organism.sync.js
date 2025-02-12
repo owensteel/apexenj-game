@@ -104,6 +104,12 @@ function bumpNodes(organism, opponent, overlappingNodes) {
 // "Syncing" two organisms, i.e checking interactions with each other
 
 function syncOrganisms(organism, opponent) {
+    // Check if orgs are ready yet
+    if (!organism.body.nodePositions || !opponent.body.nodePositions) {
+        console.warn("Sync cancelled — node positions not ready")
+        return
+    }
+
     // Get world positions of nodes in the current update
     const organismNodesWorld = organism.body.nodePositions.map((nodePos) => {
         return nodePos.worldPos
@@ -121,11 +127,15 @@ function syncOrganisms(organism, opponent) {
             const oppNodePos = nodePosPair.oppNodeWorldPos
 
             // Eat food
+            const oppNodePosState = opponent.nodeStateSync.getStateOfNodePos(oppNodePos.index)
             if (
                 orgNodePos.node.block.typeName == BLOCK_TYPENAME_ABSORBER &&
                 (
                     oppNodePos.node.block.typeName == BLOCK_TYPENAME_FOOD &&
-                    !oppNodePos.localNode.isEaten
+                    !(
+                        oppNodePosState &&
+                        oppNodePosState.isEaten
+                    )
                 )
             ) {
                 // Hides or destroys the Food block, depending on whether it
@@ -137,21 +147,25 @@ function syncOrganisms(organism, opponent) {
                     ) {
                         // Is part of a Plant, so should respawn — thus, don't destroy it,
                         // just hide it and toggle off its accessibility
-                        oppNodePos.localNode.isEaten = true
-                        oppNodePos.mesh.visible = false
-                        oppNodePos.localNode.eatenAt = Date.now()
+                        opponent.nodeStateSync.setStateForNodePos(
+                            oppNodePos.index, "eatenAt", Date.now()
+                        )
+                        opponent.nodeStateSync.setStateForNodePos(
+                            oppNodePos.index, "isEaten", true
+                        )
                     } else {
                         // This is Food that is not part of a Plant but a floating object
                         // That should not respawn
                         // So destroy it forever
                         organism.homePool.removeOrganism(opponent)
-                        // Fallback
+                        // Fallback (remove node pos mesh)
                         oppNodePos.mesh.visible = false
                         scene.remove(oppNodePos.mesh)
                     }
                 }
 
-                // Eat and digest the Food block, if there is a Digester
+                // Absorbed Food can only be eaten if connected to a Digester
+                // somewhere
                 const hasConnectedDigester = (node) => {
                     // Check if parent is Digester
                     if (!node.parentNode) {
@@ -169,13 +183,15 @@ function syncOrganisms(organism, opponent) {
                         }
                     }
                 }
+
+                // Eat and digest the Food block, if there is a Digester
                 if (hasConnectedDigester(orgNodePos.node)) {
                     // Energy can overflow once, but anything more is not allowed
                     if (organism.energy < 1) {
-                        // Make the Food block "eaten"
-                        makeFoodBlockEaten()
                         // Add the energy from this Food to this Organism
                         organism.energy += ENERGY_PER_FOOD_BLOCK
+                        // Make the Food block "eaten"
+                        makeFoodBlockEaten()
                         organism.ui.ateFood()
                     }
                 } else {
