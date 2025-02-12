@@ -183,7 +183,7 @@ class Pool {
             // static data
             organisms: []
         }
-        this.organisms.map((organism) => {
+        this.organisms.forEach((organism) => {
             staticExport.organisms.push(
                 {
                     id: organism.id,
