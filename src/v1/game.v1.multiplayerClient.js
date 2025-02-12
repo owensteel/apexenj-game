@@ -5,6 +5,7 @@
 */
 
 import { io } from "socket.io-client";
+import msgpack from "msgpack-lite"
 
 import * as uiDialogs from "./game.v1.ui.dialogs"
 import Main from "./game.v1.main";
@@ -127,7 +128,7 @@ class MultiplayerClient {
                     // Send to server
                     socket.emit(
                         "pool_host_sync",
-                        dataToSend
+                        msgpack.encode(dataToSend)
                     );
 
                     // Only ensure next update if connected already
