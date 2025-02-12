@@ -95,7 +95,13 @@ class Pool {
         this.addOrganism(organism)
 
         // Copy energy
-        organism.energy = presetOrganismJson.state.energy
+        if ("energy" in presetOrganismJson) {
+            organism.energy = presetOrganismJson.energy
+        } else if ("state" in presetOrganismJson) {
+            organism.energy = presetOrganismJson.state.energy
+        } else {
+            console.warn("Energy property of imported Organism could not be parsed")
+        }
 
         // Copy position and rotation
         if ("body" in presetOrganismJson) {
