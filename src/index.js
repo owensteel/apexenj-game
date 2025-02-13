@@ -12,8 +12,6 @@ import Main from "./v1/game.v1.main";
 import MultiplayerClient from "./v1/game.v1.multiplayerClient";
 import { uiGenericError, uiLoading, uiPoolNoExistError } from "./v1/game.v1.ui.dialogs";
 
-import DemoPool from "./v1/test_objects/pool_1.json"
-
 const UriParam = window.location.pathname.split("/")[1]
 const selectedPoolId = UriParam.split("_")[0]
 const multiplayerMode = UriParam.split("_")[1] !== "offline"
@@ -40,7 +38,7 @@ if (!multiplayerMode || !selectedPoolId) {
         })
     } else {
         // Create new empty sandbox
-        new Main(DemoPool)
+        new Main()
     }
 } else {
     // Public Pools
