@@ -11,6 +11,10 @@ import * as uiDialogs from "./game.v1.ui.dialogs"
 import Main from "./game.v1.main";
 import { UPDATES_PER_SEC } from "./game.v1.references";
 
+// The maximum amount of time since the last update
+// Before we accept the connection has gone down
+const MIN_UPDATE_GAP_SECS = 1
+
 class MultiplayerClient {
     constructor(selectedPoolId) {
         // Setup
@@ -56,10 +60,15 @@ class MultiplayerClient {
         // Handle connection error
         socket.on('connect_error', (err) => {
             console.error('Connection error:', err);
+            // Mark our game instance because the server will
+            // now have a different state to us, and by keeping
+            // it we risk sending an outdated state
+            this.currentGame.outdatedState = true
             // Connection error dialog
-            if (!this.currentOpenDialog.isOpen) {
-                this.currentOpenDialog = uiDialogs.uiCouldNotConnect()
+            if (this.currentOpenDialog) {
+                this.currentOpenDialog.close()
             }
+            this.currentOpenDialog = uiDialogs.uiCouldNotConnect()
         });
 
         // Listen for server events
@@ -75,13 +84,16 @@ class MultiplayerClient {
             // Check for delays
             timeOfLastClientUpdate = Date.now()
             clientUpdateDelayCheck = setTimeout(() => {
-                if (Date.now() >= timeOfLastClientUpdate + 1000) {
-                    // No updates for a second, so freeze
+                if (Date.now() >= timeOfLastClientUpdate + (MIN_UPDATE_GAP_SECS * 1000)) {
+                    // No updates for too long, so freeze
                     this.hasReceivedFirstUpdate = false
                     // "Reconnecting" dialog
+                    if (this.currentOpenDialog) {
+                        this.currentOpenDialog.close()
+                    }
                     this.currentOpenDialog = uiDialogs.uiConnectionError()
                 }
-            }, 1000)
+            }, (MIN_UPDATE_GAP_SECS * 1000))
         });
         socket.on("pool_host_init", (poolInitStateBuffer) => {
             if (!poolInitStateBuffer) {
@@ -108,6 +120,11 @@ class MultiplayerClient {
             const hostUpdateLoop = () => {
                 // Only update if server can receive updates
                 if (this.isConnectedToServer) {
+                    if (this.currentGame.outdatedState) {
+                        console.warn("Outdated state has been blocked from being sent")
+                        return
+                    }
+
                     // Update
                     this.currentGame.currentPool.updateLife()
                     // Send updated state to server
@@ -200,10 +217,16 @@ class MultiplayerClient {
             this.isConnectedToServer = false
             console.log("Disconnected from server");
 
+            // Mark our game instance because the server will
+            // now have a different state to us, and by keeping
+            // it we risk sending an outdated state
+            this.currentGame.outdatedState = true
+
             // Connection error dialog
-            if (!this.currentOpenDialog.isOpen) {
-                this.currentOpenDialog = uiDialogs.uiConnectionError()
+            if (this.currentOpenDialog) {
+                this.currentOpenDialog.close(true)
             }
+            this.currentOpenDialog = uiDialogs.uiConnectionError()
         });
     }
     syncGameWithServer(stateData) {
@@ -215,6 +238,11 @@ class MultiplayerClient {
             )
         }
         this.currentGame.currentPool.syncWithServer(stateData)
+        if (this.currentGame.outdatedState) {
+            setTimeout(() => {
+                this.currentGame.outdatedState = false
+            }, 500)
+        }
 
         // Only remove "connecting" dialog now we've
         // had first update
