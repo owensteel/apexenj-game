@@ -47,7 +47,9 @@ class MultiplayerClient {
             if (this.hasReceivedFirstUpdate) {
                 // Remove any connection error dialogs
                 // as we've now connected
-                this.currentOpenDialog.close()
+                if (this.currentOpenDialog.isRemovable) {
+                    this.currentOpenDialog.close()
+                }
             }
         });
 
@@ -55,7 +57,7 @@ class MultiplayerClient {
         socket.on('connect_error', (err) => {
             console.error('Connection error:', err);
             // Connection error dialog
-            if (!this.currentOpenDialog.getOpenState()) {
+            if (!this.currentOpenDialog.isOpen) {
                 this.currentOpenDialog = uiDialogs.uiCouldNotConnect()
             }
         });
@@ -77,9 +79,7 @@ class MultiplayerClient {
                     // No updates for a second, so freeze
                     this.hasReceivedFirstUpdate = false
                     // "Reconnecting" dialog
-                    if (!this.currentOpenDialog.getOpenState()) {
-                        this.currentOpenDialog = uiDialogs.uiConnectionError()
-                    }
+                    this.currentOpenDialog = uiDialogs.uiConnectionError()
                 }
             }, 1000)
         });
@@ -181,6 +181,15 @@ class MultiplayerClient {
                 case "pool_noexist":
                     this.currentOpenDialog = uiDialogs.uiPoolNoExistError()
                     break;
+                case "service_maxcapacity":
+                    this.currentOpenDialog = uiDialogs.uiServiceMaxCapacity()
+                    break;
+                case "pool_maxcapacity":
+                    this.currentOpenDialog = uiDialogs.uiPoolMaxCapacity()
+                    setTimeout(() => {
+                        this.currentGame.builderUi.hideUI()
+                    }, 500)
+                    break;
                 default:
                     this.currentOpenDialog = uiDialogs.uiGenericServerError()
             }
@@ -192,7 +201,7 @@ class MultiplayerClient {
             console.log("Disconnected from server");
 
             // Connection error dialog
-            if (!this.currentOpenDialog.getOpenState()) {
+            if (!this.currentOpenDialog.isOpen) {
                 this.currentOpenDialog = uiDialogs.uiConnectionError()
             }
         });
@@ -209,7 +218,7 @@ class MultiplayerClient {
 
         // Only remove "connecting" dialog now we've
         // had first update
-        if (!this.hasReceivedFirstUpdate || this.currentOpenDialog.getOpenState()) {
+        if (!this.hasReceivedFirstUpdate || this.currentOpenDialog.isOpen) {
             this.hasReceivedFirstUpdate = true
             this.currentOpenDialog.close()
         }

@@ -4,65 +4,82 @@
 
 */
 
-function createUiDialog(msg, controlType = "ok", buttonAction = () => { }) {
-    const dialogOverlay = document.createElement("dialog-overlay")
-    document.body.appendChild(dialogOverlay)
+class UiDialog {
+    constructor(
+        msg = null,
+        controlType = "ok",
+        buttonAction = () => { },
+        isRemovable = true
+    ) {
+        if (!msg) {
+            throw new Error("Message must be provided for dialog.")
+        }
 
-    let isOpen = true
-    const getOpenState = () => {
-        return isOpen
+        // Can the dialog be removed automatically? Or should
+        // it have to stay until the user closes it?
+        this.isRemovable = isRemovable
+
+        const dialogOverlay = document.createElement("dialog-overlay")
+        document.body.appendChild(dialogOverlay)
+
+        // Toggled state
+        this.isOpen = true
+        this.close = (isUser) => {
+            if (this.isRemovable || isUser) {
+                this.isOpen = false
+                dialogOverlay.remove()
+            } else {
+                console.warn("Prevented closure of unremovable dialog.")
+            }
+        }
+
+        const dialogBox = document.createElement("dialog")
+        dialogOverlay.appendChild(dialogBox)
+
+        const dialogContentWrapper = document.createElement("dialog-content-wrapper")
+        dialogContentWrapper.innerHTML = `<p>${msg}</p>`
+        dialogBox.appendChild(dialogContentWrapper)
+
+        if (controlType == "ok") {
+            const dialogButton = document.createElement("button")
+            dialogButton.innerHTML = "OK"
+            dialogButton.addEventListener("click", () => {
+                if (buttonAction) {
+                    buttonAction()
+                }
+                this.close(true)
+            })
+            dialogContentWrapper.appendChild(dialogButton)
+        }
+        if (controlType == "spinner") {
+            dialogContentWrapper.innerHTML += "<spinner></spinner>"
+        }
     }
-    const close = () => {
-        isOpen = false
-        dialogOverlay.remove()
-    }
-
-    const dialogBox = document.createElement("dialog")
-    dialogOverlay.appendChild(dialogBox)
-
-    const dialogContentWrapper = document.createElement("dialog-content-wrapper")
-    dialogContentWrapper.innerHTML = `<p>${msg}</p>`
-    dialogBox.appendChild(dialogContentWrapper)
-
-    if (controlType == "ok") {
-        const dialogButton = document.createElement("button")
-        dialogButton.innerHTML = "OK"
-        dialogButton.addEventListener("click", () => {
-            buttonAction()
-            close()
-        })
-        dialogContentWrapper.appendChild(dialogButton)
-    }
-    if (controlType == "spinner") {
-        dialogContentWrapper.innerHTML += "<spinner></spinner>"
-    }
-
-    return { getOpenState, close }
 }
 
 function uiConnectionError() {
-    return createUiDialog(
+    return new UiDialog(
         "Communications with the multiplayer service were disrupted.<br>Trying to reconnect...",
         "spinner"
     )
 }
 
 function uiCouldNotConnect() {
-    return createUiDialog(
+    return new UiDialog(
         "Could not connect to multiplayer service. Please try again later.",
         "none"
     )
 }
 
 function uiConnectingToService() {
-    return createUiDialog(
+    return new UiDialog(
         "Connecting to multiplayer service, please wait...",
         "spinner"
     )
 }
 
 function uiPoolNoExistError() {
-    return createUiDialog(
+    return new UiDialog(
         "Could not connect to this Pool. It does not exist.",
         "ok",
         () => {
@@ -73,17 +90,42 @@ function uiPoolNoExistError() {
 }
 
 function uiGenericServerError() {
-    return createUiDialog(
+    return new UiDialog(
         "A server error occurred.",
         "none"
     )
 }
 
+function uiServiceMaxCapacity() {
+    return new UiDialog(
+        "The multiplayer service is currently at maximum capacity. Please check back later.",
+        "none"
+    )
+}
+
+function uiPoolMaxCapacity() {
+    return new UiDialog(
+        "This Pool is at maximum capacity. You can only watch.",
+        "ok",
+        () => {
+            new UiDialog(
+                "If you wait, you will be connected automatically when a space becomes available.",
+                "ok",
+                null,
+                false
+            )
+        },
+        false
+    )
+}
+
 export {
-    createUiDialog,
+    UiDialog,
     uiConnectionError,
     uiCouldNotConnect,
     uiConnectingToService,
     uiPoolNoExistError,
-    uiGenericServerError
+    uiGenericServerError,
+    uiServiceMaxCapacity,
+    uiPoolMaxCapacity
 }
