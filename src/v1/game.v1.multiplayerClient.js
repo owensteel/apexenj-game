@@ -60,10 +60,12 @@ class MultiplayerClient {
         // Handle connection error
         socket.on('connect_error', (err) => {
             console.error('Connection error:', err);
-            // Mark our game instance because the server will
-            // now have a different state to us, and by keeping
-            // it we risk sending an outdated state
-            this.currentGame.outdatedState = true
+            if (this.currentGame) {
+                // Mark our game instance because the server will
+                // now have a different state to us, and by keeping
+                // it we risk sending an outdated state
+                this.currentGame.outdatedState = true
+            }
             // Connection error dialog
             if (this.currentOpenDialog) {
                 this.currentOpenDialog.close()
@@ -217,10 +219,12 @@ class MultiplayerClient {
             this.isConnectedToServer = false
             console.log("Disconnected from server");
 
-            // Mark our game instance because the server will
-            // now have a different state to us, and by keeping
-            // it we risk sending an outdated state
-            this.currentGame.outdatedState = true
+            if (this.currentGame) {
+                // Mark our game instance because the server will
+                // now have a different state to us, and by keeping
+                // it we risk sending an outdated state
+                this.currentGame.outdatedState = true
+            }
 
             // Connection error dialog
             if (this.currentOpenDialog) {
