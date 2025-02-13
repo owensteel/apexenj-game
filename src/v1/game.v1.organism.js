@@ -71,8 +71,24 @@ function bumpCanvasEdges(organism) {
     organism.body.mesh.position.x += shiftX;
     organism.body.mesh.position.y += shiftY;
 
+    // "Bounce" organism
+    // As it drives into the edge, the force of its velocity should
+    // cause it to gradually rotate relevant to the angle it is pointing
+    // in
     if (Math.abs(shiftX) > 0 || Math.abs(shiftY) > 0) {
-        organism.body.mesh.rotation.z += (Math.PI * 2) * (0.0125 * organism.energy)
+        // Compute the angle of the shift vector
+        const shiftAngle = Math.atan2(shiftY, shiftX);
+        // Get the current rotation (in radians) of the organism
+        const currentAngle = organism.body.mesh.rotation.z;
+        // Calculate the normalized angle difference (-PI to PI)
+        const angleDiff = Math.atan2(
+            Math.sin(shiftAngle - currentAngle), Math.cos(shiftAngle - currentAngle)
+        );
+        // Update the rotation.
+        // The rotation change is scaled by organism.energy (and an arbitrary factor for tuning)
+        organism.body.mesh.rotation.z += (
+            (Math.PI * 2) * (0.025 * organism.energy)
+        ) * Math.sign(angleDiff);
     }
 }
 
