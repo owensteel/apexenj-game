@@ -57,6 +57,13 @@ class UiDialog {
     }
 }
 
+function uiGenericError() {
+    return new UiDialog(
+        "An error occurred. Please try again later.",
+        "none"
+    )
+}
+
 function uiConnectionError() {
     return new UiDialog(
         "Communications with the multiplayer service were disrupted.<br>Trying to reconnect...",
@@ -80,7 +87,7 @@ function uiConnectingToService() {
 
 function uiPoolNoExistError() {
     return new UiDialog(
-        "Could not connect to this Pool. It does not exist.",
+        "This Pool does not exist.",
         "ok",
         () => {
             // Send player to default sandbox
@@ -119,6 +126,13 @@ function uiPoolMaxCapacity() {
     )
 }
 
+function uiLoading() {
+    return new UiDialog(
+        "Loading, please wait...",
+        "spinner"
+    )
+}
+
 export {
     UiDialog,
     uiConnectionError,
@@ -127,5 +141,7 @@ export {
     uiPoolNoExistError,
     uiGenericServerError,
     uiServiceMaxCapacity,
-    uiPoolMaxCapacity
+    uiPoolMaxCapacity,
+    uiLoading,
+    uiGenericError
 }
