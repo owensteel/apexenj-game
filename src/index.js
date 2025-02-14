@@ -6,8 +6,9 @@
 
 */
 
-import axiosAPI from "./services/api"
+import msgpack from "msgpack-lite"
 
+import axiosAPI from "./services/api"
 import Main from "./v1/game.v1.main";
 import MultiplayerClient from "./v1/game.v1.multiplayerClient";
 import { uiGenericError, uiLoading, uiPoolNoExistError } from "./v1/game.v1.ui.dialogs";
@@ -25,13 +26,17 @@ if (!multiplayerMode || !selectedPoolId) {
         const loadingDialog = uiLoading()
         axiosAPI.get(`/games/${selectedPoolId}`).then((response) => {
             if (response.status === 200) {
-                new Main(response.data.stateData)
+                const stateDataBuffer = new Uint8Array(response.data.stateData.data)
+                new Main(msgpack.decode(stateDataBuffer))
             }
         }).catch(e => {
-            if (e.response.status === 404) {
-                uiPoolNoExistError()
-            } else {
-                uiGenericError()
+            console.error("Error fetching Game from API", e)
+            if (e.response) {
+                if (e.response.status === 404) {
+                    uiPoolNoExistError()
+                } else {
+                    uiGenericError()
+                }
             }
         }).finally(() => {
             loadingDialog.close()
