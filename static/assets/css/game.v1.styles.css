@@ -340,3 +340,9 @@ game-wrapper organism-ui-container organism-ui-atefood:after {
         transform: translateY(-50px);
     }
 }
+
+game-wrapper .publish-button {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+}

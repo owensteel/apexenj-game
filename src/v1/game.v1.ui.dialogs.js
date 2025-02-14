@@ -128,8 +128,25 @@ function uiPoolMaxCapacity() {
 
 function uiLoading() {
     return new UiDialog(
-        "Loading, please wait...",
+        "Please wait...",
         "spinner"
+    )
+}
+
+function uiGameSaved() {
+    return new UiDialog(
+        "This Pool has been saved.",
+        "ok"
+    )
+}
+
+function uiMustLogin() {
+    return new UiDialog(
+        "To continue, please sign in or create an account.",
+        "ok",
+        () => {
+            window.open(`https://apexenj.com/account/signin/?origin=play.apexenj.com&ref=game_client`)
+        }
     )
 }
 
@@ -143,5 +160,7 @@ export {
     uiServiceMaxCapacity,
     uiPoolMaxCapacity,
     uiLoading,
-    uiGenericError
+    uiGenericError,
+    uiGameSaved,
+    uiMustLogin
 }
