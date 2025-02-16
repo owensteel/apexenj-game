@@ -60,7 +60,7 @@ class UiDialog {
 function uiGenericError() {
     return new UiDialog(
         "An error occurred. Please try again later.",
-        "none"
+        "ok"
     )
 }
 
