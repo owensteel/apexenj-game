@@ -4,6 +4,11 @@
 
 */
 
+import msgpack from "msgpack-lite"
+import Cookies from 'js-cookie';
+import axiosInstance from '../services/api';
+import { uiGameSaved, uiGenericError, uiLoading, uiMustLogin } from "./game.v1.ui.dialogs"
+
 import * as ThreeElements from "./game.v1.3d"
 import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
@@ -255,6 +260,48 @@ class Pool {
                 this.removeOrganism(cliOrg)
             }
         })
+    }
+    saveStateToServer(silently = false) {
+        const authToken = Cookies.get('auth_token');
+        if (!authToken) {
+            uiMustLogin()
+            return
+        }
+        let loadingUi
+        if (!silently) {
+            loadingUi = uiLoading()
+        }
+        const gameStateData = this.getStaticExport()
+        axiosInstance.post('/games/save', {
+            stateDataBuffer: msgpack.encode(gameStateData)
+        }, {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        }).then((response) => {
+            if (response.status === 201) {
+                if (!silently) {
+                    uiGameSaved()
+                }
+                // Update URL so that user re-enters this saved game
+                // on refresh instead of going back to empty Sandbox
+                window.history.pushState(
+                    {
+                        "html": document.body.innerHTML,
+                        "pageTitle": document.title
+                    },
+                    "",
+                    `/${gameStateData.id}_offline`
+                );
+            }
+        }).catch(e => {
+            console.error("Error occurred during saving", e)
+            uiGenericError()
+        }).finally(() => {
+            if (!silently) {
+                loadingUi.close()
+            }
+        });
     }
 }
 
