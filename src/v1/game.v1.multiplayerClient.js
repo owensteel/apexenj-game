@@ -241,7 +241,7 @@ class MultiplayerClient {
                 this
             )
         }
-        this.currentGame.currentPool.syncWithServer(stateData)
+        this.currentGame.currentPool.syncWithServerState(stateData)
         if (this.currentGame.outdatedState) {
             setTimeout(() => {
                 this.currentGame.outdatedState = false

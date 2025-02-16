@@ -214,7 +214,7 @@ class Pool {
         return JSON.stringify(this.staticExportCache)
     }
     // Multiplayer
-    syncWithServer(serverGameState) {
+    syncWithServerState(serverGameState) {
         // Import any new organisms from server
         serverGameState.organisms.forEach((servOrg) => {
             const realOrg = this.organisms.find((oS) => {
