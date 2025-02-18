@@ -45,6 +45,9 @@ class OrganismUI {
         this.syncBacklog = []
     }
     applyGamerTag() {
+        if (!this.organism.creator) {
+            return
+        }
         const gTe = document.createElement("organism-ui-gamertag")
         gTe.innerHTML = this.organism.creator.name
         this.organismUiContainer.appendChild(gTe)

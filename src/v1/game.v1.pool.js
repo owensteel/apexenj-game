@@ -34,12 +34,6 @@ class Pool {
         // Determines what features should be shown
         this.isMultiplayerMode = isMultiplayerMode
 
-        // To be implemented
-        this.author = {
-            id: null,
-            username: null
-        }
-
         // Time sync data
         if (timeSync) {
             this.timeSync = timeSync
@@ -71,9 +65,7 @@ class Pool {
         }
 
         // Add gamertag if in multiplayer
-        // Only add gamer tag to player-created organisms
-        // i.e ones with authors
-        if (this.isMultiplayerMode && this.author.username) {
+        if (this.isMultiplayerMode) {
             organism.ui.applyGamerTag()
         }
 
