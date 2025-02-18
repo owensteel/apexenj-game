@@ -51,7 +51,7 @@ if (!selectedPoolId) {
                 if (loggedInPlayer.isLoggedIn) {
                     // Check if logged-in player is the creator/owner
                     if (loggedInPlayer.id == response.data.creatorId) {
-                        // Create offline game
+                        // Open offline game
                         const initialisedGame = new Main(
                             msgpack.decode(stateDataBuffer),
                             null,

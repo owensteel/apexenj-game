@@ -102,6 +102,16 @@ class Main {
             }
             renderUpdateLoop()
         }
+
+        // Autosave
+
+        const autosaveLoop = () => {
+            if (!this.multiplayerClient || this.multiplayerClient.role == "host") {
+                this.currentPool.saveStateToServer(true)
+            }
+            setTimeout(autosaveLoop, 5000)
+        }
+        autosaveLoop()
     }
     displayUI() {
         // Set up Builder UI
