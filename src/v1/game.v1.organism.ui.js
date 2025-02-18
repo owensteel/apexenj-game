@@ -67,7 +67,6 @@ class OrganismUI {
             this.syncBacklog.push({
                 type: UI_SYNC_BACKLOG_EVENT_TYPE_ID_ATEFOOD
             })
-            console.log(this.syncBacklog)
         }
     }
     processSyncBacklog(importedSyncBacklog) {
