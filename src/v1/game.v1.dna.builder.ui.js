@@ -12,6 +12,7 @@ import { generateAbsoluteNodePositions } from "./game.v1.3d";
 import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
+import { uiMustLogin } from "./game.v1.ui.dialogs";
 
 // Size of nodes in designer render
 
@@ -91,7 +92,7 @@ class DNABuilderUI {
     ) {
         this.multiplayerClient = multiplayerClient
         if (multiplayerClient && !(multiplayerClient instanceof MultiplayerClient)) {
-            throw new Error("If in multiplayer mode, the Multiplayer Client must be provided")
+            throw new Error("If in multiplayer mode, a valid Multiplayer Client must be provided")
         }
 
         if (!(dnaModel instanceof DNA)) {
@@ -361,16 +362,21 @@ class DNABuilderUI {
             // Send to server if needed
             if (this.multiplayerClient && this.multiplayerClient.role == "client") {
                 // Not host, needs to be sent to sync service
-                this.multiplayerClient.connectionSocket.emit(
-                    "pool_new_organism",
-                    {
-                        poolId: this.currentPool.id,
-                        organismData: {
-                            id: newOrganism.id,
-                            dna: newOrganism.dnaModel.getStaticClone()
+                if (this.multiplayerClient.playerAccount.isLoggedIn) {
+                    // Player must be logged-in to create Organisms in public Pool
+                    this.multiplayerClient.connectionSocket.emit(
+                        "pool_new_organism",
+                        {
+                            poolId: this.currentPool.id,
+                            organismData: {
+                                id: newOrganism.id,
+                                dna: newOrganism.dnaModel.getStaticClone()
+                            }
                         }
-                    }
-                );
+                    );
+                } else {
+                    uiMustLogin()
+                }
             } else {
                 // Offline or host, can be added instantly
                 this.currentPool.addOrganism(newOrganism)

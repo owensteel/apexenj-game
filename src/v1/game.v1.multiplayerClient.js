@@ -10,13 +10,14 @@ import msgpack from "msgpack-lite"
 import * as uiDialogs from "./game.v1.ui.dialogs"
 import Main from "./game.v1.main";
 import { UPDATES_PER_SEC } from "./game.v1.references";
+import PlayerAccount from "../services/playerAccount";
 
 // The maximum amount of time since the last update
 // Before we accept the connection has gone down
 const MIN_UPDATE_GAP_SECS = 1
 
 class MultiplayerClient {
-    constructor(selectedPoolId) {
+    constructor(selectedPoolId, playerAccount) {
         // Setup
         if (!selectedPoolId) {
             throw new Error("Pool to connect to must be specified")
@@ -24,6 +25,15 @@ class MultiplayerClient {
         this.selectedPoolId = selectedPoolId
         this.currentGame = null
         this.role = "client" // Client or host
+
+        // Logged-in user
+        if (!playerAccount) {
+            throw new Error("Player's account/status must be specified")
+        }
+        if (playerAccount instanceof PlayerAccount == false) {
+            throw new Error("Player's account must be a valid PlayerAccount instance")
+        }
+        this.playerAccount = playerAccount
 
         // Connect to the service
         const serverAddress = (
