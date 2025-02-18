@@ -96,6 +96,17 @@ function uiPoolNoExistError() {
     )
 }
 
+function uiPoolPrivateError() {
+    return new UiDialog(
+        "This Pool is private.",
+        "ok",
+        () => {
+            // Send player to default sandbox
+            window.location.href = "/"
+        }
+    )
+}
+
 function uiGenericServerError() {
     return new UiDialog(
         "A server error occurred.",
@@ -156,6 +167,7 @@ export {
     uiCouldNotConnect,
     uiConnectingToService,
     uiPoolNoExistError,
+    uiPoolPrivateError,
     uiGenericServerError,
     uiServiceMaxCapacity,
     uiPoolMaxCapacity,
