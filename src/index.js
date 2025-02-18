@@ -15,23 +15,34 @@ import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPriva
 import UiPublishMenu from "./v1/game.v1.ui.publish";
 import PlayerAccount from './services/PlayerAccount';
 
-const UriParam = window.location.pathname.split("/")[1]
-const selectedPoolId = UriParam.split("_")[0]
+// Start initialisation
+
+const loadingDialog = uiLoading()
+
+// Get the status of player as a logged in user
+
+const loggedInPlayer = new PlayerAccount()
+await loggedInPlayer.logInFromCookie()
 
 // Initialise game
 
+const UriParam = window.location.pathname.split("/")[1]
+const selectedPoolId = UriParam.split("_")[0]
+
 if (!selectedPoolId) {
     // Create new empty sandbox
-    const initialisedGame = new Main()
-    // Publish menu
-    new UiPublishMenu(initialisedGame)
+    if (!loggedInPlayer.isLoggedIn) {
+        const initialisedGame = new Main(null, null, loggedInPlayer)
+        // Publish menu
+        new UiPublishMenu(initialisedGame)
+    } else {
+        // User must be logged-in to create a Sandbox
+        uiMustLogin()
+    }
+    // Finish initialisation
+    loadingDialog.close()
 } else {
     // Load existing game
-    const loadingDialog = uiLoading()
-    // Get the status of player as a logged in user
-    const loggedInPlayer = new PlayerAccount()
-    await loggedInPlayer.logInFromCookie()
-    // Fetch saved game state
     axiosAPI.get(`/games/${selectedPoolId}`).then((response) => {
         if (response.status === 200) {
             const stateDataBuffer = new Uint8Array(response.data.stateData.data)
@@ -42,7 +53,9 @@ if (!selectedPoolId) {
                     if (loggedInPlayer.id == response.data.creatorId) {
                         // Create offline game
                         const initialisedGame = new Main(
-                            msgpack.decode(stateDataBuffer)
+                            msgpack.decode(stateDataBuffer),
+                            null,
+                            loggedInPlayer
                         )
                         // Add Publish Menu
                         new UiPublishMenu(initialisedGame)
@@ -54,7 +67,7 @@ if (!selectedPoolId) {
                     uiMustLogin()
                 }
             } else {
-                // Public or otherwise online
+                // Public or otherwise online, allow anyone
                 new MultiplayerClient(
                     selectedPoolId,
                     loggedInPlayer

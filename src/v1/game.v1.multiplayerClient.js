@@ -248,7 +248,8 @@ class MultiplayerClient {
         if (!this.currentGame) {
             this.currentGame = new Main(
                 stateData,
-                this
+                this,
+                this.playerAccount
             )
         }
         this.currentGame.currentPool.syncWithServerState(stateData)

@@ -116,20 +116,41 @@ class NodePositionStateSync {
 
 // Organism Creator Profile
 
+const organismCreatorProfilesCache = {}
+
 class OrganismCreatorProfile {
     constructor(id) {
+        if (!id) {
+            throw new Error("Creator ID must be provided for Creator Profile to initialise.")
+        }
         this.id = id
+
         this.name = undefined
         this.picture = undefined
 
-        this.initProfile()
+        this.refreshProfile()
     }
-    initProfile() {
-        axiosAPI.get(`/users/${this.id}`).then((response) => {
-            if (response.status == 200) {
-                const { name, picture } = response.data;
-                this.name = name
-                this.picture = picture
+    refreshProfile() {
+        return new Promise((resolveOuter) => {
+            // No need to get the same profile twice
+            if (this.id in organismCreatorProfilesCache) {
+                const cachedOcP = organismCreatorProfilesCache[this.id]
+                this.name = cachedOcP.name
+                this.picture = cachedOcP.picture
+
+                resolveOuter(this)
+            } else {
+                axiosAPI.get(`/users/${this.id}`).then((response) => {
+                    if (response.status == 200) {
+                        const { name, picture } = response.data;
+                        this.name = name
+                        this.picture = picture
+
+                        organismCreatorProfilesCache[this.id] = this
+                    }
+                }).finally(() => {
+                    resolveOuter(this)
+                })
             }
         })
     }

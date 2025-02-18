@@ -369,7 +369,7 @@ class DNABuilderUI {
             // Send to server if needed
             if (this.multiplayerClient && this.multiplayerClient.role == "client") {
                 // Not host, needs to be sent to sync service
-                if (this.multiplayerClient.playerAccount.isLoggedIn) {
+                if (this.playerAccount.isLoggedIn) {
                     // Player must be logged-in to create Organisms in public Pool
                     this.multiplayerClient.connectionSocket.emit(
                         "pool_new_organism",

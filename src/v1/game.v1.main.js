@@ -38,21 +38,14 @@ class Main {
         }
 
         // Player account (if provided)
-        if (playerAccount) {
-            if (playerAccount instanceof PlayerAccount) {
-                this.playerAccount = playerAccount
-            } else {
-                throw new Error("Player Account provided must be a valid instance")
-            }
+        if (playerAccount instanceof PlayerAccount) {
+            this.playerAccount = playerAccount
         } else {
-            this.playerAccount = new PlayerAccount()
+            throw new Error("Player Account provided must be a valid instance")
         }
 
         // Setup pool
         this.presetPoolData = presetPoolData
-
-        // Grab canvas
-        this.gameWrapper = document.getElementById("game-wrapper")
 
         // Create or open Pool
         if (this.presetPoolData) {
@@ -71,6 +64,9 @@ class Main {
                 !(!this.multiplayerClient)
             )
         }
+
+        // Grab canvas
+        this.gameWrapper = document.getElementById("game-wrapper")
 
         // Init Builder UI
         this.builderUi = new DNABuilderUI(
