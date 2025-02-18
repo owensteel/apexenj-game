@@ -10,7 +10,7 @@ import Pool from "./game.v1.pool"
 import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 import MultiplayerClient from "./game.v1.multiplayerClient"
-import PlayerAccount from "../services/playerAccount"
+import PlayerAccount from "../services/PlayerAccount"
 
 const defaultDNA = new DNA(
     DNA_NODE_ROLE_ROOT,

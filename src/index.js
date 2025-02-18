@@ -13,7 +13,7 @@ import Main from "./v1/game.v1.main";
 import MultiplayerClient from "./v1/game.v1.multiplayerClient";
 import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPrivateError } from "./v1/game.v1.ui.dialogs";
 import UiPublishMenu from "./v1/game.v1.ui.publish";
-import PlayerAccount from './services/playerAccount';
+import PlayerAccount from './services/PlayerAccount';
 
 const UriParam = window.location.pathname.split("/")[1]
 const selectedPoolId = UriParam.split("_")[0]
