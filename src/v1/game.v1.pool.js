@@ -188,25 +188,8 @@ class Pool {
             // static data
             organisms: []
         }
-        this.organisms.forEach((organism) => {
-            staticExport.organisms.push(
-                {
-                    id: organism.id,
-                    absorbedFood: organism.absorbedFood,
-                    state: {
-                        energy: organism.energy,
-                        nodeStateSync: organism.nodeStateSync,
-                        ui: {
-                            syncBacklog: organism.ui.syncBacklog
-                        }
-                    },
-                    body: {
-                        position: organism.body.mesh.position,
-                        rotation: organism.body.mesh.rotation
-                    },
-                    dna: organism.dnaModel.getStaticClone()
-                }
-            )
+        staticExport.organisms = this.organisms.map((organism) => {
+            return organism.getStaticExport()
         })
         return staticExport
     }

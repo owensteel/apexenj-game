@@ -355,6 +355,25 @@ class Organism {
 
         bumpCanvasEdges(this)
     }
+    // For static export of Pool
+    getStaticExport() {
+        return {
+            id: this.id,
+            absorbedFood: this.absorbedFood,
+            state: {
+                energy: this.energy,
+                nodeStateSync: this.nodeStateSync,
+                ui: {
+                    syncBacklog: this.ui.syncBacklog
+                }
+            },
+            body: {
+                position: this.body.mesh.position,
+                rotation: this.body.mesh.rotation
+            },
+            dna: this.dnaModel.getStaticClone()
+        }
+    }
 }
 
 export default Organism
