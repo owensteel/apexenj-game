@@ -388,7 +388,7 @@ class Organism {
     getStaticExport() {
         return {
             id: this.id,
-            creatorId: this.creator.id,
+            creatorId: this.creator ? this.creator.id : null,
             absorbedFood: this.absorbedFood,
             state: {
                 energy: this.energy,
