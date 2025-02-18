@@ -12,6 +12,8 @@ import DNABuilderUI from "./game.v1.dna.builder.ui"
 import MultiplayerClient from "./game.v1.multiplayerClient"
 import PlayerAccount from "../services/PlayerAccount"
 
+const AUTOSAVE_INTERVAL_SECS = 5
+
 const defaultDNA = new DNA(
     DNA_NODE_ROLE_ROOT,
     BLOCK_TYPENAME_HEART,
@@ -109,9 +111,9 @@ class Main {
             if (!this.multiplayerClient || this.multiplayerClient.role == "host") {
                 this.currentPool.saveStateToServer(true)
             }
-            setTimeout(autosaveLoop, 5000)
+            setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
-        autosaveLoop()
+        setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
     }
     displayUI() {
         // Set up Builder UI
