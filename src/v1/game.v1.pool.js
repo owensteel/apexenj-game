@@ -262,7 +262,9 @@ class Pool {
             }
         }).catch(e => {
             console.error("Error occurred during saving", e)
-            uiGenericError()
+            if (!silently) {
+                uiGenericError()
+            }
         }).finally(() => {
             if (!silently) {
                 loadingUi.close()
