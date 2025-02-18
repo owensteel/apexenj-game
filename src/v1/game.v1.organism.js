@@ -125,7 +125,7 @@ class OrganismCreatorProfile {
         this.initProfile()
     }
     initProfile() {
-        axiosAPI.get('/users/profile').then((response) => {
+        axiosAPI.get(`/users/${this.id}`).then((response) => {
             if (response.status == 200) {
                 const { name, picture } = response.data;
                 this.name = name
