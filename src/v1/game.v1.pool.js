@@ -95,7 +95,8 @@ class Pool {
                 presetOrganismJson.dna.detach
             ),
             presetOrganismJson.id,
-            this
+            this,
+            presetOrganismJson.creatorId
         )
         this.addOrganism(organism)
 
@@ -204,17 +205,7 @@ class Pool {
                 return oS.id == servOrg.id
             })
             if (!realOrg && "dna" in servOrg) {
-                console.log(`Importing ${servOrg.id}`)
-                this.addOrganism(new Organism(
-                    new DNA(
-                        servOrg.dna.role,
-                        servOrg.dna.block.typeName,
-                        servOrg.dna.children,
-                        servOrg.dna.detach
-                    ),
-                    servOrg.id,
-                    this
-                ))
+                this.importOrganism(servOrg)
             }
         })
         // Update all organisms

@@ -41,7 +41,9 @@ if (!selectedPoolId) {
                     // Check if logged-in player is the creator/owner
                     if (loggedInPlayer.id == response.data.creatorId) {
                         // Create offline game
-                        const initialisedGame = new Main(msgpack.decode(stateDataBuffer))
+                        const initialisedGame = new Main(
+                            msgpack.decode(stateDataBuffer)
+                        )
                         // Add Publish Menu
                         new UiPublishMenu(initialisedGame)
                     } else {

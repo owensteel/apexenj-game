@@ -4,6 +4,7 @@
 
 */
 
+import axiosAPI from "../services/api"
 import { Vector3 } from 'three';
 import { BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_MOTOR, BLOCK_TYPENAME_PLANT } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
@@ -113,10 +114,31 @@ class NodePositionStateSync {
     }
 }
 
+// Organism Creator Profile
+
+class OrganismCreatorProfile {
+    constructor(id) {
+        this.id = id
+        this.name = undefined
+        this.picture = undefined
+
+        this.initProfile()
+    }
+    initProfile() {
+        axiosAPI.get('/users/profile').then((response) => {
+            if (response.status == 200) {
+                const { name, picture } = response.data;
+                this.name = name
+                this.picture = picture
+            }
+        })
+    }
+}
+
 // Organism model
 
 class Organism {
-    constructor(dnaModel, id, homePool) {
+    constructor(dnaModel, id, homePool, creatorId) {
         if (dnaModel instanceof DNA == false) {
             throw new Error("Organism must be initialised with a DNA model")
         }
@@ -131,6 +153,13 @@ class Organism {
             this.id = id
         } else {
             this.id = generateID()
+        }
+
+        // Creator
+        if (creatorId) {
+            this.creator = new OrganismCreatorProfile(creatorId)
+        } else {
+            this.creator = null
         }
 
         // UI
@@ -359,6 +388,7 @@ class Organism {
     getStaticExport() {
         return {
             id: this.id,
+            creatorId: this.creator.id,
             absorbedFood: this.absorbedFood,
             state: {
                 energy: this.energy,

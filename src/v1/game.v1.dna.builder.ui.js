@@ -356,7 +356,8 @@ class DNABuilderUI {
             const newOrganism = new Organism(
                 this.focusedDnaModel,
                 null,
-                this.currentPool
+                this.currentPool,
+                this.multiplayerClient ? this.multiplayerClient.playerAccount.id : null
             )
 
             // Send to server if needed
