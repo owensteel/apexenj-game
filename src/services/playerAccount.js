@@ -17,7 +17,6 @@ class PlayerAccount {
     }
     async logInFromCookie() {
         return new Promise((resolveOuter) => {
-            const loggedInPlayerResult = new LoggedInPlayer()
             const authToken = Cookies.get('auth_token');
             if (authToken) {
                 axiosAPI.get('/auth/account', {
@@ -27,10 +26,10 @@ class PlayerAccount {
                 }).then((response) => {
                     if (response.status == 200) {
                         const { id, name, picture } = response.data;
-                        loggedInPlayerResult.id = id
-                        loggedInPlayerResult.name = name
-                        loggedInPlayerResult.picture = picture
-                        loggedInPlayerResult.isLoggedIn = true
+                        this.id = id
+                        this.name = name
+                        this.picture = picture
+                        this.isLoggedIn = true
                     }
                 }).catch(e => {
                     if (e.response && (e.response.status == 404 || e.response.status == 401)) {
@@ -39,10 +38,10 @@ class PlayerAccount {
                         Cookies.remove('auth_token');
                     }
                 }).finally(() => {
-                    resolveOuter(loggedInPlayerResult)
+                    resolveOuter(this)
                 })
             } else {
-                resolveOuter(loggedInPlayerResult)
+                resolveOuter(this)
             }
         })
     }
