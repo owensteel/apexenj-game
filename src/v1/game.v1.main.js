@@ -28,12 +28,24 @@ const defaultDNA = new DNA(
 class Main {
     constructor(
         presetPoolData,
-        multiplayerClient
+        multiplayerClient,
+        playerAccount
     ) {
         // Multiplayer (if provided)
         this.multiplayerClient = multiplayerClient
         if (multiplayerClient && !(multiplayerClient instanceof MultiplayerClient)) {
             throw new Error("If in multiplayer mode, the Multiplayer Client must be provided")
+        }
+
+        // Player account (if provided)
+        if (playerAccount) {
+            if (playerAccount instanceof PlayerAccount) {
+                this.playerAccount = playerAccount
+            } else {
+                throw new Error("Player Account provided must be a valid instance")
+            }
+        } else {
+            this.playerAccount = new PlayerAccount()
         }
 
         // Setup pool
@@ -64,7 +76,8 @@ class Main {
         this.builderUi = new DNABuilderUI(
             defaultDNA,
             this.currentPool,
-            this.multiplayerClient
+            this.multiplayerClient,
+            this.playerAccount
         )
 
         // Init all

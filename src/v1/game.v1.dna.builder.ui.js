@@ -6,13 +6,13 @@
 
 import DNA from "./game.v1.dna";
 import * as Blocks from "./game.v1.blocks";
-import { getGlobalBoundingBoxOfHTMLElement } from "./game.v1.utils";
 import { COMMON_PRIMARY_COLOR, DNA_NODE_ROLE_ROOT, NODESIZE_DEFAULT } from "./game.v1.references";
 import { generateAbsoluteNodePositions } from "./game.v1.3d";
 import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
 import { uiMustLogin } from "./game.v1.ui.dialogs";
+import PlayerAccount from "../services/PlayerAccount";
 
 // Size of nodes in designer render
 
@@ -88,12 +88,18 @@ class DNABuilderUI {
     constructor(
         dnaModel,
         currentPool,
-        multiplayerClient
+        multiplayerClient,
+        playerAccount
     ) {
         this.multiplayerClient = multiplayerClient
         if (multiplayerClient && !(multiplayerClient instanceof MultiplayerClient)) {
             throw new Error("If in multiplayer mode, a valid Multiplayer Client must be provided")
         }
+
+        if (!playerAccount || playerAccount instanceof PlayerAccount == false) {
+            throw new Error("Player account must be provided")
+        }
+        this.playerAccount = playerAccount
 
         if (!(dnaModel instanceof DNA)) {
             throw new Error("Builder UI must have DNA model");
@@ -357,7 +363,7 @@ class DNABuilderUI {
                 this.focusedDnaModel,
                 null,
                 this.currentPool,
-                this.multiplayerClient ? this.multiplayerClient.playerAccount.id : null
+                this.playerAccount.id
             )
 
             // Send to server if needed
@@ -369,10 +375,7 @@ class DNABuilderUI {
                         "pool_new_organism",
                         {
                             poolId: this.currentPool.id,
-                            organismData: {
-                                id: newOrganism.id,
-                                dna: newOrganism.dnaModel.getStaticClone()
-                            }
+                            organismData: newOrganism.getStaticExport()
                         }
                     );
                 } else {

@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import axiosAPI from "./api"
 
 class PlayerAccount {
-    constructor(id = null, name = null, picture = null) {
+    constructor(id = null, name = "Anonymous", picture = null) {
         this.id = id
         this.name = name
         this.picture = picture
