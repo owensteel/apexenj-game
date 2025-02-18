@@ -265,7 +265,7 @@ class Pool {
                         "pageTitle": document.title
                     },
                     "",
-                    `/${gameStateData.id}_offline`
+                    `/${gameStateData.id}`
                 );
             }
         }).catch(e => {
