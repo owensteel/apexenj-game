@@ -365,6 +365,8 @@ class DNABuilderUI {
                 this.currentPool,
                 this.playerAccount.id
             )
+
+            // Cache/save work
             const newOrganismStaticExport = newOrganism.getStaticExport()
             window.localStorage.setItem(
                 "lastBuiltOrganism",
@@ -372,10 +374,9 @@ class DNABuilderUI {
             )
 
             // Send to server if needed
-            if (this.multiplayerClient && this.multiplayerClient.role == "client") {
-                // Not host, needs to be sent to sync service
-                if (this.playerAccount.isLoggedIn) {
-                    // Player must be logged-in to create Organisms in public Pool
+            if (this.playerAccount.isLoggedIn) {
+                if (this.multiplayerClient && this.multiplayerClient.role == "client") {
+                    // Not host, needs to be sent to sync service
                     this.multiplayerClient.connectionSocket.emit(
                         "pool_new_organism",
                         {
@@ -384,14 +385,14 @@ class DNABuilderUI {
                         }
                     );
                 } else {
-                    uiMustLogin(() => {
-                        // Work has been saved above
-                        window.location.reload()
-                    })
+                    // Offline or host, can be added instantly
+                    this.currentPool.addOrganism(newOrganism)
                 }
             } else {
-                // Offline or host, can be added instantly
-                this.currentPool.addOrganism(newOrganism)
+                uiMustLogin(() => {
+                    // Work has been saved above, so safely reload the app
+                    window.location.reload()
+                })
             }
         }
         this.builderWrapper.appendChild(deployOrganismButton)
