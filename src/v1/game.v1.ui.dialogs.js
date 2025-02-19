@@ -59,10 +59,10 @@ class UiDialog {
     }
 }
 
-function uiGenericError() {
+function uiGenericError(allowClose = true) {
     return new UiDialog(
         "An error occurred. Please try again later.",
-        "ok"
+        allowClose ? "ok" : "none"
     )
 }
 
