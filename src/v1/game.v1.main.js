@@ -71,9 +71,13 @@ class Main {
         this.gameWrapper = document.getElementById("game-wrapper")
 
         // Init Builder UI
-        const presetDNA = "lastBuiltOrganism" in window.localStorage ? window.localStorage.getItem("lastBuiltOrganism") : defaultDNA
+        let builderPresetDNA = defaultDNA
+        if ("lastBuiltOrganism" in window.localStorage) {
+            const lastBuiltOrganismStatic = JSON.parse(window.localStorage.getItem("lastBuiltOrganism"))
+            builderPresetDNA = new DNA().fromStaticObject(lastBuiltOrganismStatic.dna)
+        }
         this.builderUi = new DNABuilderUI(
-            presetDNA,
+            builderPresetDNA,
             this.currentPool,
             this.multiplayerClient,
             this.playerAccount

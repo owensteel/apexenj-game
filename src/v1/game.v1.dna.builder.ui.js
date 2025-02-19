@@ -368,7 +368,7 @@ class DNABuilderUI {
             const newOrganismStaticExport = newOrganism.getStaticExport()
             window.localStorage.setItem(
                 "lastBuiltOrganism",
-                newOrganismStaticExport
+                JSON.stringify(newOrganismStaticExport)
             )
 
             // Send to server if needed
