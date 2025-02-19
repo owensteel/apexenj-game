@@ -37,7 +37,9 @@ if (!selectedPoolId) {
         new UiPublishMenu(initialisedGame)
     } else {
         // User must be logged-in to create a Sandbox
-        uiMustLogin()
+        uiMustLogin(() => {
+            window.location.reload()
+        })
     }
     // Finish initialisation
     loadingDialog.close()
@@ -64,7 +66,9 @@ if (!selectedPoolId) {
                     }
                 } else {
                     // User may be owner, just not logged in
-                    uiMustLogin()
+                    uiMustLogin(() => {
+                        window.location.reload()
+                    })
                 }
             } else {
                 // Public or otherwise online, allow anyone

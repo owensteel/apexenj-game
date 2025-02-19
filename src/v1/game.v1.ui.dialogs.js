@@ -4,6 +4,8 @@
 
 */
 
+import LoginWindow from "../services/LoginWindow"
+
 class UiDialog {
     constructor(
         msg = null,
@@ -151,12 +153,12 @@ function uiGameSaved() {
     )
 }
 
-function uiMustLogin() {
+function uiMustLogin(whenCompletedAction = () => { }) {
     return new UiDialog(
         "To continue, please sign in or create an account.",
         "ok",
         () => {
-            window.open(`https://apexenj.com/account/signin/?origin=play.apexenj.com&ref=game_client`)
+            new LoginWindow(whenCompletedAction)
         }
     )
 }

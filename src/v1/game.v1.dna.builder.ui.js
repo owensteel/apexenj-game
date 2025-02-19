@@ -365,6 +365,11 @@ class DNABuilderUI {
                 this.currentPool,
                 this.playerAccount.id
             )
+            const newOrganismStaticExport = newOrganism.getStaticExport()
+            window.localStorage.setItem(
+                "lastBuiltOrganism",
+                newOrganismStaticExport
+            )
 
             // Send to server if needed
             if (this.multiplayerClient && this.multiplayerClient.role == "client") {
@@ -375,11 +380,14 @@ class DNABuilderUI {
                         "pool_new_organism",
                         {
                             poolId: this.currentPool.id,
-                            organismData: newOrganism.getStaticExport()
+                            organismData: newOrganismStaticExport
                         }
                     );
                 } else {
-                    uiMustLogin()
+                    uiMustLogin(() => {
+                        // Work has been saved above
+                        window.location.reload()
+                    })
                 }
             } else {
                 // Offline or host, can be added instantly

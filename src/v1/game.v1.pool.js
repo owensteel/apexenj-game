@@ -230,7 +230,10 @@ class Pool {
     saveStateToServer(silently = false) {
         const authToken = Cookies.get('auth_token');
         if (!authToken) {
-            uiMustLogin()
+            uiMustLogin(() => {
+                // Attempt to save again once logged-in
+                this.saveStateToServer()
+            })
             return
         }
         let loadingUi
