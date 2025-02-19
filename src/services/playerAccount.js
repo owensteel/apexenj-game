@@ -17,10 +17,10 @@ class PlayerAccount {
         this.isLoggedIn = false
     }
     async logInFromCookie() {
-        const loadingDialog = uiLoading()
         return new Promise((resolveOuter) => {
             const authToken = Cookies.get('auth_token');
             if (authToken) {
+                const loadingDialog = uiLoading()
                 axiosAPI.get('/auth/account', {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
