@@ -15,10 +15,6 @@ import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPriva
 import UiPublishMenu from "./v1/game.v1.ui.publish";
 import PlayerAccount from './services/PlayerAccount';
 
-// Start initialisation
-
-const loadingDialog = uiLoading()
-
 // Get the status of player as a logged in user
 
 const loggedInPlayer = new PlayerAccount()
@@ -41,9 +37,8 @@ if (!selectedPoolId) {
             window.location.reload()
         })
     }
-    // Finish initialisation
-    loadingDialog.close()
 } else {
+    const loadingDialog = uiLoading()
     // Load existing game
     axiosAPI.get(`/games/${selectedPoolId}`).then((response) => {
         if (response.status === 200) {

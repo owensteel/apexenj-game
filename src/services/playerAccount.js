@@ -6,6 +6,7 @@
 
 import Cookies from 'js-cookie';
 import axiosAPI from "./api"
+import { uiGenericServerError, uiLoading } from '../v1/game.v1.ui.dialogs';
 
 class PlayerAccount {
     constructor(id = null, name = "Anonymous", picture = null) {
@@ -16,6 +17,7 @@ class PlayerAccount {
         this.isLoggedIn = false
     }
     async logInFromCookie() {
+        const loadingDialog = uiLoading()
         return new Promise((resolveOuter) => {
             const authToken = Cookies.get('auth_token');
             if (authToken) {
@@ -30,17 +32,30 @@ class PlayerAccount {
                         this.name = name
                         this.picture = picture
                         this.isLoggedIn = true
+
+                        // Resolve as we have a certain response
+                        resolveOuter(this)
+                    } else {
+                        throw new Error("Unhandled non-error response status from API")
                     }
                 }).catch(e => {
                     if (e.response && (e.response.status == 404 || e.response.status == 401)) {
                         // Cookie is invalid token or points to a
                         // non-existent account, so delete it
                         Cookies.remove('auth_token');
+                        // Resolve as this is certainly a case of the user "not being
+                        // logged-in"
+                        resolveOuter(this)
+                    } else {
+                        // Do not resolve because this is an exception server-side, not
+                        // necessarily a response
+                        uiGenericServerError(false)
                     }
                 }).finally(() => {
-                    resolveOuter(this)
+                    loadingDialog.close()
                 })
             } else {
+                // Resolve as we are sure the user is not logged-in
                 resolveOuter(this)
             }
         })
