@@ -349,6 +349,7 @@ game-wrapper .publish-button {
 
 login-window-wrapper {
     position: fixed;
+    z-index: 15;
     top: 0px;
     left: 0px;
     right: 0px;
