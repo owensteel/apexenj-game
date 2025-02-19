@@ -80,12 +80,7 @@ class Pool {
 
         // Create replica from DNA
         const organism = new Organism(
-            new DNA(
-                presetOrganismJson.dna.role,
-                presetOrganismJson.dna.block.typeName,
-                presetOrganismJson.dna.children,
-                presetOrganismJson.dna.detach
-            ),
+            new DNA().fromStaticObject(presetOrganismJson.dna),
             presetOrganismJson.id,
             this,
             presetOrganismJson.creatorId

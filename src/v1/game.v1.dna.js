@@ -5,7 +5,7 @@
 */
 
 import * as Blocks from './game.v1.blocks'
-import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT } from './game.v1.references'
+import { DNA_NODE_ROLE_APPENDAGE } from './game.v1.references'
 
 class DNA {
     constructor(
@@ -45,6 +45,15 @@ class DNA {
         // Hierarchal references (non-static)
         this.parentNode = parentNode
         this.edgeOfParent = edgeOfParent
+    }
+    // Converts static object to instance
+    fromStaticObject(staticDNAObject) {
+        return new DNA(
+            staticDNAObject.role,
+            staticDNAObject.block.typeName,
+            staticDNAObject.children,
+            staticDNAObject.detach
+        )
     }
     addChild(blockTypeName, edge) {
         // Motor blocks cannot have other motor blocks attached
