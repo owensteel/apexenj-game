@@ -31,7 +31,7 @@ const selectedPoolId = UriParam.split("_")[0]
 
 if (!selectedPoolId) {
     // Create new empty sandbox
-    if (!loggedInPlayer.isLoggedIn) {
+    if (loggedInPlayer.isLoggedIn) {
         const initialisedGame = new Main(null, null, loggedInPlayer)
         // Publish menu
         new UiPublishMenu(initialisedGame)
