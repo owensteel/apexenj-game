@@ -4,30 +4,27 @@
 
 */
 
-import Cookies from 'js-cookie';
+const websiteBaseURL = window.location.hostname == "localhost" ? "http://localhost:3000" : "https://apexenj.com"
 
 class LoginWindow {
     constructor(whenCompletedAction = () => { }) {
+        // Open frame
         const loginWindowWrapper = document.createElement("login-window-wrapper")
-
         const loginWindowFrame = document.createElement("iframe")
         loginWindowFrame.className = "login-window-frame"
-        loginWindowFrame.src = "https://apexenj.com/account/signin/?origin=play.apexenj.com&ref=game_client"
+        loginWindowFrame.src = `${websiteBaseURL}/account/signin/?origin=play.apexenj.com&ref=game_client`
         loginWindowWrapper.appendChild(loginWindowFrame)
-
         document.body.appendChild(loginWindowWrapper)
 
-        // TODO: replace with extra-iframe function
-        const hasLoginCompletedCheck = setInterval(() => {
-            if (Cookies.get('auth_token')) {
-                // Has completed
-                clearInterval(hasLoginCompletedCheck)
+        // Handle login completion event
+        window.addEventListener('message', (event) => {
+            if (event.origin == websiteBaseURL && event.data == "loginCompleted") {
                 // Close Window
                 loginWindowWrapper.remove()
                 // Action
                 whenCompletedAction()
             }
-        }, 2000)
+        });
     }
 }
 
