@@ -110,18 +110,13 @@ class Main {
         }
 
         // Autosave
-        // Only if manually turned on, or by default in multiplayer
-        // TODO: move multiplayer autosave to server-side
+        // Only if manually turned on
 
         const autosaveLoop = () => {
-            // Only save from this client if we are the
-            // owner (offline) or the host (multiplayer)
-            if (!this.multiplayerClient || this.multiplayerClient.role == "host") {
-                this.currentPool.saveStateToServer(true)
-            }
+            this.currentPool.saveStateToServer(true)
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
-        if (this.multiplayerClient || this.enableOfflineAutosave) {
+        if (this.enableOfflineAutosave && !this.multiplayerClient) {
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
     }
