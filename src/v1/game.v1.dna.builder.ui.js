@@ -370,7 +370,7 @@ class DNABuilderUI {
             const newOrganismStaticExport = newOrganism.getStaticExport()
             window.localStorage.setItem(
                 `last_built_organism.${this.currentPool.id}`,
-                JSON.stringify(newOrganismStaticExport)
+                JSON.stringify(newOrganismStaticExport.dna)
             )
 
             // Send to server if needed

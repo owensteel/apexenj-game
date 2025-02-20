@@ -77,8 +77,8 @@ class Main {
         // Restore last Organism player built for this Pool
         const lastBuiltOrganismCookieKey = `last_built_organism.${this.currentPool.id}`
         if (lastBuiltOrganismCookieKey in window.localStorage) {
-            const lastBuiltOrganismStatic = JSON.parse(window.localStorage.getItem(lastBuiltOrganismCookieKey))
-            builderPresetDNA = new DNA().fromStaticObject(lastBuiltOrganismStatic.dna)
+            const lastBuiltOrganismStaticDNA = JSON.parse(window.localStorage.getItem(lastBuiltOrganismCookieKey))
+            builderPresetDNA = new DNA().fromStaticObject(lastBuiltOrganismStaticDNA)
         }
 
         this.builderUi = new DNABuilderUI(
