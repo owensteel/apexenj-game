@@ -22,7 +22,6 @@ class Pool {
     constructor(
         id,
         presetOrganisms = [],
-        timeSync,
         isMultiplayerMode = false
     ) {
         if (id) {
@@ -33,16 +32,6 @@ class Pool {
 
         // Determines what features should be shown
         this.isMultiplayerMode = isMultiplayerMode
-
-        // Time sync data
-        if (timeSync) {
-            this.timeSync = timeSync
-        } else {
-            this.timeSync = {
-                pool: Date.now(),
-                organisms: {}
-            }
-        }
 
         // Pool state
         this.organisms = []
@@ -58,11 +47,6 @@ class Pool {
         }
         this.organisms.push(organism)
         ThreeElements.scene.add(organism.body.mesh)
-
-        // Save creation time for syncing
-        if (organism.id in this.timeSync.organisms == false) {
-            this.timeSync.organisms[organism.id] = Date.now()
-        }
 
         // Add gamertag if in multiplayer
         if (this.isMultiplayerMode) {
@@ -120,13 +104,10 @@ class Pool {
         // so making that invisible is a genuine fallback)
         organism.body.mesh.visible = false
     }
-    updateLife(timeOfUpdate = Date.now()) {
+    updateLife() {
         // Only get organisms that have been created by the time
         // of this update
-        const existingOrganisms = this.organisms.filter((organism) => {
-            const orgCreationTime = this.timeSync.organisms[organism.id]
-            return (orgCreationTime < timeOfUpdate)
-        })
+        const existingOrganisms = this.organisms
 
         // Update all organism motion and living states
         for (const organism of existingOrganisms) {
@@ -150,28 +131,9 @@ class Pool {
             }
         }
     }
-    syncLifeToTime(timeToUpdateTo = Date.now()) {
-        if (timeToUpdateTo < this.timeSync.pool) {
-            throw new Error("Impossible time specified")
-        }
-
-        let timeDeltaSecs = Math.round(
-            (timeToUpdateTo - this.timeSync.pool) / 1000
-        )
-        console.log("Updates to catch-up on:", timeDeltaSecs * UPDATES_PER_SEC)
-        while (timeDeltaSecs > 0) {
-            const timeOfThisUpdate = timeToUpdateTo - timeDeltaSecs
-            // Update UPS for each second since starting
-            for (let uI = 0; uI < UPDATES_PER_SEC; uI++) {
-                this.updateLife(timeOfThisUpdate)
-            }
-            timeDeltaSecs--
-        }
-    }
     getStaticExport() {
         const staticExport = {
             id: this.id,
-            timeSync: this.timeSync,
             // Organisms must be converted into
             // static data
             organisms: []
