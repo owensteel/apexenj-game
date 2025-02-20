@@ -163,6 +163,13 @@ function uiMustLogin(whenCompletedAction = () => { }) {
     )
 }
 
+function uiOrganismCannotBeDeployedYet() {
+    return new UiDialog(
+        "You cannot deploy a another Organism until your current one has died.",
+        "ok"
+    )
+}
+
 export {
     UiDialog,
     uiConnectionError,
@@ -176,5 +183,6 @@ export {
     uiLoading,
     uiGenericError,
     uiGameSaved,
-    uiMustLogin
+    uiMustLogin,
+    uiOrganismCannotBeDeployedYet
 }

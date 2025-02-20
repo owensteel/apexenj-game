@@ -11,7 +11,7 @@ import { generateAbsoluteNodePositions } from "./game.v1.3d";
 import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
 import MultiplayerClient from "./game.v1.multiplayerClient"
-import { uiMustLogin } from "./game.v1.ui.dialogs";
+import { uiMustLogin, uiOrganismCannotBeDeployedYet } from "./game.v1.ui.dialogs";
 import PlayerAccount from "../services/PlayerAccount";
 
 // Size of nodes in designer render
@@ -375,6 +375,20 @@ class DNABuilderUI {
 
             // Send to server if needed
             if (this.playerAccount.isLoggedIn) {
+                // Game: check if organism can be deployed yet
+                // In multiplayer it is limited to one at a time
+                // as part of the gameplay
+                if (this.multiplayerClient && (
+                    this.currentPool.organisms.find((o) => {
+                        o.creator.id == this.playerAccount.id
+                    })
+                )) {
+                    uiOrganismCannotBeDeployedYet()
+                    return
+                }
+                // System: check if organism needs to be sent to
+                // the server or can be added to the Pool instance
+                // immediately
                 if (this.multiplayerClient && this.multiplayerClient.role == "client") {
                     // Not host, needs to be sent to sync service
                     this.multiplayerClient.connectionSocket.emit(
