@@ -14,7 +14,6 @@ import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
 import { generateID } from "./game.v1.utils"
-import { UPDATES_PER_SEC } from "./game.v1.references"
 
 // Pool model
 
