@@ -380,7 +380,7 @@ class DNABuilderUI {
                 // as part of the gameplay
                 if (this.multiplayerClient && (
                     this.currentPool.organisms.find((o) => {
-                        o.creator.id == this.playerAccount.id
+                        return o.creatorId == this.playerAccount.id
                     })
                 )) {
                     uiOrganismCannotBeDeployedYet()

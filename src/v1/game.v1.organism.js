@@ -177,6 +177,7 @@ class Organism {
         }
 
         // Creator
+        this.creatorId = creatorId
         if (creatorId) {
             this.creator = new OrganismCreatorProfile(creatorId)
         } else {

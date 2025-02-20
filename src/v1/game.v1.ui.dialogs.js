@@ -165,8 +165,16 @@ function uiMustLogin(whenCompletedAction = () => { }) {
 
 function uiOrganismCannotBeDeployedYet() {
     return new UiDialog(
-        "You cannot deploy a another Organism until your current one has died.",
-        "ok"
+        "In a multiplayer contest, you cannot deploy a another organism until your last one has died.",
+        "ok",
+        () => {
+            new UiDialog(
+                `Turn on notifications and you'll be alerted if and when your last organism is defeated, so you can get back in instantly.
+                <br><br>
+                Otherwise, keep checking here or in your Dashboard to see how it's getting on!`,
+                "ok"
+            )
+        }
     )
 }
 
