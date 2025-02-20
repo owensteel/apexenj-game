@@ -14,7 +14,7 @@ import PlayerAccount from "../services/PlayerAccount"
 
 const AUTOSAVE_INTERVAL_SECS = 5
 
-const defaultDNA = new DNA(
+const DefaultDNA = new DNA(
     DNA_NODE_ROLE_ROOT,
     BLOCK_TYPENAME_HEART,
     [
@@ -72,7 +72,7 @@ class Main {
 
         // Init Builder UI
 
-        let builderPresetDNA = defaultDNA
+        let builderPresetDNA = DefaultDNA
 
         // Restore last Organism player built for this Pool
         const lastBuiltOrganismCookieKey = `last_built_organism.${this.currentPool.id}`
