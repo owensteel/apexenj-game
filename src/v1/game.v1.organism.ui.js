@@ -45,15 +45,14 @@ class OrganismUI {
         this.syncBacklog = []
     }
     async applyGamerTag() {
-        const gTe = document.createElement("organism-ui-gamertag")
-        this.organismUiContainer.appendChild(gTe)
+        // Only actually apply gamertag if we are sure there's
+        // an applicable creator
         if (this.organism.creator) {
+            const gTe = document.createElement("organism-ui-gamertag")
+            this.organismUiContainer.appendChild(gTe)
             // Refresh here to prevent race condition from init
             await this.organism.creator.refreshProfile()
             gTe.innerHTML = this.organism.creator.name
-        } else {
-            // Handle anonymous
-            gTe.innerHTML = "Anonymous"
         }
     }
     ateFood() {
