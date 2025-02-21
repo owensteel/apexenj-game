@@ -134,6 +134,7 @@ class MultiplayerClient {
                 if (this.isConnectedToServer) {
                     if (this.currentGame.outdatedState) {
                         console.warn("Outdated state has been blocked from being sent")
+                        window.location.refresh()
                         return
                     }
 
