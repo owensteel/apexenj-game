@@ -205,6 +205,9 @@ class Organism {
         this.velocity = { x: 0, y: 0 }
         this.appliedVelocity = { x: 0, y: 0, finalX: 0, finalY: 0 }
     }
+    die() {
+        this.homePool.removeOrganism(this)
+    }
     updateDna(dnaModel) {
         if (dnaModel instanceof DNA == false) {
             throw new Error("Organism must be initialised with a DNA model")
