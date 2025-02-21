@@ -132,49 +132,50 @@ class MultiplayerClient {
             const hostUpdateLoop = () => {
                 // Only update if server can receive updates
                 if (this.isConnectedToServer) {
+                    // Block this client's cached state from being sent as
+                    // it may be outdated in comparison to the server's
                     if (this.currentGame.outdatedState) {
                         console.warn("Outdated state has been blocked from being sent")
-                        window.location.refresh()
-                        return
-                    }
+                        // Don't do anything until next update
+                    } else {
 
-                    // Update
-                    this.currentGame.currentPool.updateLife()
-                    // Send updated state to server
-                    // for syncing
+                        // Update
+                        this.currentGame.currentPool.updateLife()
+                        // Send updated state to server
+                        // for syncing
 
-                    // Clone so we can remove data without damaging
-                    // the original static cache
-                    const dataToSend = JSON.parse(JSON.stringify(
-                        this.currentGame.currentPool.getStaticExport()
-                    ))
+                        // Clone so we can remove data without damaging
+                        // the original static cache
+                        const dataToSend = JSON.parse(JSON.stringify(
+                            this.currentGame.currentPool.getStaticExport()
+                        ))
 
-                    // Don't send DNA twice, after initial update
-                    // server has it cached already
-                    for (const organism of dataToSend.organisms) {
-                        if (exportedOrganisms.includes(organism.id)) {
-                            delete organism["dna"]
-                        } else {
-                            // Send DNA this time, make sure it isn't
-                            // sent again
-                            exportedOrganisms.push(organism.id)
+                        // Don't send DNA twice, after initial update
+                        // server has it cached already
+                        for (const organism of dataToSend.organisms) {
+                            if (exportedOrganisms.includes(organism.id)) {
+                                delete organism["dna"]
+                            } else {
+                                // Send DNA this time, make sure it isn't
+                                // sent again
+                                exportedOrganisms.push(organism.id)
+                            }
                         }
+
+                        // Send to server
+                        socket.emit(
+                            "pool_host_sync",
+                            msgpack.encode(dataToSend)
+                        );
+
+                        // Clear UI backlog now it has been sent to clients
+                        // Otherwise backlog will just grow exponentially
+                        // and cause infinitely duplicated UI events
+                        for (const organism of this.currentGame.currentPool.organisms) {
+                            organism.ui.syncBacklog = []
+                        }
+
                     }
-
-                    // Send to server
-                    socket.emit(
-                        "pool_host_sync",
-                        msgpack.encode(dataToSend)
-                    );
-
-                    // Clear UI backlog now it has been sent to clients
-                    // Otherwise backlog will just grow exponentially
-                    // and cause infinitely duplicated UI events
-                    for (const organism of this.currentGame.currentPool.organisms) {
-                        organism.ui.syncBacklog = []
-                    }
-
-                    // Only ensure next update if connected already
                     setTimeout(() => {
                         hostUpdateLoop()
                     }, 1000 / UPDATES_PER_SEC)
