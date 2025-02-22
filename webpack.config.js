@@ -4,8 +4,14 @@ module.exports = {
     mode: 'development',
     entry: './src/index.js',
     output: {
-        filename: 'bundle.js',
-        path: path.resolve(__dirname, 'static'),
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'GameComplete.js',
+        // The library name is the global variable name (if using a browser global)
+        library: 'GameComplete',
+        // UMD format makes the library consumable in various environments (CommonJS, AMD, or as a global variable)
+        libraryTarget: 'umd',
+        // This ensures the UMD build works in Node and browser environments
+        globalObject: 'this'
     },
     devServer: {
         static: './static',
