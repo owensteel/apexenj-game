@@ -4,6 +4,8 @@
     Provides visual editor for a given DNA sequence.
 */
 
+import axiosInstance from '../services/api';
+
 import DNA from "./game.v1.dna";
 import * as Blocks from "./game.v1.blocks";
 import { COMMON_PRIMARY_COLOR, DNA_NODE_ROLE_ROOT, NODESIZE_DEFAULT } from "./game.v1.references";
@@ -189,6 +191,23 @@ class DNABuilderUI {
 
             document.querySelector(".builder-ui-show-button").classList.remove("hidden")
         }
+    }
+
+    saveThumbnailToServer(organismPublicId) {
+        if (!organismPublicId) {
+            throw new Error("Last built Organism's ID must be provided")
+        }
+
+        // Make sure render is up-to-date
+        // And prevent client-side canvas tampering
+        this._renderBuilderUIVisual()
+
+        // Capture and save
+        axiosInstance.post("/thumbnails/save", {
+            subjectType: "organism",
+            subjectPublicId: organismPublicId,
+            thumbImageUrl: this.builderCanvas.toDataURL()
+        })
     }
 
     // Internal Utility Methods
@@ -402,6 +421,9 @@ class DNABuilderUI {
                     // Offline or host, can be added instantly
                     this.currentPool.addOrganism(newOrganism)
                 }
+                // Save thumbnail for Organism if we are in multiplayer 
+                // mode, as it will have been entered into a Contest
+                this.saveThumbnailToServer(newOrganismStaticExport.id)
             } else {
                 uiMustLogin(() => {
                     // Work has been saved above, so safely reload the app
