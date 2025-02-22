@@ -42,6 +42,7 @@ const defLighting = new THREE.PointLight("#fff", 4, 0, 0);
 scene.add(defLighting)
 
 const ThreeRenderer = new THREE.WebGLRenderer({
+    preserveDrawingBuffer: true,
     antialias: true
 });
 ThreeRenderer.setClearColor("#ffffff", 0);

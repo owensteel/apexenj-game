@@ -4,6 +4,7 @@
 
 */
 
+import { toPng } from 'html-to-image';
 import msgpack from "msgpack-lite"
 import Cookies from 'js-cookie';
 import axiosInstance from '../services/api';
@@ -229,6 +230,36 @@ class Pool {
                 loadingUi.close()
             }
         });
+    }
+    async saveThumbnailToServer() {
+        // Full-size capture of canvas
+        const gameStageWrapper = document.getElementsByTagName("game-stage-wrapper")[0]
+        const canvasCaptureFullSizeURL = await toPng(gameStageWrapper)
+        // Reduce image size to thumbnail dimensions
+        const reducedCanvas = document.createElement("canvas")
+        reducedCanvas.width = ThreeElements.ThreeCanvas.width / 4
+        reducedCanvas.height = ThreeElements.ThreeCanvas.height / 4
+        // By "squashing" full size image into a smaller canvas
+        const fullSizeCanvCapImg = new Image(
+            reducedCanvas.width,
+            reducedCanvas.height
+        )
+        fullSizeCanvCapImg.src = canvasCaptureFullSizeURL
+        fullSizeCanvCapImg.onload = () => {
+            reducedCanvas.getContext("2d").drawImage(
+                fullSizeCanvCapImg,
+                0, 0, reducedCanvas.width, reducedCanvas.height
+            )
+            const reducedCanvasDataURL = reducedCanvas.toDataURL(
+                "image/jpeg", 1
+            )
+            // Save new canvas
+            axiosInstance.post("/thumbnails/save", {
+                subjectType: "game",
+                subjectPublicId: this.id,
+                thumbImageUrl: reducedCanvasDataURL
+            })
+        }
     }
 }
 

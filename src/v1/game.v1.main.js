@@ -122,6 +122,7 @@ class Main {
 
         const autosaveLoop = () => {
             this.currentPool.saveStateToServer(true)
+            this.currentPool.saveThumbnailToServer()
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
         if (this.enableOfflineAutosave && !this.multiplayerClient) {
