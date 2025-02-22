@@ -23,6 +23,11 @@ await loggedInPlayer.logInFromCookie()
 // Initialise game
 
 const UriParams = window.location.pathname.split("/")
+// Remove empty first parameter
+if (!UriParams[0]) {
+    UriParams.splice(0, 1)
+}
+// Remove redundant path parameter
 if (UriParams[0] == "play") {
     UriParams.splice(0, 1)
 }
