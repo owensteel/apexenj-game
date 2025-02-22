@@ -22,8 +22,11 @@ await loggedInPlayer.logInFromCookie()
 
 // Initialise game
 
-const UriParam = window.location.pathname.split("/")[1]
-const selectedPoolId = UriParam.split("_")[0]
+const UriParams = window.location.pathname.split("/")
+if (UriParams[0] == "play") {
+    UriParams.splice(0, 1)
+}
+const selectedPoolId = UriParams[0]
 
 if (!selectedPoolId) {
     // Create new empty sandbox
