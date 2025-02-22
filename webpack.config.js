@@ -5,9 +5,9 @@ module.exports = {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'GameComplete.js',
+        filename: 'GameModule.js',
         // The library name is the global variable name (if using a browser global)
-        library: 'GameComplete',
+        library: 'GameModule',
         // UMD format makes the library consumable in various environments (CommonJS, AMD, or as a global variable)
         libraryTarget: 'umd',
         // This ensures the UMD build works in Node and browser environments
