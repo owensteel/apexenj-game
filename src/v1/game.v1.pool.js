@@ -4,7 +4,6 @@
 
 */
 
-import { toPng } from 'html-to-image';
 import msgpack from "msgpack-lite"
 import Cookies from 'js-cookie';
 import axiosInstance from '../services/api';
@@ -15,6 +14,7 @@ import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
 import { generateID } from "./game.v1.utils"
+import { COMMON_PRIMARY_COLOR, COMMON_SECONDARY_COLOR } from "./game.v1.references";
 
 // Pool model
 
@@ -237,23 +237,32 @@ class Pool {
     }
     async saveThumbnailToServer() {
         // Full-size capture of canvas
-        const gameStageWrapper = document.getElementsByTagName("game-stage-wrapper")[0]
-        const canvasCaptureFullSizeURL = await toPng(gameStageWrapper)
+        const canvasCaptureFullSizeURL = ThreeElements.ThreeCanvas.toDataURL()
         // Reduce image size to thumbnail dimensions
         const reducedCanvas = document.createElement("canvas")
         reducedCanvas.width = ThreeElements.ThreeCanvas.width / 4
         reducedCanvas.height = ThreeElements.ThreeCanvas.height / 4
-        // By "squashing" full size image into a smaller canvas
+        const reducedCanvasCtx = reducedCanvas.getContext("2d")
+        // Mirror UI background, without the pattern
+        reducedCanvasCtx.fillStyle = COMMON_SECONDARY_COLOR
+        reducedCanvasCtx.fillRect(
+            0,
+            0,
+            reducedCanvas.width,
+            reducedCanvas.height
+        )
+        // "Squash" full size image into the smaller/"reducing" canvas
         const fullSizeCanvCapImg = new Image(
             reducedCanvas.width,
             reducedCanvas.height
         )
         fullSizeCanvCapImg.src = canvasCaptureFullSizeURL
         fullSizeCanvCapImg.onload = () => {
-            reducedCanvas.getContext("2d").drawImage(
+            reducedCanvasCtx.drawImage(
                 fullSizeCanvCapImg,
                 0, 0, reducedCanvas.width, reducedCanvas.height
             )
+            // Export as jpeg as a solid background has now been added
             const reducedCanvasDataURL = reducedCanvas.toDataURL(
                 "image/jpeg", 1
             )

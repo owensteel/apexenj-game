@@ -9,6 +9,7 @@ import { stageEdges3D } from "./game.v1.3d";
 // Styles
 
 const COMMON_PRIMARY_COLOR = "#04b1fd"
+const COMMON_SECONDARY_COLOR = "#5BD585"
 
 // Rendering
 
@@ -44,6 +45,7 @@ const ENERGY_PER_FOOD_BLOCK = 0.5
 
 export {
     COMMON_PRIMARY_COLOR,
+    COMMON_SECONDARY_COLOR,
     UPDATES_PER_SEC,
     DNA_NODE_ROLE_APPENDAGE,
     DNA_NODE_ROLE_ROOT,
