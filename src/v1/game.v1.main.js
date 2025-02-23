@@ -155,7 +155,6 @@ class Main {
 
         // Update frontend (parent) on the game state
         // so it can update a leaderboard display
-        // Only in multiplayer mode
 
         const frontendUpdateLoop = () => {
             window.parent.postMessage(
@@ -166,9 +165,7 @@ class Main {
             );
             setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
         }
-        if (this.multiplayerClient) {
-            setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
-        }
+        setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
     }
     displayUI() {
         // Set up Builder UI
