@@ -13,6 +13,7 @@ import MultiplayerClient from "./game.v1.multiplayerClient"
 import PlayerAccount from "../services/PlayerAccount"
 
 const AUTOSAVE_INTERVAL_SECS = 5
+const FRONTEND_UPDATES_INTERVAL_SECS = 2
 
 const DefaultDNA = new DNA(
     DNA_NODE_ROLE_ROOT,
@@ -127,6 +128,23 @@ class Main {
         }
         if (this.enableOfflineAutosave && !this.multiplayerClient) {
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
+        }
+
+        // Update frontend (parent) on the game state
+        // so it can update a leaderboard display
+        // Only in multiplayer mode
+
+        const frontendUpdateLoop = () => {
+            window.parent.postMessage(
+                {
+                    messageType: "gameStateUpdate",
+                    gameStateData: this.currentPool.getStaticExport()
+                }, "*"
+            );
+            setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
+        }
+        if (this.multiplayerClient) {
+            setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
         }
     }
     displayUI() {

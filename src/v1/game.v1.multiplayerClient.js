@@ -168,9 +168,6 @@ class MultiplayerClient {
                             msgpack.encode(dataToSend)
                         );
 
-                        // Send to frontend (as we are in "host" mode)
-                        this.syncFrontendWithGame(dataToSend)
-
                         // Clear UI backlog now it has been sent to clients
                         // Otherwise backlog will just grow exponentially
                         // and cause infinitely duplicated UI events
@@ -270,19 +267,6 @@ class MultiplayerClient {
             this.hasReceivedFirstUpdate = true
             this.currentOpenDialog.close()
         }
-
-        // Send to frontend (as we are in "client" mode)
-        this.syncFrontendWithGame(stateData)
-    }
-    syncFrontendWithGame(stateData) {
-        // Update frontend (parent) on the game state
-        // so it can update a leaderboard display
-        window.parent.postMessage(
-            {
-                messageType: "gameStateUpdate",
-                gameStateData: stateData
-            }, "*"
-        );
     }
 }
 

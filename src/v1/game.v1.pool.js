@@ -136,11 +136,10 @@ class Pool {
             id: this.id,
             // Organisms must be converted into
             // static data
-            organisms: []
+            organisms: this.organisms.map((organism) => {
+                return organism.getStaticExport()
+            })
         }
-        staticExport.organisms = this.organisms.map((organism) => {
-            return organism.getStaticExport()
-        })
         return staticExport
     }
     exportToJson() {
