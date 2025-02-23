@@ -122,13 +122,12 @@ class Main {
         // Only while offline
 
         const autosaveLoop = () => {
-            if (!this.currentPool.hasBeenCreatedOnServer) {
-                // Only autosave if the game actually
-                // exists in the first place — otherwise
-                // we're saving nothing
-                return
+            // Only autosave if the game actually
+            // exists in the first place — otherwise
+            // we're saving nothing
+            if (this.currentPool.hasBeenCreatedOnServer) {
+                this.currentPool.saveStateToServer(true)
             }
-            this.currentPool.saveStateToServer(true)
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
         if (!this.multiplayerClient) {
@@ -139,13 +138,12 @@ class Main {
         // Automatically updates thumbnail on server while game is running
 
         const thumbAutosaveLoop = () => {
-            if (!this.currentPool.hasBeenCreatedOnServer) {
-                // Only autosave if the game actually
-                // exists in the first place — otherwise
-                // we're saving for nothing
-                return
+            // Only autosave if the game actually
+            // exists in the first place — otherwise
+            // we're saving for nothing
+            if (this.currentPool.hasBeenCreatedOnServer) {
+                this.currentPool.saveThumbnailToServer(true)
             }
-            this.currentPool.saveThumbnailToServer(true)
             setTimeout(thumbAutosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
         // Only be the controller of thumbnail autosave if we are offline
