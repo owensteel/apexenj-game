@@ -15,6 +15,14 @@ import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPriva
 import UiPublishMenu from "./v1/game.v1.ui.publish";
 import PlayerAccount from './services/PlayerAccount';
 
+// Prevent direct access to Game if intended to only be
+// embedded in a iframe
+if (window.location.hostname !== "localhost" && (window.self === window.top)) {
+    // The page is not inside an iframe
+    document.body.innerHTML = ""
+    throw new Error("Illegal access method of Game client")
+}
+
 // Get the status of player as a logged in user
 
 const loggedInPlayer = new PlayerAccount()
