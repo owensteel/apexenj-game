@@ -423,7 +423,9 @@ class DNABuilderUI {
                 }
                 // Save thumbnail for Organism if we are in multiplayer 
                 // mode, as it will have been entered into a Contest
-                this.saveThumbnailToServer(newOrganismStaticExport.id)
+                if (this.multiplayerClient) {
+                    this.saveThumbnailToServer(newOrganismStaticExport.id)
+                }
             } else {
                 uiMustLogin(() => {
                     // Work has been saved above, so safely reload the app
