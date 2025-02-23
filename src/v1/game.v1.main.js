@@ -161,9 +161,11 @@ class Main {
             window.parent.postMessage(
                 {
                     messageType: "gameStateUpdate",
-                    gameStateData: JSON.stringify(this.currentPool.organisms.map((org) => {
-                        return org.id
-                    }))
+                    gameStateData: JSON.stringify({
+                        organisms: this.currentPool.organisms.map((org) => {
+                            return org.id
+                        })
+                    })
                 }, "*"
             );
             setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
