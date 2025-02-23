@@ -161,7 +161,7 @@ class Main {
             window.parent.postMessage(
                 {
                     messageType: "gameStateUpdate",
-                    gameStateData: this.currentPool.getStaticExport()
+                    gameStateData: JSON.stringify(this.currentPool.getStaticExport())
                 }, "*"
             );
             setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
