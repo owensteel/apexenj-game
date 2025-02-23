@@ -215,14 +215,24 @@ class Pool {
                 // on refresh instead of going back to empty Sandbox
                 window.history.pushState(
                     {
-                        "html": document.body.innerHTML,
                         "pageTitle": document.title
                     },
                     "",
                     `/${gameStateData.id}`
                 );
-                // Start autosave and other autosave features
-                this.hasBeenCreatedOnServer = true
+
+                // Game first initialisated
+                if (!this.hasBeenCreatedOnServer) {
+                    // Update URL on frontend
+                    window.parent.postMessage(
+                        {
+                            messageType: "gameCreated",
+                            gameId: this.id
+                        }, "*"
+                    );
+                    // Start autosave and other autosave features
+                    this.hasBeenCreatedOnServer = true
+                }
             }
         }).catch(e => {
             console.error("Error occurred during saving", e)
