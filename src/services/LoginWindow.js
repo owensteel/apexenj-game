@@ -9,7 +9,7 @@ const websiteBaseURL = window.location.hostname == "localhost" ? "http://localho
 class LoginWindow {
     constructor(whenCompletedAction = () => { }) {
         // Open window
-        window.parent.postMessage("loginRequested", "*");
+        window.parent.postMessage({ messageType: "loginRequested" }, "*");
         // Handle login completion event
         window.addEventListener('message', (event) => {
             if (event.origin == websiteBaseURL && event.data == "loginCompleted") {
