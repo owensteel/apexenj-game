@@ -30,6 +30,9 @@ class Pool {
             this.id = generateID()
         }
 
+        // So we know whether or not to enable autosave
+        this.hasBeenCreatedOnServer = false
+
         // Determines what features should be shown
         this.isMultiplayerMode = isMultiplayerMode
 
@@ -218,6 +221,8 @@ class Pool {
                     "",
                     `/${gameStateData.id}`
                 );
+                // Start autosave and other autosave features
+                this.hasBeenCreatedOnServer = true
             }
         }).catch(e => {
             console.error("Error occurred during saving", e)

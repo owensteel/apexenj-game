@@ -58,6 +58,9 @@ class Main {
                 !(!this.multiplayerClient)
             )
             this.currentPool.syncWithServerState(presetPoolData)
+            // Game exists/"has been created on server"
+            // This allows autosave
+            this.currentPool.hasBeenCreatedOnServer = true
         } else {
             this.currentPool = new Pool(
                 null,
@@ -88,9 +91,6 @@ class Main {
             this.playerAccount
         )
 
-        // Options
-        this.enableOfflineAutosave = false
-
         // Init all
         this.init()
         this.displayUI()
@@ -119,15 +119,40 @@ class Main {
         }
 
         // Autosave
-        // Only if manually turned on
+        // Only while offline
 
         const autosaveLoop = () => {
+            if (!this.currentPool.hasBeenCreatedOnServer) {
+                // Only autosave if the game actually
+                // exists in the first place — otherwise
+                // we're saving nothing
+                return
+            }
             this.currentPool.saveStateToServer(true)
-            this.currentPool.saveThumbnailToServer()
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
-        if (this.enableOfflineAutosave && !this.multiplayerClient) {
+        if (!this.multiplayerClient) {
             setTimeout(autosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
+        }
+
+        // Thumbnail autosave
+        // Automatically updates thumbnail on server while game is running
+
+        const thumbAutosaveLoop = () => {
+            if (!this.currentPool.hasBeenCreatedOnServer) {
+                // Only autosave if the game actually
+                // exists in the first place — otherwise
+                // we're saving for nothing
+                return
+            }
+            this.currentPool.saveThumbnailToServer(true)
+            setTimeout(thumbAutosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
+        }
+        // Only be the controller of thumbnail autosave if we are offline
+        // or the host in multiplayer mode
+        if (!this.multiplayerClient ||
+            (this.multiplayerClient && this.multiplayerClient.role == "host")) {
+            setTimeout(thumbAutosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
         }
 
         // Update frontend (parent) on the game state
