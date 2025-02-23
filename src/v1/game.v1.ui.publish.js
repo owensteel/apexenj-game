@@ -21,6 +21,13 @@ class UiPublishMenu {
 
         saveButton.addEventListener("click", async () => {
             currentGame.currentPool.saveStateToServer()
+            // Update frontend URL
+            window.parent.postMessage(
+                {
+                    messageType: "gameCreated",
+                    gameId: currentGame.currentPool.id
+                }, "*"
+            );
         })
     }
 }
