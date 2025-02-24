@@ -221,6 +221,7 @@ class Pool {
                 // Game first initialisated
                 if (!this.hasBeenCreatedOnServer) {
                     // Reinstate Loading UI until init has completed
+                    loadingUi.close()
                     loadingUi = uiLoading()
                     this.saveThumbnailToServer().finally(() => {
                         // UI placebo
