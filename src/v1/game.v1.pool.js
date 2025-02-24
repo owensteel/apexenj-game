@@ -208,9 +208,6 @@ class Pool {
             }
         }).then((response) => {
             if (response.status === 201) {
-                if (!silently) {
-                    uiGameSaved()
-                }
                 // Update URL so that user re-enters this saved game
                 // on refresh instead of going back to empty Sandbox
                 window.history.pushState(
@@ -223,7 +220,12 @@ class Pool {
 
                 // Game first initialisated
                 if (!this.hasBeenCreatedOnServer) {
+                    // Reinstate Loading UI until init has completed
+                    loadingUi = uiLoading()
                     this.saveThumbnailToServer().finally(() => {
+                        // UI placebo
+                        loadingUi.close()
+                        uiGameSaved()
                         // Update URL on frontend
                         window.parent.postMessage(
                             {
@@ -234,6 +236,10 @@ class Pool {
                         // Start autosave and other autosave features
                         this.hasBeenCreatedOnServer = true
                     })
+                } else {
+                    if (!silently) {
+                        uiGameSaved()
+                    }
                 }
             }
         }).catch(e => {
