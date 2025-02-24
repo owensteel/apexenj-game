@@ -227,12 +227,16 @@ class Pool {
                         loadingUi.close()
                         uiGameSaved()
                         // Update URL on frontend
-                        window.parent.postMessage(
-                            {
-                                messageType: "gameCreated",
-                                gameId: this.id
-                            }, "*"
-                        );
+                        setTimeout(() => {
+                            // For some reason a timeout is needed for
+                            // the thumbnail to appear on the frontend
+                            window.parent.postMessage(
+                                {
+                                    messageType: "gameCreated",
+                                    gameId: this.id
+                                }, "*"
+                            );
+                        }, 1000)
                         // Start autosave and other autosave features
                         this.hasBeenCreatedOnServer = true
                     })
