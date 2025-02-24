@@ -56,7 +56,7 @@ if (!selectedPoolId) {
 } else {
     const loadingDialog = uiLoading()
     // Load existing game
-    axiosAPI.get(`/games/${selectedPoolId}`).then((response) => {
+    axiosAPI.get(`/games/get/${selectedPoolId}`).then((response) => {
         if (response.status === 200) {
             const stateDataBuffer = new Uint8Array(response.data.stateData.data)
             if (response.data.status == 0) {
