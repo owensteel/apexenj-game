@@ -223,15 +223,17 @@ class Pool {
 
                 // Game first initialisated
                 if (!this.hasBeenCreatedOnServer) {
-                    // Update URL on frontend
-                    window.parent.postMessage(
-                        {
-                            messageType: "gameCreated",
-                            gameId: this.id
-                        }, "*"
-                    );
-                    // Start autosave and other autosave features
-                    this.hasBeenCreatedOnServer = true
+                    this.saveThumbnailToServer().finally(() => {
+                        // Update URL on frontend
+                        window.parent.postMessage(
+                            {
+                                messageType: "gameCreated",
+                                gameId: this.id
+                            }, "*"
+                        );
+                        // Start autosave and other autosave features
+                        this.hasBeenCreatedOnServer = true
+                    })
                 }
             }
         }).catch(e => {
