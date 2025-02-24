@@ -37,7 +37,7 @@ if (!UriParams[0]) {
     UriParams.splice(0, 1)
 }
 // Remove redundant path parameter
-if (UriParams[0] == "play") {
+if (UriParams[0] == "play" || UriParams[0] == "game") {
     UriParams.splice(0, 1)
 }
 const selectedPoolId = UriParams[0]

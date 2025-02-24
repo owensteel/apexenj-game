@@ -90,22 +90,14 @@ function uiConnectingToService() {
 function uiPoolNoExistError() {
     return new UiDialog(
         "This Pool does not exist.",
-        "ok",
-        () => {
-            // Send player to default sandbox
-            window.location.href = "/"
-        }
+        "none"
     )
 }
 
 function uiPoolPrivateError() {
     return new UiDialog(
         "This Pool is private.",
-        "ok",
-        () => {
-            // Send player to default sandbox
-            window.location.href = "/"
-        }
+        "none"
     )
 }
 
