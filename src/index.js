@@ -12,7 +12,6 @@ import axiosAPI from "./services/api"
 import Main from "./v1/game.v1.main";
 import MultiplayerClient from "./v1/game.v1.multiplayerClient";
 import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPrivateError } from "./v1/game.v1.ui.dialogs";
-import UiPublishMenu from "./v1/game.v1.ui.publish";
 import PlayerAccount from './services/PlayerAccount';
 
 // Prevent direct access to Game if intended to only be
@@ -30,6 +29,8 @@ await loggedInPlayer.logInFromCookie()
 
 // Initialise game
 
+let initialisedGame = null
+
 const UriParams = window.location.pathname.split("/")
 // Remove empty first parameter
 if (!UriParams[0]) {
@@ -44,9 +45,7 @@ const selectedPoolId = UriParams[0]
 if (!selectedPoolId) {
     // Create new empty sandbox
     if (loggedInPlayer.isLoggedIn) {
-        const initialisedGame = new Main(null, null, loggedInPlayer)
-        // Publish menu
-        new UiPublishMenu(initialisedGame)
+        initialisedGame = new Main(null, null, loggedInPlayer)
     } else {
         // User must be logged-in to create a Sandbox
         uiMustLogin(() => {
@@ -65,13 +64,11 @@ if (!selectedPoolId) {
                     // Check if logged-in player is the creator/owner
                     if (loggedInPlayer.id == response.data.creatorId) {
                         // Open offline game
-                        const initialisedGame = new Main(
+                        initialisedGame = new Main(
                             msgpack.decode(stateDataBuffer),
                             null,
                             loggedInPlayer
                         )
-                        // Add Publish Menu
-                        new UiPublishMenu(initialisedGame)
                     } else {
                         uiPoolPrivateError()
                     }
@@ -104,3 +101,18 @@ if (!selectedPoolId) {
         loadingDialog.close()
     })
 }
+
+// Listen for events sent from frontend
+
+window.addEventListener('message', (event) => {
+    if ("messageType" in event.data) {
+        if (event.data.messageType == "saveRequested") {
+            // Save
+            if (initialisedGame && initialisedGame instanceof Main) {
+                initialisedGame.currentPool.saveStateToServer()
+            } else {
+                throw new Error("Game has not been initialised or is not accessible")
+            }
+        }
+    }
+});

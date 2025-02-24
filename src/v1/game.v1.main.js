@@ -184,7 +184,7 @@ class Main {
 
         const statusBar = document.createElement("game-status-bar")
         // TODO: Provide string constants
-        statusBar.innerHTML = `<status-mode>${this.multiplayerClient ? "MULTIPLAYER" : "SANDBOX"}</status-mode>: ${this.currentPool.id}`
+        statusBar.innerHTML = `<status-mode>${this.multiplayerClient ? "MULTIPLAYER" : "SANDBOX"}</status-mode>`
         this.gameWrapper.appendChild(statusBar)
     }
 }
