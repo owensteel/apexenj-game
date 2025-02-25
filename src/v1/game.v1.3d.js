@@ -20,7 +20,7 @@ gameWrapper.appendChild(gameStageWrapper)
 // Initialize Three.js scene
 
 const canvasWidth = Math.min(400, gameWrapper.clientWidth);
-const canvasHeight = Math.min(800, window.innerHeight);
+const canvasHeight = Math.min(700, window.innerHeight);
 
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(
