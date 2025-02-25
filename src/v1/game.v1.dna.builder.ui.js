@@ -200,7 +200,7 @@ class DNABuilderUI {
 
         // Make sure render is up-to-date
         // And prevent client-side canvas tampering
-        this._renderBuilderUIVisual()
+        this._renderBuilderUIVisual(/* allowHighlighting: */ false)
 
         // Capture and save
         axiosInstance.post("/thumbnails/save", {
@@ -568,7 +568,7 @@ class DNABuilderUI {
 
     // Render the Builder UI Visual Representation
 
-    _renderBuilderUIVisual() {
+    _renderBuilderUIVisual(allowHighlighting = true) {
         // Obtain node positions based on current DNA model and node size.
         const nodePositions = generateAbsoluteNodePositions(
             NODE_SIZE_BUILDER,
@@ -649,8 +649,10 @@ class DNABuilderUI {
         drawNodePositions(nodePositions)
 
         // Draw selected node, if any
-        if (selectedTreeNodePositions.length > 0) {
-            drawNodePositions(selectedTreeNodePositions, COMMON_PRIMARY_COLOR)
+        if (allowHighlighting) {
+            if (selectedTreeNodePositions.length > 0) {
+                drawNodePositions(selectedTreeNodePositions, COMMON_PRIMARY_COLOR)
+            }
         }
     }
 }
