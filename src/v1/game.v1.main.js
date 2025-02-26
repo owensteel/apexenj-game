@@ -13,7 +13,6 @@ import MultiplayerClient from "./game.v1.multiplayerClient"
 import PlayerAccount from "../services/PlayerAccount"
 
 const AUTOSAVE_INTERVAL_SECS = 5
-const FRONTEND_UPDATES_INTERVAL_SECS = 2
 
 const DefaultDNA = new DNA(
     DNA_NODE_ROLE_ROOT,
@@ -151,27 +150,6 @@ class Main {
         if (!this.multiplayerClient ||
             (this.multiplayerClient && this.multiplayerClient.role == "host")) {
             setTimeout(thumbAutosaveLoop, AUTOSAVE_INTERVAL_SECS * 1000)
-        }
-
-        // Update frontend (parent) on the game state
-        // so it can update a leaderboard display
-        // Multiplayer contests only
-
-        const frontendUpdateLoop = () => {
-            window.parent.postMessage(
-                {
-                    messageType: "gameStateUpdate",
-                    gameStateData: JSON.stringify({
-                        organisms: this.currentPool.organisms.map((org) => {
-                            return org.id
-                        })
-                    })
-                }, "*"
-            );
-            setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
-        }
-        if (this.multiplayerClient) {
-            setTimeout(frontendUpdateLoop, FRONTEND_UPDATES_INTERVAL_SECS * 1000)
         }
     }
     displayUI() {
