@@ -421,10 +421,17 @@ class DNABuilderUI {
                     // Offline or host, can be added instantly
                     this.currentPool.addOrganism(newOrganism)
                 }
-                // Save thumbnail for Organism if we are in multiplayer 
-                // mode, as it will have been entered into a Contest
+                // Organism will have been entered into a Contest
                 if (this.multiplayerClient) {
+                    // Save thumbnail for Organism
                     this.saveThumbnailToServer(newOrganismStaticExport.id)
+                    // Inform frontend
+                    window.parent.postMessage(
+                        {
+                            messageType: "hasEnteredNewContest",
+                            contestId: this.currentPool.id
+                        }, "*"
+                    );
                 }
             } else {
                 uiMustLogin(() => {
