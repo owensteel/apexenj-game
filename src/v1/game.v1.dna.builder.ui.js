@@ -429,7 +429,8 @@ class DNABuilderUI {
                     window.parent.postMessage(
                         {
                             messageType: "hasEnteredNewContest",
-                            contestId: this.currentPool.id
+                            contestId: this.currentPool.id,
+                            entryId: newOrganism.id
                         }, "*"
                     );
                 }
