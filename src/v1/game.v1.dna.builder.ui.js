@@ -389,7 +389,10 @@ class DNABuilderUI {
                 this.focusedDnaModel,
                 null,
                 this.currentPool,
-                this.playerAccount.id
+                // Only attach creator ID in
+                // Play mode, or Food designs
+                // will count as "entries"
+                this.gameMode == GAME_MODE_PLAY ? this.playerAccount.id : null
             )
 
             // Cache/save work
