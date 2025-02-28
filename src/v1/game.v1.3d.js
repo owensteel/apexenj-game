@@ -208,7 +208,7 @@ function hit3DFromCanvasClickPos(clickPos) {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
 
-    // Get all intersections with a group or array of meshes in your scene
+    // Get all intersections with a group or array of meshes in the scene
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     if (intersects.length > 0) {

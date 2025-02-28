@@ -50,6 +50,11 @@ class Pool {
         presetOrganisms.forEach((presetOrg) => {
             this.importOrganism(presetOrg)
         })
+
+        // Sandbox UI
+        if (this.gameMode == GAME_MODE_SANDBOX) {
+            this.enableSandboxCursorMovement()
+        }
     }
     addOrganism(organism) {
         if (organism instanceof Organism == false) {
@@ -303,6 +308,56 @@ class Pool {
                 thumbImageUrl: reducedCanvasDataURL
             })
         }
+    }
+    // Sandbox UI
+    // Sandbox Mode cursor movement
+    enableSandboxCursorMovement() {
+        const gameStageWrapper = document.getElementsByTagName("game-stage-wrapper")[0]
+        const cW = gameStageWrapper.clientWidth;
+        const cH = gameStageWrapper.clientHeight;
+
+        const getClickPosFromScreenPos = (screenPos) => {
+            const rect = gameStageWrapper.getBoundingClientRect();
+            return {
+                x: screenPos.x - rect.left,
+                y: screenPos.y - rect.top
+            };
+        }
+
+        let focusedOrganismRootNodePos = null
+
+        const stageClickEvent = (e) => {
+            const hit3D = ThreeElements.hit3DFromCanvasClickPos({
+                x: e.pageX, y: e.pageY
+            })
+            if (hit3D && hit3D.object && hit3D.object.nodePos) {
+                focusedOrganismRootNodePos = hit3D.object.nodePos;
+                while (focusedOrganismRootNodePos.parentNodePos !== null) {
+                    focusedOrganismRootNodePos = focusedOrganismRootNodePos.parentNodePos
+                }
+            }
+        }
+        const stageDragEvent = (e) => {
+            if (focusedOrganismRootNodePos) {
+                const clickPos = getClickPosFromScreenPos({
+                    x: e.pageX, y: e.pageY
+                })
+
+                focusedOrganismRootNodePos.mesh.position.x = clickPos.x - (cW / 2);
+                focusedOrganismRootNodePos.mesh.position.y = -(clickPos.y - (cH / 2));
+            }
+        }
+        const stageUnfocusEvent = (e) => {
+            focusedOrganismRootNodePos = null
+        }
+
+        gameStageWrapper.addEventListener("mousedown", stageClickEvent)
+        gameStageWrapper.addEventListener("touchstart", stageClickEvent)
+        gameStageWrapper.addEventListener("mousemove", stageDragEvent)
+        gameStageWrapper.addEventListener("touchmove", stageDragEvent)
+        gameStageWrapper.addEventListener("mouseup", stageUnfocusEvent)
+        gameStageWrapper.addEventListener("mouseout", stageUnfocusEvent)
+        gameStageWrapper.addEventListener("touchend", stageUnfocusEvent)
     }
 }
 
