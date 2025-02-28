@@ -8,7 +8,7 @@ import { scene } from "./game.v1.3d";
 import { BLOCK_TYPENAME_ABSORBER, BLOCK_TYPENAME_DIGESTER, BLOCK_TYPENAME_FOOD, BLOCK_TYPENAME_PLANT } from "./game.v1.blocks";
 import DNA from "./game.v1.dna";
 import Organism from "./game.v1.organism";
-import { ENERGY_PER_FOOD_BLOCK, NODESIZE_DEFAULT } from "./game.v1.references";
+import { ENERGY_PER_FOOD_BLOCK, GAME_MODE_PLAY, NODESIZE_DEFAULT } from "./game.v1.references";
 
 // Mechanics utilities
 
@@ -36,7 +36,7 @@ function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
     return result;
 }
 
-function bumpNodes(organism, opponent, overlappingNodes) {
+function bumpNodes(organism, opponent, overlappingNodes, gameMode) {
     for (const pair of overlappingNodes) {
         const orgNode = pair.orgNodeWorldPos;
         const oppNode = pair.oppNodeWorldPos;
@@ -81,13 +81,15 @@ function bumpNodes(organism, opponent, overlappingNodes) {
 
             // Plants are immovable, so give it equal pushing power as anythin
             // bumping into it to nullify any actual pushing
-            if (BLOCK_TYPENAME_PLANT in organism.body.nodePosByBlockTypeCache) {
-                oppPushFactor += orgPushFactor
-                orgPushFactor = 0
-            }
-            if (BLOCK_TYPENAME_PLANT in opponent.body.nodePosByBlockTypeCache) {
-                orgPushFactor += oppPushFactor
-                oppPushFactor = 0
+            if (gameMode == GAME_MODE_PLAY) {
+                if (BLOCK_TYPENAME_PLANT in organism.body.nodePosByBlockTypeCache) {
+                    oppPushFactor += orgPushFactor
+                    orgPushFactor = 0
+                }
+                if (BLOCK_TYPENAME_PLANT in opponent.body.nodePosByBlockTypeCache) {
+                    orgPushFactor += oppPushFactor
+                    oppPushFactor = 0
+                }
             }
 
             // Apply movement adjustments
@@ -103,7 +105,7 @@ function bumpNodes(organism, opponent, overlappingNodes) {
 
 // "Syncing" two organisms, i.e checking interactions with each other
 
-function syncOrganisms(organism, opponent) {
+function syncOrganisms(organism, opponent, gameMode) {
     // Check if orgs are ready yet
     if (!organism.body.nodePositions || !opponent.body.nodePositions) {
         console.warn("Sync cancelled — node positions not ready")
@@ -244,7 +246,7 @@ function syncOrganisms(organism, opponent) {
         }
 
         // Bump them so that none of these overlapping node pairs remain overlapped
-        bumpNodes(organism, opponent, overlappingNodes);
+        bumpNodes(organism, opponent, overlappingNodes, gameMode);
     }
 }
 

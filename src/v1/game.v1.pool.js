@@ -14,7 +14,7 @@ import DNA from "./game.v1.dna"
 import Organism from "./game.v1.organism"
 import syncOrganisms from "./game.v1.organism.sync"
 import { generateID } from "./game.v1.utils"
-import { COMMON_PRIMARY_COLOR, COMMON_SECONDARY_COLOR } from "./game.v1.references";
+import { COMMON_PRIMARY_COLOR, COMMON_SECONDARY_COLOR, GAME_MODE_PLAY, GAME_MODE_SANDBOX } from "./game.v1.references";
 
 // Pool model
 
@@ -22,12 +22,19 @@ class Pool {
     constructor(
         id,
         presetOrganisms = [],
-        isMultiplayerMode = false
+        isMultiplayerMode = false,
+        gameMode = GAME_MODE_PLAY
     ) {
         if (id) {
             this.id = id
         } else {
             this.id = generateID()
+        }
+
+        // Set game mode
+        this.gameMode = gameMode
+        if (gameMode !== GAME_MODE_PLAY && gameMode !== GAME_MODE_SANDBOX) {
+            throw new Error(`Invalid Game Mode specified (${gameMode})`)
         }
 
         // So we know whether or not to enable autosave
@@ -129,7 +136,7 @@ class Pool {
         for (const organism of existingOrganisms) {
             for (const opponent of existingOrganisms) {
                 if (opponent.id !== organism.id) {
-                    syncOrganisms(organism, opponent)
+                    syncOrganisms(organism, opponent, this.gameMode)
                 }
             }
         }

@@ -8,7 +8,7 @@ import axiosInstance from '../services/api';
 
 import DNA from "./game.v1.dna";
 import * as Blocks from "./game.v1.blocks";
-import { COMMON_PRIMARY_COLOR, DNA_NODE_ROLE_ROOT, NODESIZE_DEFAULT } from "./game.v1.references";
+import { COMMON_PRIMARY_COLOR, DNA_NODE_ROLE_ROOT, GAME_MODE_PLAY, GAME_MODE_SANDBOX, NODESIZE_DEFAULT } from "./game.v1.references";
 import { generateAbsoluteNodePositions } from "./game.v1.3d";
 import Pool from "./game.v1.pool";
 import Organism from "./game.v1.organism";
@@ -91,7 +91,8 @@ class DNABuilderUI {
         dnaModel,
         currentPool,
         multiplayerClient,
-        playerAccount
+        playerAccount,
+        gameMode
     ) {
         this.multiplayerClient = multiplayerClient
         if (multiplayerClient && !(multiplayerClient instanceof MultiplayerClient)) {
@@ -112,6 +113,12 @@ class DNABuilderUI {
             throw new Error("Builder UI must have reference to current Pool");
         }
         this.currentPool = currentPool;
+
+        // Set game mode
+        this.gameMode = gameMode
+        if (gameMode !== GAME_MODE_PLAY && gameMode !== GAME_MODE_SANDBOX) {
+            throw new Error("Invalid Game Mode specified")
+        }
 
         // Hex grid configuration
         this.hexGrid = {
@@ -322,7 +329,7 @@ class DNABuilderUI {
                 }
             }
         }
-        Blocks.PlayerAccessibleBlockTypeNamesList.forEach((blockTypeName, blockTypeInd) => {
+        Blocks.AccessibleBlockTypeNamesByGameMode[this.gameMode].forEach((blockTypeName, blockTypeInd) => {
             const blockTypeBlob = document.createElement("node-block-palette-blob");
             const blockTypeColor = Blocks.getBlockInstanceFromTypeName(blockTypeName).color
 
@@ -387,10 +394,12 @@ class DNABuilderUI {
 
             // Cache/save work
             const newOrganismStaticExport = newOrganism.getStaticExport()
-            window.localStorage.setItem(
-                `last_built_organism.${this.currentPool.id}`,
-                JSON.stringify(newOrganismStaticExport.dna)
-            )
+            if (this.gameMode !== GAME_MODE_SANDBOX) {
+                window.localStorage.setItem(
+                    `last_built_organism.${this.currentPool.id}`,
+                    JSON.stringify(newOrganismStaticExport.dna)
+                )
+            }
 
             // Send to server if needed
             if (this.playerAccount.isLoggedIn) {

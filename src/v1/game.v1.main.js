@@ -4,17 +4,20 @@
 
 */
 
-import { BLOCK_TYPENAME_HEART } from "./game.v1.blocks"
+import { BLOCK_TYPENAME_HEART, BLOCK_TYPENAME_PLANT, BLOCK_TYPENAME_FOOD } from "./game.v1.blocks"
 import DNA from "./game.v1.dna"
 import Pool from "./game.v1.pool"
-import { DNA_NODE_ROLE_ROOT, UPDATES_PER_SEC } from "./game.v1.references"
+import { DNA_NODE_ROLE_APPENDAGE, DNA_NODE_ROLE_ROOT, GAME_MODE_PLAY, GAME_MODE_SANDBOX, UPDATES_PER_SEC } from "./game.v1.references"
 import DNABuilderUI from "./game.v1.dna.builder.ui"
 import MultiplayerClient from "./game.v1.multiplayerClient"
 import PlayerAccount from "../services/PlayerAccount"
 
 const AUTOSAVE_INTERVAL_SECS = 5
 
-const DefaultDNA = new DNA(
+// Default DNA for Builder
+
+const DefaultDNA = {}
+DefaultDNA[GAME_MODE_PLAY] = new DNA(
     DNA_NODE_ROLE_ROOT,
     BLOCK_TYPENAME_HEART,
     [
@@ -26,12 +29,43 @@ const DefaultDNA = new DNA(
         new DNA()
     ]
 )
+DefaultDNA[GAME_MODE_SANDBOX] = new DNA(
+    DNA_NODE_ROLE_ROOT,
+    BLOCK_TYPENAME_HEART,
+    [
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_FOOD
+        ),
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_PLANT
+        ),
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_FOOD
+        ),
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_PLANT
+        ),
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_FOOD
+        ),
+        new DNA(
+            DNA_NODE_ROLE_APPENDAGE,
+            BLOCK_TYPENAME_PLANT
+        )
+    ]
+)
 
 class Main {
     constructor(
         presetPoolData,
         multiplayerClient,
-        playerAccount
+        playerAccount,
+        gameMode = GAME_MODE_PLAY
     ) {
         // Multiplayer (if provided)
         this.multiplayerClient = multiplayerClient
@@ -46,6 +80,12 @@ class Main {
             throw new Error("Player Account provided must be a valid instance")
         }
 
+        // Set game mode
+        this.gameMode = gameMode
+        if (gameMode !== GAME_MODE_PLAY && gameMode !== GAME_MODE_SANDBOX) {
+            throw new Error("Invalid Game Mode specified")
+        }
+
         // Setup pool
         this.presetPoolData = presetPoolData
 
@@ -54,7 +94,8 @@ class Main {
             this.currentPool = new Pool(
                 this.presetPoolData.id,
                 [],
-                !(!this.multiplayerClient)
+                !(!this.multiplayerClient),
+                this.gameMode
             )
             this.currentPool.syncWithServerState(presetPoolData)
             // Game exists/"has been created on server"
@@ -64,8 +105,8 @@ class Main {
             this.currentPool = new Pool(
                 null,
                 [],
-                null,
-                !(!this.multiplayerClient)
+                !(!this.multiplayerClient),
+                this.gameMode
             )
         }
 
@@ -74,7 +115,7 @@ class Main {
 
         // Init Builder UI
 
-        let builderPresetDNA = DefaultDNA
+        let builderPresetDNA = DefaultDNA[this.gameMode]
 
         // Restore last Organism player built for this Pool
         const lastBuiltOrganismCookieKey = `last_built_organism.${this.currentPool.id}`
@@ -87,7 +128,8 @@ class Main {
             builderPresetDNA,
             this.currentPool,
             this.multiplayerClient,
-            this.playerAccount
+            this.playerAccount,
+            this.gameMode
         )
 
         // Init all

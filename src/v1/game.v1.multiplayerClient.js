@@ -9,7 +9,7 @@ import msgpack from "msgpack-lite"
 
 import * as uiDialogs from "./game.v1.ui.dialogs"
 import Main from "./game.v1.main";
-import { UPDATES_PER_SEC } from "./game.v1.references";
+import { GAME_MODE_PLAY, UPDATES_PER_SEC } from "./game.v1.references";
 import PlayerAccount from "../services/PlayerAccount";
 
 // The maximum amount of time since the last update
@@ -251,7 +251,8 @@ class MultiplayerClient {
             this.currentGame = new Main(
                 stateData,
                 this,
-                this.playerAccount
+                this.playerAccount,
+                GAME_MODE_PLAY
             )
         }
         this.currentGame.currentPool.syncWithServerState(stateData)

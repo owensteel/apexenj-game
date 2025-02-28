@@ -13,6 +13,7 @@ import Main from "./v1/game.v1.main";
 import MultiplayerClient from "./v1/game.v1.multiplayerClient";
 import { uiGenericError, uiLoading, uiMustLogin, uiPoolNoExistError, uiPoolPrivateError } from "./v1/game.v1.ui.dialogs";
 import PlayerAccount from './services/PlayerAccount';
+import { GAME_MODE_PLAY, GAME_MODE_SANDBOX } from "./v1/game.v1.references";
 
 // Prevent direct access to Game if intended to only be
 // embedded in a iframe
@@ -43,9 +44,18 @@ if (UriParams[0] == "play" || UriParams[0] == "game") {
 const selectedPoolId = UriParams[0]
 
 if (!selectedPoolId) {
+    // DEPRECATED route — user should always have a
+    // pre-created Sandbox prepared for them, instead
+    // of an uninitialised Game
+
     // Create new empty sandbox
     if (loggedInPlayer.isLoggedIn) {
-        initialisedGame = new Main(null, null, loggedInPlayer)
+        initialisedGame = new Main(
+            null,
+            null,
+            loggedInPlayer,
+            GAME_MODE_SANDBOX
+        )
     } else {
         // User must be logged-in to create a Sandbox
         uiMustLogin(() => {
@@ -59,15 +69,16 @@ if (!selectedPoolId) {
         if (response.status === 200) {
             const stateDataBuffer = new Uint8Array(response.data.stateData.data)
             if (response.data.status == 0) {
-                // Private, offline
+                // Sandbox, offline
                 if (loggedInPlayer.isLoggedIn) {
                     // Check if logged-in player is the creator/owner
                     if (loggedInPlayer.id == response.data.creatorId) {
-                        // Open offline game
+                        // Open game in Sandbox Mode
                         initialisedGame = new Main(
                             msgpack.decode(stateDataBuffer),
                             null,
-                            loggedInPlayer
+                            loggedInPlayer,
+                            GAME_MODE_SANDBOX
                         )
                     } else {
                         uiPoolPrivateError()
@@ -80,6 +91,7 @@ if (!selectedPoolId) {
                 }
             } else {
                 // Public or otherwise online, allow anyone
+                // Implicitly opens Game in Play Mode
                 new MultiplayerClient(
                     selectedPoolId,
                     loggedInPlayer

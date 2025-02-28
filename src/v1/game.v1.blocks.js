@@ -4,9 +4,13 @@
 
 */
 
+import { GAME_MODE_PLAY, GAME_MODE_SANDBOX } from "./game.v1.references"
+
 // Types of block the player can use
 
-const PlayerAccessibleBlockTypeNamesList = []
+const AccessibleBlockTypeNamesByGameMode = {}
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_PLAY] = []
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_SANDBOX] = []
 
 /*
 
@@ -28,7 +32,7 @@ class DefaultBlock {
         this.color = color
     }
 }
-PlayerAccessibleBlockTypeNamesList.push("default")
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_PLAY].push("default")
 
 /*
 
@@ -44,6 +48,7 @@ class PlantBlock extends DefaultBlock {
         this.setColor("DarkViolet")
     }
 }
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_SANDBOX].push(BLOCK_TYPENAME_PLANT)
 
 /*
 
@@ -61,7 +66,7 @@ class MotorBlock extends DefaultBlock {
         this.setColor("hotpink")
     }
 }
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_MOTOR)
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_PLAY].push(BLOCK_TYPENAME_MOTOR)
 
 /*
 
@@ -109,6 +114,7 @@ class FoodBlock extends DefaultBlock {
         this.setColor("Lavender")
     }
 }
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_SANDBOX].push(BLOCK_TYPENAME_FOOD)
 
 /*
 
@@ -124,7 +130,7 @@ class AbsorberBlock extends DefaultBlock {
         this.setColor("lightgreen")
     }
 }
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_ABSORBER)
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_PLAY].push(BLOCK_TYPENAME_ABSORBER)
 
 /*
 
@@ -140,7 +146,7 @@ class DigesterBlock extends DefaultBlock {
         this.setColor("yellow")
     }
 }
-PlayerAccessibleBlockTypeNamesList.push(BLOCK_TYPENAME_DIGESTER)
+AccessibleBlockTypeNamesByGameMode[GAME_MODE_PLAY].push(BLOCK_TYPENAME_DIGESTER)
 
 // Type name to instance
 function getBlockInstanceFromTypeName(typeName) {
@@ -177,8 +183,10 @@ export {
     AbsorberBlock,
 
     // List of accessible block IDs
+    // Sorted by the Game Mode in which
+    // they are accessible
 
-    PlayerAccessibleBlockTypeNamesList,
+    AccessibleBlockTypeNamesByGameMode,
 
     // Block type constants
 

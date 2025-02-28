@@ -59,8 +59,12 @@ class DNA {
         // Motor blocks cannot have other motor blocks attached
 
         if (
-            this.block.typeName == Blocks.BLOCK_TYPENAME_MOTOR &&
-            blockTypeName == Blocks.BLOCK_TYPENAME_MOTOR
+            (this.block.typeName == Blocks.BLOCK_TYPENAME_MOTOR &&
+                blockTypeName == Blocks.BLOCK_TYPENAME_MOTOR) ||
+            (this.block.typeName == Blocks.BLOCK_TYPENAME_FOOD &&
+                blockTypeName == Blocks.BLOCK_TYPENAME_FOOD) ||
+            (this.block.typeName == Blocks.BLOCK_TYPENAME_FOOD &&
+                blockTypeName == Blocks.BLOCK_TYPENAME_PLANT)
         ) {
             return false
         }
