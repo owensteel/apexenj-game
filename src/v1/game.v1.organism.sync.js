@@ -18,18 +18,26 @@ function getOverlappingNodes(organismNodesWorld, opponentNodesWorld) {
 
     // Naive O(N*M) check
     for (const orgNodeWorld of organismNodesWorld) {
-        for (const oppNodeWorld of opponentNodesWorld) {
-            // AABB overlap check (quick & dirty)
-            if (
-                (orgNodeWorld.x > oppNodeWorld.x - overlapRadius) &&
-                (orgNodeWorld.x < oppNodeWorld.x + overlapRadius) &&
-                (orgNodeWorld.y > oppNodeWorld.y - overlapRadius) &&
-                (orgNodeWorld.y < oppNodeWorld.y + overlapRadius)
-            ) {
-                result.push({
-                    orgNodeWorldPos: orgNodeWorld,
-                    oppNodeWorldPos: oppNodeWorld
-                });
+        if (!orgNodeWorld) {
+            console.warn("null orgNodeWorld encountered")
+        } else {
+            for (const oppNodeWorld of opponentNodesWorld) {
+                if (!oppNodeWorld) {
+                    console.warn("null oppNodeWorld encountered")
+                } else {
+                    // AABB overlap check (quick & dirty)
+                    if (
+                        (orgNodeWorld.x > oppNodeWorld.x - overlapRadius) &&
+                        (orgNodeWorld.x < oppNodeWorld.x + overlapRadius) &&
+                        (orgNodeWorld.y > oppNodeWorld.y - overlapRadius) &&
+                        (orgNodeWorld.y < oppNodeWorld.y + overlapRadius)
+                    ) {
+                        result.push({
+                            orgNodeWorldPos: orgNodeWorld,
+                            oppNodeWorldPos: oppNodeWorld
+                        });
+                    }
+                }
             }
         }
     }
